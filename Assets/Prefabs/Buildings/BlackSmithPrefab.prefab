@@ -1,5 +1,53 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3869341665367780409
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6090949010494016702}
+  - component: {fileID: 9116340982088630336}
+  m_Layer: 0
+  m_Name: Obstracle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &6090949010494016702
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3869341665367780409}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0.00315, z: 0}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7517970956193474782}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!208 &9116340982088630336
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3869341665367780409}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.075, y: 0.05, z: 0.09}
+  m_MoveThreshold: 0.1
+  m_Carve: 0
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1001 &838442866820382368
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -306,6 +354,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7b6a3a6e27a0a4e4db7519d4f523f8e5,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 6090949010494016702}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7b6a3a6e27a0a4e4db7519d4f523f8e5,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 3635479760865703411}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7b6a3a6e27a0a4e4db7519d4f523f8e5,
         type: 3}
@@ -351,6 +403,7 @@ MonoBehaviour:
   flattenScale: 0.9
   smoothIterations: 2
   maxHeightDifference: 0.1
+  rotationSpeed: 90
 --- !u!65 &-3292502988666772052
 BoxCollider:
   m_ObjectHideFlags: 0

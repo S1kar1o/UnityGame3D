@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 public class Building : MonoBehaviour
 {
@@ -12,9 +13,10 @@ public class Building : MonoBehaviour
 
     private bool isPlaced = false;
     private TerrainData terrainData;
-    private Renderer buildingRenderer;  // Для зміни кольору/визуального індикатора
+    private Renderer[] renderers; // Масив Renderer для зміни кольорів
     private Color validColor = Color.green;
     private Color invalidColor = Color.red;
+    private Color[] originalColors; // Початкові кольори для відновлення
 
     void Start()
     {
@@ -27,10 +29,19 @@ public class Building : MonoBehaviour
             Debug.LogError("Terrain not assigned!");
         }
 
-        buildingRenderer = GetComponent<Renderer>();
-        if (buildingRenderer == null)
+        renderers = GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length == 0)
         {
-            Debug.LogError("Renderer not found on the building object.");
+            Debug.LogError("No renderers found on the building object.");
+            return;
+        }
+
+        // Збереження початкових кольорів кожного матеріалу
+        originalColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            originalColors[i] = renderers[i].material.color;
         }
     }
 
@@ -39,25 +50,28 @@ public class Building : MonoBehaviour
         if (!isPlaced)
         {
             PositionObject();
+
             if (Input.GetKey(KeyCode.R))
             {
                 RotateObject();
             }
 
-            // Оновлюємо індикатор на основі валідності позиції
+            // Оновлення кольору для індикатора валідності
             UpdatePositionIndicator();
 
             if (Input.GetMouseButtonDown(0) && IsValidPosition())
             {
+                Transform child = transform.GetChild(0); // Отримуємо першого дочірнього
                 AdjustTerrainUnderBuilding();
                 isPlaced = true;
-                buildingRenderer.material.color = Color.white; // Зміна кольору на білий після розміщення будинку
-                Destroy(this); // Знищуємо цей скрипт
+                RestoreOriginalColors(); // Повернення до початкових кольорів
+                child.gameObject.SetActive(true);// додав їбану колізію
+                Destroy(this); // Знищення скрипта
             }
 
             if (Input.GetMouseButtonDown(1))
             {
-                Destroy(gameObject);
+                Destroy(gameObject); // Видалення об'єкта правою кнопкою
             }
         }
     }
@@ -74,10 +88,8 @@ public class Building : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
         {
-            // Коригуємо розташування, додаючи 3 до координати Y
             Vector3 correctedPosition = hit.point;
-            correctedPosition.y += 3f;  // Додаємо 3 до Y для виправлення
-
+            correctedPosition.y += 3f; // Додавання до координати Y для корекції
             transform.position = correctedPosition;
         }
     }
@@ -96,16 +108,24 @@ public class Building : MonoBehaviour
 
     private void UpdatePositionIndicator()
     {
-        if (buildingRenderer != null)
+        foreach (Renderer renderer in renderers)
         {
             if (IsValidPosition())
             {
-                buildingRenderer.material.color = validColor;  // Зелений колір для валідної позиції
+                renderer.material.color = validColor; // Зелений колір
             }
             else
             {
-                buildingRenderer.material.color = invalidColor;  // Червоний колір для невалідної позиції
+                renderer.material.color = invalidColor; // Червоний колір
             }
+        }
+    }
+
+    private void RestoreOriginalColors()
+    {
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i].material.color = originalColors[i]; // Повернення початкових кольорів
         }
     }
 
@@ -145,7 +165,6 @@ public class Building : MonoBehaviour
         {
             for (int z = 0; z < heights.GetLength(1); z++)
             {
-                // Вирівнювання тільки якщо висота не виходить за межі дозволеного порогу
                 if (Mathf.Abs(heights[x, z] - averageHeight) <= maxHeightDifference)
                 {
                     heights[x, z] = averageHeight;
