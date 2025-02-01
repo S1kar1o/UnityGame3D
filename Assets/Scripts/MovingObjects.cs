@@ -12,6 +12,8 @@ public class MovingObjects : MonoBehaviour
     public LayerMask groundLayer;        // Шар для землі (xz-площина)
     public LayerMask selectionLayer;     // Шар для об'єктів вибору
     public List<GameObject> selectedUnits = new List<GameObject>(); // Список вибраних юнітів
+    private float holdTime=0.0f; // Час утримання кнопки
+    public float holdThreshold = 0.2f; // Час (у секундах), після якого вважаємо, що кнопку утримують
 
     void Start()
     {
@@ -25,30 +27,74 @@ public class MovingObjects : MonoBehaviour
 
     void HandleMouseInput()
     {
-        if(Input.GetMouseButtonDown(1)&&selectedUnits.Count>0) {
-            Ray ray= mainCamera.ScreenPointToRay( Input.mousePosition );
-            if(Physics.Raycast(ray,out RaycastHit agentTarget,3000f,groundLayer) ) {
-            foreach(var obj in selectedUnits)
+        if (holdTime != 0.0f)
+        {
+            if (Time.time - holdTime > holdThreshold)
+            {
+                Debug.Log(Time.time - holdTime);
+                isDragging = true;
+            }
+        }
+        else
+        {
+            if (Input.GetMouseButtonDown(1) && selectedUnits.Count > 0)
+            {
+                Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hit, 3000f))
                 {
-                    obj.GetComponent<NavMeshAgent>().SetDestination(agentTarget.point);
+                    if (hit.collider.CompareTag("Resource")) // Якщо натиснуто на ресурс
+                    {
+                        GameObject resource = hit.collider.gameObject;
+
+                        foreach (var obj in selectedUnits)
+                        {
+                            var extractor = obj.GetComponent<VillagerParametrs>();
+                            if (extractor != null)
+                            {
+                                extractor.MoveToResource(resource); // Рух до ресурсу
+                            }
+                        }
+                    }
+                    else if (((1 << hit.collider.gameObject.layer) & groundLayer) != 0) // Якщо натиснуто на землю
+                    {
+                        foreach (var obj in selectedUnits)
+                        {
+                            var extractor = obj.GetComponent<VillagerParametrs>();
+                            if (extractor != null)
+                            {
+                                extractor.StopExtracting(); // зупинення видобування
+                            }
+                            obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
+                        }
+                    }
                 }
-            
             }
         }
         if (Input.GetMouseButtonDown(0))
         {
-            startScreenPosition = Input.mousePosition;
-            isDragging = true;
-            Debug.Log($"Початок вибору (екранні координати): {startScreenPosition}");
+            holdTime = Time.time; // Запам'ятовуємо час натискання
+
+            if (ColisionBuildings())
+            {
+            
+            }
+            else
+            {
+                startScreenPosition = Input.mousePosition;
+            }
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            isDragging = false;
             endScreenPosition = Input.mousePosition;
+            if (isDragging)
+            {
+                SelectUnits();
+                isDragging = false;
 
-            Debug.Log($"Кінець вибору (екранні координати): {endScreenPosition}");
-            SelectUnits();
+            }
+            holdTime = 0.0f;
         }
 
         if (isDragging)
@@ -57,6 +103,25 @@ public class MovingObjects : MonoBehaviour
         }
     }
 
+
+    bool ColisionBuildings()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, 3000f))
+        {
+            if (hit.collider.CompareTag("Building")) // Якщо натиснуто на ресурс
+            {
+                GameObject building = hit.collider.gameObject;
+                SpawnUnits buildingStatement=building.GetComponent<SpawnUnits>();
+                buildingStatement.ActivatePanelRecruiting();
+                return true;
+
+            }
+
+        }
+        return false;
+    }
     void OnGUI()
     {
         if (isDragging)
