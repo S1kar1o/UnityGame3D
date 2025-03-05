@@ -18,14 +18,10 @@ public class Conecting : MonoBehaviour
         tcpClient = FindObjectOfType<UnityTcpClient>();
     }
 
-    public async void PlayGame()
+    
+    public async void SendMessageToServer()
     {
-        await tcpClient.ConnectToServer();
-    }
-
-    public async void SendMessageToServer(string message)
-    {
-        await tcpClient.SendMessage(message);
+        await tcpClient.SendMessage("READYTOPLAY\n");
     }
 
     void Update()

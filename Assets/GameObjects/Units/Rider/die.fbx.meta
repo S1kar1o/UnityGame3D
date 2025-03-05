@@ -1,0 +1,369 @@
+fileFormatVersion: 2
+guid: 0a3227229ee823745a757bcb64b8d1f6
+ModelImporter:
+  serializedVersion: 22200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sceneman5_defaultMat1.001
+    second: {fileID: 2100000, guid: 8a76051eed58d3744992e7ec4d064398, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn11.003
+    second: {fileID: 2100000, guid: afb9fde3a31736e40ab2b8e3a87b5d00, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn13.003
+    second: {fileID: 2100000, guid: c87fba6ca6e90754f9e6ace98b464e71, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn14.003
+    second: {fileID: 2100000, guid: 6be9115e89f211f41893ef4c8812bfc1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn15.001
+    second: {fileID: 2100000, guid: 14583cdaf8d05274e84c03256d2e4444, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn17.003
+    second: {fileID: 2100000, guid: c098ecf45a9feaf469abc45ab812ff0f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn18.003
+    second: {fileID: 2100000, guid: c7d794589ce0776408dcafdad99b2def, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn19.003
+    second: {fileID: 2100000, guid: c7d405ded79c03c4abd53b842cfe5fa7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn20.003
+    second: {fileID: 2100000, guid: 2eff6cb1569e5b24eaffd9f7e691891b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn21.003
+    second: {fileID: 2100000, guid: cf35d22e2f5be124487e01b13cbfbab2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn22.003
+    second: {fileID: 2100000, guid: 880cec294213da14181aab6f7fd36b9f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn23.003
+    second: {fileID: 2100000, guid: 9a4641467abde1548ac4d69ba6929b29, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn24.003
+    second: {fileID: 2100000, guid: 0aaf8948bc99630408580baf2e5f9dcd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn25.003
+    second: {fileID: 2100000, guid: dbbb7dea47ac83c4f9d2036ad79b26dc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn26.003
+    second: {fileID: 2100000, guid: 4f58fc34c93e0654fa9f7c041a95bb37, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: blinn27.003
+    second: {fileID: 2100000, guid: 9ab357559d58a7742bce430f9650222b, type: 2}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Beltmesh_blinn33SG_Diffuse
+    second: {fileID: 2800000, guid: ff2ee9dc4d17a7d43b8e9fef282007c1, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Beltmesh_blinn33SG_Glossiness
+    second: {fileID: 2800000, guid: 35a937e2f899b2547bf747328c4466a2, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Beltmesh_blinn33SG_Normal
+    second: {fileID: 2800000, guid: 7f377409f11718f458b72174ae9a4cc3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: CloakMesh_CloakMesh5_defaultMat_Glossiness
+    second: {fileID: 2800000, guid: e120dc770abe25d419e01854fbd19564, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: CloakMesh_CloakMesh5_defaultMat_Normal
+    second: {fileID: 2800000, guid: 08aced5a87f371f4182870c93e1e5ef9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: CloakMesh_CloakMesh5_defaultMat_Specular
+    second: {fileID: 2800000, guid: 5e11a6fd52ee9fc418cf454c8ad1c2d0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: GlovesLow_blinn35SG_Diffuse
+    second: {fileID: 2800000, guid: dd4c20ef738f7cb4c902dd850f0fdf0d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: GlovesLow_blinn35SG_Glossiness
+    second: {fileID: 2800000, guid: 5ea5b31bf01f93f49bcaa1c5fa9a5731, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: GlovesLow_blinn35SG_Normal
+    second: {fileID: 2800000, guid: 30a10ddd1daa9864daa7e0a8259d46ba, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Legsfull2_blinn34SG_Diffuse
+    second: {fileID: 2800000, guid: e819dee63861b3c4e9d5e6cb356bbfd8, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Legsfull2_blinn34SG_Glossiness
+    second: {fileID: 2800000, guid: 933a6e46a3c80d342b51fbc5326aa8dd, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Legsfull2_blinn34SG_Normal
+    second: {fileID: 2800000, guid: f6a59c710604b504d81f3a29ffd51252, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: LowpolyHorse_blinn1SG_Glossiness
+    second: {fileID: 2800000, guid: 229719f76092a8a48bd20c62ebbb8fe7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: LowpolyHorse_blinn1SG_Normal
+    second: {fileID: 2800000, guid: 0fbc44706faf27c4290f7118ac73f546, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: LowpolyHorse_blinn1SG_Specular
+    second: {fileID: 2800000, guid: fd788f400ca272b46887ffdc56e112f9, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: RyggLow_blinn31SG_Diffuse
+    second: {fileID: 2800000, guid: d059cfd707fbbad40837c43854897282, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: RyggLow_blinn31SG_Glossiness
+    second: {fileID: 2800000, guid: 940d28c6a118f8f418fecb5eddf6a66b, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: RyggLow_blinn31SG_Normal
+    second: {fileID: 2800000, guid: 0ff3bc2eb2559284d8d0b64ff6799758, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SadelMesh_blinn5SG_Glossiness
+    second: {fileID: 2800000, guid: ed28cf7599f58434f83bff9b384cd207, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SadelMesh_blinn5SG_Normal
+    second: {fileID: 2800000, guid: f7018c466415e524a88bfbb0179db42d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: SadelMesh_blinn5SG_Specular
+    second: {fileID: 2800000, guid: 827ac81970399464b9a76d94cf57f737, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: ShouldercapeQuad_initialShadingGroup_Gloss
+    second: {fileID: 2800000, guid: 3631af45ca29c0e44b6284ba99451456, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Shoulderdone_blinn37SG_Diffuse
+    second: {fileID: 2800000, guid: cc6d3388f3f16f6429bd578795211de3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Shoulderdone_blinn37SG_Normal
+    second: {fileID: 2800000, guid: 96726fadc37f9cb4b947a79ebea989d0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sidebasefull_blinn6SG_Diffuse
+    second: {fileID: 2800000, guid: f2059eee377f85f4482f16496365b764, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sidebasefull_blinn6SG_Glossiness
+    second: {fileID: 2800000, guid: 0ed8685062a2bf44bbfae2a18324e203, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Sidebasefull_blinn6SG_Normal
+    second: {fileID: 2800000, guid: 286cdcd0b565c7c4684ab6f6dc542858, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Swordmesh_blinn1SG_Diffuse
+    second: {fileID: 2800000, guid: b35936ea9168b8441adedafefa3dd698, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Swordmesh_blinn1SG_Glossiness
+    second: {fileID: 2800000, guid: 15221f449c5c3f14d96a9d08fbdf0c8a, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: Swordmesh_blinn1SG_Normal
+    second: {fileID: 2800000, guid: ed7b04b64e03eec4fb74ce237d3a7f4d, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: bodysuitmesh_blinn15SG_Diffuse
+    second: {fileID: 2800000, guid: fb396f7e3422240439aacf80f64c76a0, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: bodysuitmesh_blinn15SG_Glossiness
+    second: {fileID: 2800000, guid: ada1b9570d58eaf4495d8c35a59f0f58, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: bodysuitmesh_blinn15SG_Normal
+    second: {fileID: 2800000, guid: daab1826f14b1624a97e8664882f54e3, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: chestfullllow_blinn9SG_Diffuse
+    second: {fileID: 2800000, guid: e8f2516bc9205054d88a4d310163ad16, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: chestfullllow_blinn9SG_Normal
+    second: {fileID: 2800000, guid: a5dfd1d62aa7c7a4b82ff1a0a41ac0b7, type: 3}
+  - first:
+      type: UnityEngine:Texture2D
+      assembly: UnityEngine.CoreModule
+      name: chestfullllow_blinn9SG_Specular
+    second: {fileID: 2800000, guid: 01472cae228427443bc95991442252da, type: 3}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 1
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: Head4
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

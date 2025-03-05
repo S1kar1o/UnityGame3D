@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Threading.Tasks; // Додайте цей рядок, щоб використовувати Task
 
 public class Building : MonoBehaviour
 {
@@ -60,13 +61,8 @@ public class Building : MonoBehaviour
             UpdatePositionIndicator();
 
             if (Input.GetMouseButtonDown(0) && IsValidPosition())
-            {
-                Transform child = transform.GetChild(0); // Отримуємо першого дочірнього
-                AdjustTerrainUnderBuilding();
-                isPlaced = true;
-                RestoreOriginalColors(); // Повернення до початкових кольорів
-                child.gameObject.SetActive(true);// додав їбану колізію
-                Destroy(this); // Знищення скрипта
+            {             
+                PlaceBuilding();
             }
 
             if (Input.GetMouseButtonDown(1))
@@ -76,6 +72,57 @@ public class Building : MonoBehaviour
         }
     }
 
+    private async void PlaceBuilding()
+    {
+        try
+        {
+            await PlaceBuildingAsync();
+            Destroy(this); // Знищення скрипта після успішного розміщення будівлі та відправки повідомлення
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Помилка при розміщенні будівлі: {e.Message}");
+            // Тут можна додати додаткову логіку обробки помилок, наприклад, скасувати розміщення.
+        }
+    }
+
+    private async Task PlaceBuildingAsync()
+    {
+        Transform child = transform.GetChild(0);
+        isPlaced = true;
+        RestoreOriginalColors();
+        child.gameObject.SetActive(true);
+        SpawnUnits sp = this.GetComponent<SpawnUnits>();
+        sp.enabled = true;
+        string prefabName = gameObject.name.Replace("(Clone)", "").Trim();
+        float rotationX = gameObject.transform.rotation.x;
+        float rotationY = gameObject.transform.rotation.y;
+        float rotationZ = gameObject.transform.rotation.z;
+        string message = $"BUILT {prefabName} {gameObject.transform.position.x} {gameObject.transform.position.y} {gameObject.transform.position.z} {rotationX} {rotationY} {rotationZ}\n";
+
+        UnityTcpClient tcp = FindAnyObjectByType<UnityTcpClient>();
+        if (tcp != null)
+        {
+              Debug.Log(message);
+            try
+            {
+                await tcp.SendMessage(message);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Помилка при відправці TCP повідомлення: {e.Message}");
+                // Важливо обробити помилку відправки повідомлення. Можливо, потрібно повторити спробу або повідомити про помилку.
+                throw; // Перекидаємо виняток, щоб він був оброблений в PlaceBuilding()
+            }
+            return;
+        }
+        else
+        {
+            Debug.LogError("UnityTcpClient not found in the scene!");
+            // Можливо, тут варто передбачити якусь альтернативну дію, якщо TCP клієнт не знайдено.
+            return;
+        }
+    }
     private void RotateObject()
     {
         float rotationStep = rotationSpeed * Time.deltaTime; // Кут обертання за кадр
@@ -129,7 +176,7 @@ public class Building : MonoBehaviour
         }
     }
 
-    private void AdjustTerrainUnderBuilding()
+   /* private void AdjustTerrainUnderBuilding()
     {
         if (terrainData == null) return;
 
@@ -198,5 +245,5 @@ public class Building : MonoBehaviour
 
             terrainData.SetHeights(startX, startZ, smoothed);
         }
-    }
+    }*/
 }

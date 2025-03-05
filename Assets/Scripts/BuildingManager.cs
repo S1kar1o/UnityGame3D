@@ -11,6 +11,7 @@ public class BuildingManager : MonoBehaviour
         {
             GameObject newBuilding = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             Building buildingScript = newBuilding.GetComponent<Building>();
+            buildingScript.enabled = true;
             buildingScript.terrain = terrain;  // Передаємо посилання на терейн
         }
         else

@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
+using TMPro;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MovingObjects : MonoBehaviour
 {
@@ -11,15 +14,54 @@ public class MovingObjects : MonoBehaviour
     private Camera mainCamera;           // Головна камера
     public LayerMask groundLayer;        // Шар для землі (xz-площина)
     public LayerMask selectionLayer;     // Шар для об'єктів вибору
+    public LayerMask riverLayer;
+
+    public GameObject hirePanel;
+    public Button hireButton;
+    private ButtonControler buttonControler;
+    public GameObject spawnBuilding;
     public List<GameObject> selectedUnits = new List<GameObject>(); // Список вибраних юнітів
     private float holdTime=0.0f; // Час утримання кнопки
-    public float holdThreshold = 0.2f; // Час (у секундах), після якого вважаємо, що кнопку утримують
+    public float holdThreshold = 0.3f; // Час (у секундах), після якого вважаємо, що кнопку утримують
 
     void Start()
     {
         mainCamera = Camera.main;
-    }
+        GameObject eventSestem = GameObject.Find("EventSystem");
+        buttonControler = eventSestem.GetComponent<ButtonControler>();
+        GameObject canvasObject = GameObject.Find("Canvas");
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
 
+        // Знайти панель в Canvas
+        if (canvas != null)
+        {
+            Transform panelTransform = canvas.transform.Find("RecruitPanel");
+
+            if (panelTransform != null)
+            {
+                hirePanel = panelTransform.gameObject;
+
+            }
+        }
+        hireButton = hirePanel.transform.Find("Recruit").GetComponent<Button>();
+        if (hirePanel != null)
+        {
+            hirePanel.SetActive(false); // Приховуємо панель на старті
+            hireButton.onClick.AddListener(OnConnectedToServer); // Викликаємо коректний метод
+
+        }
+    }
+    public void OnConnectedToServer()
+    {
+        SpawnUnits sp = spawnBuilding.GetComponent<SpawnUnits>();
+        sp.SpawnUnit();
+    }
+    public void ActivatePanelRecruiting()
+    {
+        hirePanel.SetActive(!buttonControler.hirePanel);
+        buttonControler.hirePanel = !buttonControler.hirePanel;
+
+    }
     void Update()
     {
         HandleMouseInput();
@@ -52,6 +94,7 @@ public class MovingObjects : MonoBehaviour
                             var extractor = obj.GetComponent<VillagerParametrs>();
                             if (extractor != null)
                             {
+                                extractor.IsRunningToResource(true);
                                 extractor.MoveToResource(resource); // Рух до ресурсу
                             }
                         }
@@ -63,9 +106,35 @@ public class MovingObjects : MonoBehaviour
                             var extractor = obj.GetComponent<VillagerParametrs>();
                             if (extractor != null)
                             {
-                                extractor.StopExtracting(); // зупинення видобування
+                                // Спроба привести до WarriorParametrs, якщо це можливо
+                                if (extractor is WarriorParametrs warrior)
+                                {
+                                    warrior.targetEnemy = null;
+                                }
+                                else
+                                {
+                                    extractor.StopExtracting(); //  Викликає батьківський метод
+                                }
+
+                                extractor.targetPosition = hit.point; // Якщо targetPosition є в батьківському класі
                             }
                             obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
+
+                        }
+                    }
+                    else if (hit.collider.CompareTag("Enemy"))
+                    {
+                        GameObject enemy = hit.collider.gameObject;
+                        if (enemy != null)
+                        {
+                            foreach (var obj in selectedUnits)
+                            {
+                                var extractor = obj.GetComponent<WarriorParametrs>();
+                                if (extractor != null)
+                                {
+                                    extractor.AttackEnemy(enemy);
+                                }
+                            }
                         }
                     }
                 }
@@ -75,11 +144,7 @@ public class MovingObjects : MonoBehaviour
         {
             holdTime = Time.time; // Запам'ятовуємо час натискання
 
-            if (ColisionBuildings())
-            {
-            
-            }
-            else
+            if (!ColisionBuildings())
             {
                 startScreenPosition = Input.mousePosition;
             }
@@ -110,11 +175,15 @@ public class MovingObjects : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 3000f))
         {
-            if (hit.collider.CompareTag("Building")) // Якщо натиснуто на ресурс
+            if (hit.collider.CompareTag("Building"))
             {
                 GameObject building = hit.collider.gameObject;
+                spawnBuilding = building;
                 SpawnUnits buildingStatement=building.GetComponent<SpawnUnits>();
-                buildingStatement.ActivatePanelRecruiting();
+                if (building.GetComponent<Building>() == null)
+                {
+                    ActivatePanelRecruiting();
+                }
                 return true;
 
             }

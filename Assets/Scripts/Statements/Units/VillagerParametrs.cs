@@ -1,29 +1,220 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-
+using System;
+using UnityEngine.UI;
 public class VillagerParametrs : MonoBehaviour
 {
-    private NavMeshAgent agent;
+    [SerializeField] public Gradient hpBarCollor;
+    public Image hpBarBackground;
+    public Image hpBarForeground;
+    protected float smoothSpeed = 0.5f; // Швидкість анімації втрати HP
+
+
+    protected Rigidbody rb;
+    protected NavMeshAgent agent;
+    public BoxCollider boxCollider;
     private GameObject targetResource;
     private bool isExtracting = false; // Якщо агент видобуває ресурс
-    public float extractionInterval = 2.0f; // Час між циклами видобування
-    public int resourceAmountPerCycle = 5; // Скільки ресурсу видобувається за один цикл
-    public int distanceAces = 15;
-    private Coroutine extractionCoroutine; // Змінна для збереження корутини
+    private float extractionInterval = 2.0f; // Час між циклами видобування
+    private int resourceAmountPerCycle = 5; // Скільки ресурсу видобувається за один цикл
 
+    protected float maxHP = 100f;
+    protected float hp = 100;
+    private Coroutine extractionCoroutine; // Змінна для збереження корутини
+    protected bool isUpped=false,wasStandingInWater=false,isStandingInWater=false,inWater = false, isStanding = true,isDrow=false,isSwimming = false,
+        isRunning = false, isRunningToResource = false, isDie = false;
+    protected BoxCollider colliderForActionsWithWater;
+    private bool isGathering = false;
+    protected float fallMultiplier = 2.5f;
+
+    protected float depthBefore = 80f; // Глибина, на якій об'єкт починає витісняти воду
+    protected float displaycmentAmount = 6f; // Сила виштовхування
+    protected Transform buoyancyPoint; // Точка, яка визначає рівень занурення
+    [SerializeField] private GameObject Axe, Pickaxe;
+
+    public Vector3 targetPosition;
     void Start()
     {
+        rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
+        Transform child = transform.Find("ColliderForWater");
+        hpBarForeground.color = hpBarCollor.Evaluate(hp / 100);
+        if (child != null)
+            colliderForActionsWithWater = child.GetComponent<BoxCollider>();
+        else
+            Debug.Log("Дочірній об'єкт не знайдено!");
+
     }
 
+    protected void ArchimedPower()
+    {
+        float depth = depthBefore - buoyancyPoint.position.y; // Перевіряємо, наскільки об'єкт занурений у воду
+        float displacementMultiplier = Mathf.Clamp01(depth / depthBefore) * displaycmentAmount;
+
+        rb.AddForce(Vector3.up * Mathf.Abs(Physics.gravity.y) * displacementMultiplier, ForceMode.Acceleration);
+    }
+    protected void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Water") && colliderForActionsWithWater.bounds.Intersects(other.bounds))
+        {
+            Debug.Log("Персонаж зайшов у воду!");
+            inWater = true;
+            isRunning = false;
+        }
+    }
+
+    protected void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Water") && !colliderForActionsWithWater.bounds.Intersects(other.bounds))
+        {
+            Debug.Log("Персонаж вийшов з води!");
+            inWater = false;
+            isSwimming = false;
+            isStandingInWater = false;
+        }
+    }
+  
+    private void Update(){
+
+        if (agent.nextPosition.y > 59.4 /*&& wasStandingInWate*&&agent.transform.position.y!=transform.position.y*/)
+        {
+            agent.updatePosition = true;
+
+        }
+        else
+        {            
+            agent.updatePosition = false; // Не оновлювати позицію агента
+            Vector3 nextPos = agent.nextPosition;
+            nextPos.y = rb.position.y;
+            rb.MovePosition(nextPos);
+        }
+
+        if (hp <= 0)
+        {
+            if (!inWater)
+            {
+                isDie = true;
+                isRunning = false;
+                isStanding = false;
+                isGathering = false;
+            }
+            else
+            {
+                isDrow = true;
+            }
+            agent.isStopped = true;
+
+        }
+        else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
+        {
+            isRunning = false;
+            isSwimming = false;
+            if (isRunningToResource)
+            {
+                isGathering = true;
+                if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
+                {
+                    Axe.SetActive(true);
+
+                }
+                else
+                {
+                    Pickaxe.SetActive(true);
+
+                }
+            }
+            else
+            {
+                if (!inWater)
+                {
+                    isStanding = true;
+                }
+                else
+                {
+                    isStandingInWater = true;
+                    ArchimedPower();
+
+                }
+            }
+            agent.isStopped = true;
+        } 
+        else
+        {
+            if (!inWater) { 
+                isRunning = true;
+            }
+            else
+            {
+                ArchimedPower();
+                isSwimming = true;
+            }
+            isStanding = false;
+            isStandingInWater=false;
+            isGathering = false;
+            agent.isStopped = false;
+        }
+    }
+    protected IEnumerator UpdateHPBar(float newHP)
+    {
+        // Оновлюємо колір HP
+        hpBarForeground.color = hpBarCollor.Evaluate(newHP / maxHP);
+
+        // Якщо `Image.type = Filled`, використовуємо fillAmount
+        if (hpBarForeground.type == Image.Type.Filled)
+        {
+            hpBarForeground.fillAmount = newHP / maxHP;
+        }
+        else // Якщо `Image.type = Simple`, змінюємо розмір
+        {
+            hpBarForeground.rectTransform.localScale = new Vector3(newHP / maxHP, 1, 1);
+        }
+        hp = newHP;
+
+        // Чекаємо перед зменшенням чорного сліду (імітація втрати HP)
+        yield return new WaitForSeconds(0.1f);
+
+        // Плавне зменшення чорного HP-фону
+        float elapsedTime = 0f;
+        float startFill = hpBarBackground.fillAmount;
+
+        while (elapsedTime < smoothSpeed)
+        {
+            elapsedTime += Time.deltaTime;
+            hpBarBackground.fillAmount = Mathf.Lerp(startFill, newHP / maxHP, elapsedTime / smoothSpeed);
+            yield return null;
+        }
+
+        hpBarBackground.fillAmount = newHP / maxHP;
+    }
+
+    public void getDamage(float damage)
+    {
+        float newHP = Mathf.Clamp(hp - damage, 0, maxHP);
+        StartCoroutine(UpdateHPBar(newHP));
+    }
+   
+    void CallMethod(Component component, string methodName)
+    {
+        Type type = component.GetType();
+        var method = type.GetMethod(methodName);
+
+        if (method != null)
+        {
+            method.Invoke(component, null); // Виклик методу без параметрів
+        }
+        else
+        {
+            Debug.LogWarning($"Метод '{methodName}' не знайдено в {type.Name}");
+        }
+    }
     public void MoveToResource(GameObject resource)
     {
         if (isExtracting)
         {
-            Debug.Log(111);
             StopExtracting();
         }
+        isRunningToResource = true;
 
         targetResource = resource;
 
@@ -64,7 +255,7 @@ public class VillagerParametrs : MonoBehaviour
         }
     }
 
-    public Vector3 GetClosestPointOnResource(GameObject resource, BoxCollider resourceCollider, BoxCollider agentCollider)
+    private Vector3 GetClosestPointOnResource(GameObject resource, BoxCollider resourceCollider, BoxCollider agentCollider)
     {
         Vector3 resourceCenter = resourceCollider.transform.TransformPoint(resourceCollider.center);
         Vector3 resourceHalfSize = Vector3.Scale(resourceCollider.size * 0.5f, resourceCollider.transform.lossyScale);
@@ -117,6 +308,9 @@ public class VillagerParametrs : MonoBehaviour
 
     public void StopExtracting()
     {
+        Axe.SetActive(false);
+        Pickaxe.SetActive(false);
+        isRunningToResource = false;
         isExtracting = false;
         agent.isStopped = false;
         agent.ResetPath();
@@ -126,5 +320,29 @@ public class VillagerParametrs : MonoBehaviour
             StopCoroutine(extractionCoroutine);
             extractionCoroutine = null;
         }
+    }
+   
+    public bool IsDie()
+    { return isDie; }
+    public bool IsStanding()
+    { return isStanding; }
+    public bool IsGathering()
+    { return isGathering;    }
+   public void IsRunningToResource(bool action)
+    { isRunningToResource = action; }
+    public bool IsRunning()
+    { return isRunning;  }
+    public bool IsStandingInWater()
+    { return isStandingInWater;    }
+    public bool IsDrow()
+    { return isDrow;  }
+    public bool IsSwimming() { return isSwimming; }
+    public float GetHp()
+    {
+        return hp;
+    }
+    public GameObject GetTargetResource()
+    {
+        return targetResource;
     }
 }
