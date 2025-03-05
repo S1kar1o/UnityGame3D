@@ -207,7 +207,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 330585548}
         m_TargetAssemblyTypeName: Conecting, Assembly-CSharp
-        m_MethodName: PlayGame
+        m_MethodName: SendMessageToServer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1203,8 +1203,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c1630d2ce1bf6e44a3ea8c641904a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadingSlider: {fileID: 0}
-  progressText: {fileID: 0}
+  IDclient: 0
+  goldAmount: 50
+  woodAmount: 50
+  rockAmount: 50
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
