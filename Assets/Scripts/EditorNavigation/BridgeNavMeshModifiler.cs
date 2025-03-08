@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using Unity.AI.Navigation; // якщо використовуЇте AI Navigation Package
 
 public class BridgeNavMeshUpdater : MonoBehaviour
@@ -21,3 +21,4 @@ public class BridgeNavMeshUpdater : MonoBehaviour
         groundSurface.BuildNavMesh();
     }
 }
+*/
