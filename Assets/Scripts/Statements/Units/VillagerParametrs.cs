@@ -77,7 +77,7 @@ public class VillagerParametrs : MonoBehaviour
   
     private void Update(){
 
-        if (agent.nextPosition.y > 59.4 /*&& wasStandingInWate*&&agent.transform.position.y!=transform.position.y*/)
+        if (agent.nextPosition.y > 59.4 && hp>=0)
         {
             agent.updatePosition = true;
 
@@ -192,6 +192,10 @@ public class VillagerParametrs : MonoBehaviour
     {
         float newHP = Mathf.Clamp(hp - damage, 0, maxHP);
         StartCoroutine(UpdateHPBar(newHP));
+        if(newHP<=0)
+        {
+            agent.updatePosition = false;
+        }
     }
    
     void CallMethod(Component component, string methodName)

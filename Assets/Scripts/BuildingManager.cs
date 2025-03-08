@@ -7,6 +7,7 @@ public class BuildingManager : MonoBehaviour
 
     public void PlaceBuilt()
     {
+        Debug.Log(120);
         if (terrain != null)
         {
             GameObject newBuilding = Instantiate(prefab, Vector3.zero, Quaternion.identity);
