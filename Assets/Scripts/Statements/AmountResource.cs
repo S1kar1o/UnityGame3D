@@ -9,8 +9,12 @@ public class AmountResource : MonoBehaviour
     public UnityTcpClient utp;
     public void Start()
     {
-        GameObject obj = GameObject.Find("UnityTcpClient");
-        utp =obj.GetComponent<UnityTcpClient>();
+        try
+        {
+            GameObject obj = GameObject.Find("UnityTcpClient");
+            utp = obj.GetComponent<UnityTcpClient>();
+        }
+        catch { };
     }
     public void Extraction(int damage)
     {
