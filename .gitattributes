@@ -6,4 +6,6 @@
 # Exception: Do NOT use LFS for anything in Assets/GameObjects/Resourses/
 Assets/GameObjects/Resourses/** -filter -diff -merge -text
 Assets/GameObjects/Resourses/** !text !filter !merge !diff
+# Do NOT use LFS for .json files anywhere
+*.json -filter -diff -merge -text
 *.json !text !filter !merge !diff
