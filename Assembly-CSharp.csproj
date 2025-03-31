@@ -1182,12 +1182,12 @@
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Unity.InputSystem">
-      <HintPath>Library\ScriptAssemblies\Unity.InputSystem.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Unity.InputSystem.ForUI">
       <HintPath>Library\ScriptAssemblies\Unity.InputSystem.ForUI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>Library\ScriptAssemblies\Unity.InputSystem.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.VisualScripting.SettingsProvider.Editor">
@@ -1249,7 +1249,7 @@
       <Name>sc.vegetationspawner.editor</Name>
     </ProjectReference>
     <ProjectReference Include="Freeloader.csproj">
-      <Project>{428D518F-A187-4878-3A94-269C62422FB0}</Project>
+      <Project>{B7EFE696-018F-752B-ECE2-CD1840ECB29D}</Project>
       <Name>Freeloader</Name>
     </ProjectReference>
   </ItemGroup>
