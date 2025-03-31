@@ -1,21 +1,36 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class AmountResource : MonoBehaviour
 {
     public int Amount; // Максимальний рівень HP
     public string typeResource;
     public UnityTcpClient utp;
+    private int instanceID;
+
     public void Start()
     {
+        instanceID = gameObject.GetInstanceID();
+
         try
         {
             GameObject obj = GameObject.Find("UnityTcpClient");
-            utp = obj.GetComponent<UnityTcpClient>();
+            if (obj != null)
+            {
+                utp = obj.GetComponent<UnityTcpClient>();
+            }
+            else
+            {
+                Debug.LogError("UnityTcpClient not found in the scene!");
+            }
         }
-        catch { };
+        catch (Exception ex)
+        {
+            Debug.LogError($"Помилка в Start: {ex.Message}");
+        }
     }
+
     public void Extraction(int damage)
     {
         if (damage > Amount)
@@ -41,11 +56,56 @@ public class AmountResource : MonoBehaviour
         {
             Die();
         }
+        else
+        {
+            SendMessageAmoutExtraction(damage).ConfigureAwait(false);
+        }
     }
 
-    private void Die()
+    private async Task SendMessageAmoutExtraction(int amount)
     {
-        Debug.Log($"{gameObject.name} закінчився!");
-        Destroy(gameObject); // Видалення об'єкта при загибелі
+        string message = $"EXTRACTED {instanceID} {amount} \n";
+
+        if (utp != null)
+        {
+            Debug.Log(message);
+            try
+            {
+                await utp.SendMessage(message);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Помилка при відправці TCP повідомлення: {e.Message}");
+                // Можливо, тут варто повторити спробу або повідомити про помилку.
+            }
+        }
+        else
+        {
+            Debug.LogError("UnityTcpClient not initialized!");
+        }
+    }
+
+    private async Task Die()
+    {
+        string message = $"DIE {instanceID} \n";
+
+        if (utp != null)
+        {
+            Debug.Log(message);
+            try
+            {
+                await utp.SendMessage(message);
+                Destroy(gameObject); // Видалення об'єкта при загибелі
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Помилка при відправці TCP повідомлення: {e.Message}");
+                // Можливо, тут варто повторити спробу або повідомити про помилку.
+            }
+        }
+        else
+        {
+            Debug.LogError("UnityTcpClient not initialized!");
+        }
     }
 }
