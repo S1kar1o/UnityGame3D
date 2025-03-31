@@ -3,14 +3,17 @@ using UnityEngine.AI;
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 public class WarriorParametrs : VillagerParametrs
 {
 
     protected int Hp = 200;
     protected bool isAttack = false;
     public GameObject targetEnemy;
-    protected const float RANGE_ATTACK =20.0f;
+    protected const float RANGE_ATTACK = 20.0f;
     protected float realDistance;
+    protected int damage = 50;
+
     void Update()
     {
         if (agent.nextPosition.y > 59.4)
@@ -101,6 +104,8 @@ public class WarriorParametrs : VillagerParametrs
             agent.isStopped = false;
         }
     }
+
+
     void CallMethod(Component component, string methodName)
     {
         Type type = component.GetType();
@@ -147,5 +152,8 @@ public class WarriorParametrs : VillagerParametrs
     {
         return isAttack;
     }
+    public int GetDamage()
+    {
+        return damage;
+    }
 }
-

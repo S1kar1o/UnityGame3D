@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sc.vegetationspawner.runtim
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{C7A19D5E-08D2-4336-A706-1725D855D9B5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freeloader", "Freeloader.csproj", "{428D518F-A187-4878-3A94-269C62422FB0}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sc.vegetationspawner.editor", "sc.vegetationspawner.editor.csproj", "{5DEE7D5C-348C-DBED-2590-0D012FA55610}"
 EndProject
 Global
@@ -27,6 +29,10 @@ Global
 		{C7A19D5E-08D2-4336-A706-1725D855D9B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7A19D5E-08D2-4336-A706-1725D855D9B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7A19D5E-08D2-4336-A706-1725D855D9B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{428D518F-A187-4878-3A94-269C62422FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{428D518F-A187-4878-3A94-269C62422FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{428D518F-A187-4878-3A94-269C62422FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{428D518F-A187-4878-3A94-269C62422FB0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5DEE7D5C-348C-DBED-2590-0D012FA55610}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5DEE7D5C-348C-DBED-2590-0D012FA55610}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DEE7D5C-348C-DBED-2590-0D012FA55610}.Release|Any CPU.ActiveCfg = Release|Any CPU

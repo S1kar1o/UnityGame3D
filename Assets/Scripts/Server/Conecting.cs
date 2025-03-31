@@ -21,7 +21,7 @@ public class Conecting : MonoBehaviour
     
     public async void SendMessageToServer()
     {
-        await tcpClient.SendMessage("READYTOPLAY\n");
+        await tcpClient.SendMessage("READYTOPLAY");
     }
 
     void Update()

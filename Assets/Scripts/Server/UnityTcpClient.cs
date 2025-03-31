@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 public class UnityTcpClient : MonoBehaviour
@@ -61,6 +62,7 @@ public class UnityTcpClient : MonoBehaviour
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
+            Application.runInBackground = true; // Дозволяє виконання у фоновому режимі
             ConnectToServer(); // Підключення до сервера
         }
         else
@@ -188,9 +190,41 @@ public class UnityTcpClient : MonoBehaviour
                         }
                         else if (message.StartsWith("MOVE"))
                         {
-                            /*                            ProcessMoveMessage(message);
-                            */
-                        } 
+                            string[] parts = message.Split(' ');
+                            if (parts.Length == 5)
+                            {
+                                int unitId = int.Parse(parts[1]);
+                                Vector3 position = new Vector3(
+                                    float.Parse(parts[2]),
+                                    float.Parse(parts[3]),
+                                    float.Parse(parts[4])
+                                );
+
+                                // Знаходимо об’єкт за ID і оновлюємо його позицію
+                                foreach (GameObject unit in FindObjectsOfType<GameObject>())
+                                {
+                                   
+                                    if (unit.GetInstanceID() == unitId)
+                                    {
+                                        unit.GetComponent<NavMeshAgent>().SetDestination(position);
+                                        Debug.Log($"Оновлено позицію юніта {unitId} до {position}");
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else if (message.StartsWith("ATTACK"))
+                        {
+                            ProcessAttackMessage(message);
+                        }
+                        else if (message.StartsWith("EXTRACT"))
+                        {
+                            ProcessExtractMessage(message);
+                        }
+                        else if (message.StartsWith("DIE"))
+                        {
+                            ProcessDieMessage(message);
+                        }
                         else if (message.StartsWith("LOGIN_SUCCESS_WITHOUT_TOKEN"))
                         {
                             Debug.Log(120);
@@ -296,53 +330,156 @@ public class UnityTcpClient : MonoBehaviour
 
     }
 
-   /* private void ProcessMoveMessage(string message)
+    /* private void ProcessMoveMessage(string message)
+     {
+         string[] moves = message.Split(new[] { "MOVE " }, StringSplitOptions.RemoveEmptyEntries);
+         foreach (var move in moves)
+         {
+             string[] parts = move.Trim().Split(' ');
+             if (parts.Length == 7)
+             {
+                 string objectName = parts[0];
+                 if (float.TryParse(parts[1], out float startX) &&
+                     float.TryParse(parts[2], out float startY) &&
+                     float.TryParse(parts[3], out float startZ) &&
+                     float.TryParse(parts[4], out float endX) &&
+                     float.TryParse(parts[5], out float endY) &&
+                     float.TryParse(parts[6], out float endZ))
+                 {
+                     GameObject obj = GameObject.Find(objectName);
+                     if (obj != null)
+                     {
+                         moveInfos[objectName] = new MoveInfo
+                         {
+                             startPosition = new Vector3(startX, startY, startZ),
+                             targetPosition = new Vector3(endX, endY, endZ),
+                             startTime = Time.time,
+                             journeyTime = 1f // Customize duration if required
+                         };
+                     }
+                     else
+                     {
+                         Debug.LogError($"Object {objectName} not found");
+                     }
+                 }
+                 else
+                 {
+                     Debug.LogError("Invalid move message format. Coordinates must be numbers.");
+                 }
+             }
+             else
+             {
+                 Debug.LogError("Invalid move message format. Expected format: MOVE <objectName> <startX> <startY> <startZ> <endX> <endY> <endZ>");
+             }
+         }
+     }*/
+
+    private void ProcessExtractMessage(string message)
     {
-        string[] moves = message.Split(new[] { "MOVE " }, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var move in moves)
+        try
         {
-            string[] parts = move.Trim().Split(' ');
-            if (parts.Length == 7)
+            // Розбиваємо повідомлення на частини
+            string[] parts = message.Split(' ');
+            if (parts.Length < 3)
             {
-                string objectName = parts[0];
-                if (float.TryParse(parts[1], out float startX) &&
-                    float.TryParse(parts[2], out float startY) &&
-                    float.TryParse(parts[3], out float startZ) &&
-                    float.TryParse(parts[4], out float endX) &&
-                    float.TryParse(parts[5], out float endY) &&
-                    float.TryParse(parts[6], out float endZ))
-                {
-                    GameObject obj = GameObject.Find(objectName);
-                    if (obj != null)
-                    {
-                        moveInfos[objectName] = new MoveInfo
-                        {
-                            startPosition = new Vector3(startX, startY, startZ),
-                            targetPosition = new Vector3(endX, endY, endZ),
-                            startTime = Time.time,
-                            journeyTime = 1f // Customize duration if required
-                        };
-                    }
-                    else
-                    {
-                        Debug.LogError($"Object {objectName} not found");
-                    }
-                }
-                else
-                {
-                    Debug.LogError("Invalid move message format. Coordinates must be numbers.");
-                }
+                Debug.LogError("Невірний формат повідомлення EXTRACT: " + message);
+                return;
+            }
+
+            int resourceID = int.Parse(parts[1]); // ID ресурсу
+            int amount = int.Parse(parts[2]);    // Кількість ресурсу
+
+            // Знаходимо об'єкт ресурсу за ID (припустимо, що ID зберігається в компоненті AmountResource)
+            AmountResource resource = FindResourceByID(resourceID);
+            if (resource != null)
+            {
+                resource.Extraction(amount);
+                Debug.Log($"Видобуто {amount} одиниць ресурсу з об'єкта ID {resourceID}.");
             }
             else
             {
-                Debug.LogError("Invalid move message format. Expected format: MOVE <objectName> <startX> <startY> <startZ> <endX> <endY> <endZ>");
+                Debug.LogError($"Ресурс з ID {resourceID} не знайдено.");
             }
         }
-    }*/
-
-    void Update()
+        catch (Exception ex)
+        {
+            Debug.LogError($"Помилка при обробці повідомлення EXTRACT: {ex.Message}");
+        }
+    }
+    private void ProcessDieMessage(string message)
     {
-       
+        try
+        {
+            // Розбиваємо повідомлення на частини
+            string[] parts = message.Split(' ');
+            if (parts.Length < 2)
+            {
+                Debug.LogError("Невірний формат повідомлення DIE: " + message);
+                return;
+            }
+
+            int objectID = int.Parse(parts[1]); // ID об'єкта
+
+            // Знаходимо об'єкт за ID
+            GameObject obj = FindObjectByID(objectID);
+            if (obj != null)
+            {
+                Destroy(obj);
+                Debug.Log($"Об'єкт з ID {objectID} був знищений.");
+            }
+            else
+            {
+                Debug.LogError($"Об'єкт з ID {objectID} не знайдено.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Помилка при обробці повідомлення DIE: {ex.Message}");
+        }
+    }
+
+    // Допоміжна функція для пошуку об'єкта за ID
+    private GameObject FindObjectByID(int objectID)
+    {
+        GameObject[] allObjects = FindObjectsOfType<GameObject>();
+        foreach (var obj in allObjects)
+        {
+            if (obj.GetInstanceID() == objectID)
+            {
+                return obj;
+            }
+        }
+        return null;
+    }
+    private void ProcessAttackMessage(string message )
+    {
+        string[] parts = message.Split(' ');
+        if (parts.Length < 4)
+        {
+            Debug.LogWarning($"Неправильний формат ATTACK_RESULT: {message}");
+            return;
+        }
+        int attackerId = int.Parse(parts[1]);
+        int targetId = int.Parse(parts[2]);
+        int damage = int.Parse(parts[3]);
+
+        GameObject attacker = FindObjectByID(attackerId);
+        WarriorParametrs attackerObj= attacker.GetComponent<WarriorParametrs>();
+        GameObject target = FindObjectByID(targetId);
+        attackerObj.AttackEnemy(target);
+    }
+    // Допоміжна функція для пошуку ресурсу за ID
+    private AmountResource FindResourceByID(int resourceID)
+    {
+        AmountResource[] resources = FindObjectsOfType<AmountResource>();
+        foreach (var resource in resources)
+        {
+            if (resource.GetInstanceID() == resourceID)
+            {
+                return resource;
+            }
+        }
+        return null;
     }
     private void ProcessBuiltMessage(string message)
     {

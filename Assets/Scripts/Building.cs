@@ -61,7 +61,12 @@ public class Building : MonoBehaviour
             UpdatePositionIndicator();
 
             if (Input.GetMouseButtonDown(0) && IsValidPosition())
-            {             
+            {
+                TowerAttack ta = gameObject.GetComponent<TowerAttack>();
+                if (ta != null)
+                {
+                    ta.enabled = true;
+                }
                 PlaceBuilding();
             }
 
@@ -93,13 +98,15 @@ public class Building : MonoBehaviour
         RestoreOriginalColors();
         child.gameObject.SetActive(true);
         SpawnUnits sp = this.GetComponent<SpawnUnits>();
-        sp.enabled = true;
+        if(sp != null)
+            sp.enabled = true;
         string prefabName = gameObject.name.Replace("(Clone)", "").Trim();
         float rotationX = gameObject.transform.rotation.x;
         float rotationY = gameObject.transform.rotation.y;
         float rotationZ = gameObject.transform.rotation.z;
         string message = $"BUILT {prefabName} {gameObject.transform.position.x} {gameObject.transform.position.y} {gameObject.transform.position.z} {rotationX} {rotationY} {rotationZ}\n";
 
+   
         UnityTcpClient tcp = FindAnyObjectByType<UnityTcpClient>();
         if (tcp != null)
         {
@@ -107,6 +114,7 @@ public class Building : MonoBehaviour
             try
             {
                 await tcp.SendMessage(message);
+                
             }
             catch (System.Exception e)
             {

@@ -4,6 +4,9 @@ using UnityEngine.AI;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using static System.Net.WebRequestMethods;
+using System;
+using System.Threading.Tasks;
 
 public class MovingObjects : MonoBehaviour
 {
@@ -15,6 +18,7 @@ public class MovingObjects : MonoBehaviour
     public LayerMask groundLayer;        // Шар для землі (xz-площина)
     public LayerMask selectionLayer;     // Шар для об'єктів вибору
     public LayerMask riverLayer;
+    public UnityTcpClient utp;
 
     public GameObject hirePanel;
     public Button hireButton;
@@ -26,6 +30,15 @@ public class MovingObjects : MonoBehaviour
 
     void Start()
     {
+        GameObject obj = GameObject.Find("UnityTcpClient");
+        if (obj != null)
+        {
+            utp = obj.GetComponent<UnityTcpClient>();
+        }
+        else
+        {
+            Debug.LogError("UnityTcpClient not found in the scene!");
+        }
         mainCamera = Camera.main;
         GameObject eventSestem = GameObject.Find("EventSystem");
         buttonControler = eventSestem.GetComponent<ButtonControler>();
@@ -119,6 +132,7 @@ public class MovingObjects : MonoBehaviour
                                 extractor.targetPosition = hit.point; // Якщо targetPosition є в батьківському класі
                             }
                             obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
+                            SendMoveMessage(obj, hit.point);
 
                         }
                     }
@@ -129,10 +143,11 @@ public class MovingObjects : MonoBehaviour
                         {
                             foreach (var obj in selectedUnits)
                             {
-                                var extractor = obj.GetComponent<WarriorParametrs>();
-                                if (extractor != null)
+                                var warrior = obj.GetComponent<WarriorParametrs>();
+                                if (warrior != null)
                                 {
-                                    extractor.AttackEnemy(enemy);
+                                    warrior.AttackEnemy(enemy);
+                                    SendAttackMessage(obj,enemy, warrior.GetDamage());
                                 }
                             }
                         }
@@ -167,8 +182,53 @@ public class MovingObjects : MonoBehaviour
             endScreenPosition = Input.mousePosition;
         }
     }
+    public async Task SendAttackMessage(GameObject unit, GameObject target, int damage)
+    {
+        if (utp == null)
+        {
+            Debug.LogError("UnityTcpClient не ініціалізований!");
+            return;
+        }
 
+        int unitId = unit.GetInstanceID();
+        int targetId = target.GetInstanceID();
+        string message = $"ATTACK {unitId} {targetId} {damage}";
+        Debug.Log($"Надсилаю повідомлення про атаку: {message}");
 
+        try
+        {
+            await utp.SendMessage(message);
+            Debug.Log($"Повідомлення про атаку для юніта {unitId} успішно відправлено.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Помилка при відправці повідомлення про атаку: {e.Message}");
+        }
+    }
+    public async Task SendMoveMessage(GameObject unit, Vector3 destination)
+    {
+        if (utp == null)
+        {
+            Debug.LogError("UnityTcpClient не ініціалізований!");
+            return;
+        }
+
+        // Створення повідомлення про рух
+        int unitId = unit.GetInstanceID();
+        string message = $"MOVE {unitId} {destination.x} {destination.y} {destination.z}";
+        Debug.Log($"Надсилаю повідомлення про рух: {message}");
+
+        try
+        {
+            // Асинхронна відправка повідомлення на сервер
+            await utp.SendMessage(message);
+            Debug.Log($"Повідомлення про рух успішно відправлено: unitId={unitId}, destination={destination}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Помилка при відправці повідомлення про рух: {e.Message}");
+        }
+    }
     bool ColisionBuildings()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
