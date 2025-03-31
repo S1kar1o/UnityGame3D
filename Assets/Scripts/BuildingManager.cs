@@ -3,15 +3,19 @@ using UnityEngine;
 public class BuildingManager : MonoBehaviour
 {
     public GameObject prefab;
-    public Terrain terrain;  // Публічне поле для терейну, щоб ви могли передати посилання через інспектор
-
+    public Terrain terrain; 
     public void PlaceBuilt()
     {
-        Debug.Log(120);
         if (terrain != null)
         {
             GameObject newBuilding = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             Building buildingScript = newBuilding.GetComponent<Building>();
+            BuildingWalls building;
+            if(buildingScript == null )
+            {
+                building = newBuilding.GetComponent<BuildingWalls>();
+                building.enabled = true;
+            }
             buildingScript.enabled = true;
             buildingScript.terrain = terrain;  // Передаємо посилання на терейн
         }

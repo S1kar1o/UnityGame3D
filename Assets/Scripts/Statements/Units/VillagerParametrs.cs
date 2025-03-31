@@ -33,6 +33,9 @@ public class VillagerParametrs : MonoBehaviour
     protected Transform buoyancyPoint; // Точка, яка визначає рівень занурення
     [SerializeField] private GameObject Axe, Pickaxe;
 
+
+    public UnityTcpClient utp;
+
     public Vector3 targetPosition;
     void Start()
     {
@@ -44,7 +47,12 @@ public class VillagerParametrs : MonoBehaviour
             colliderForActionsWithWater = child.GetComponent<BoxCollider>();
         else
             Debug.Log("Дочірній об'єкт не знайдено!");
-
+        try
+        {
+            GameObject obj = GameObject.Find("UnityTcpClient");
+            utp = obj.GetComponent<UnityTcpClient>();
+        }
+        catch { };
     }
 
     protected void ArchimedPower()

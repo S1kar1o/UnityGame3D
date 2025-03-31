@@ -742,13 +742,9 @@ MonoBehaviour:
   hpBarBackground: {fileID: 8580459822577650596}
   hpBarForeground: {fileID: 9082383616071436606}
   boxCollider: {fileID: 5650575472459051738}
-  targetResource: {fileID: 0}
-  fallMultiplier: 2.5
-  depthBefore: 47.6
-  displaycmentAmount: 6
-  buoyancyPoint: {fileID: 2830148174088286806}
   Axe: {fileID: 0}
   Pickaxe: {fileID: 0}
+  utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
 --- !u!65 &5650575472459051738
@@ -770,8 +766,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1.6122541, z: 1}
-  m_Center: {x: 0, y: 1.2308804, z: 0}
+  m_Size: {x: 1, y: 1.6122541, z: 0.5010126}
+  m_Center: {x: 0, y: 1.2308804, z: -0.011389993}
 --- !u!114 &361802430780529841
 MonoBehaviour:
   m_ObjectHideFlags: 0
