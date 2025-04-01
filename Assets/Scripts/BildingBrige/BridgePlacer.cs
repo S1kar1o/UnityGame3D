@@ -11,20 +11,23 @@ public class BridgePlacer : MonoBehaviour
     public float maxSlopeAngle = 15f;
     public Color validPlacementColor = new Color(0, 1, 0, 0.5f);
     public Color invalidPlacementColor = new Color(1, 0, 0, 0.5f);
-    public Color cursorFollowColor = new Color(0, 0.5f, 1f, 0.7f); // Новый цвет для элемента, следующего за курсором
+    public Color cursorFollowColor = new Color(0, 0.5f, 1f, 0.7f);
 
     [Header("Terrain Connection")]
     public float connectionSearchDistance = 20f;
     public LayerMask groundLayerMask;
+    public float waterCheckDistance = 10f;
+    public int waterCheckPoints = 1; // Кількість точок для перевірки води
 
     private Vector3 firstPoint;
     private Vector3 secondPoint;
     private bool isFirstPointSelected = false;
     private bool isPlacingBridge = false;
     private bool isValidPlacement = true;
+    private bool hasWaterUnderBridge = false;
     private GameObject[] bridgeParts;
     private GameObject[] previewParts;
-    private GameObject cursorFollowPreview; // Новый объект для превью, следующего за курсором
+    private GameObject cursorFollowPreview;
 
     void Update()
     {
@@ -39,16 +42,17 @@ public class BridgePlacer : MonoBehaviour
         {
             if (!isFirstPointSelected)
             {
-                UpdateCursorFollowPreview(hit.point); // Обновляем позицию превью, следующего за курсором
+                UpdateCursorFollowPreview(hit.point);
             }
             else
             {
                 secondPoint = hit.point;
                 isValidPlacement = CheckPlacementValidity(firstPoint, secondPoint);
+                hasWaterUnderBridge = HasWaterUnderBridge();
                 UpdateBridgePreview();
             }
 
-            if (Input.GetMouseButtonDown(0) && isValidPlacement)
+            if (Input.GetMouseButtonDown(0))
             {
                 if (IsValidLocation(hit))
                 {
@@ -56,18 +60,14 @@ public class BridgePlacer : MonoBehaviour
                     {
                         firstPoint = hit.point;
                         isFirstPointSelected = true;
-                        Destroy(cursorFollowPreview); // Уничтожаем превью, следующее за курсором
+                        Destroy(cursorFollowPreview);
                         cursorFollowPreview = null;
                     }
-                    else
+                    else if (isValidPlacement && hasWaterUnderBridge)
                     {
-                        secondPoint = hit.point;
-                        if (CheckPlacementValidity(firstPoint, secondPoint))
-                        {
-                            ClearPreview();
-                            PlaceBridge();
-                            isPlacingBridge = false;
-                        }
+                        ClearPreview();
+                        PlaceBridge();
+                        isPlacingBridge = false;
                     }
                 }
             }
@@ -79,6 +79,32 @@ public class BridgePlacer : MonoBehaviour
         }
     }
 
+    private bool HasWaterUnderBridge()
+    {
+        if (!isFirstPointSelected) return false;
+
+        // Визначаємо центральну точку мосту
+        Vector3 centerPoint = (firstPoint + secondPoint) / 2f;
+
+        // Виконуємо Raycast тільки вниз від центральної точки
+        if (Physics.Raycast(centerPoint + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 100f))
+        {
+            if (hit.collider.CompareTag("Water"))
+            {
+                Debug.DrawLine(centerPoint, hit.point, Color.cyan, 200f);
+                return true;
+            }
+            else
+            {
+                Debug.DrawLine(centerPoint, hit.point, Color.yellow, 2f);
+                return false;
+            }
+        }
+
+        Debug.DrawRay(centerPoint + Vector3.up * 2f, Vector3.down * waterCheckDistance, Color.red, 2f);
+        return false;
+    }
+
     private void UpdateCursorFollowPreview(Vector3 position)
     {
         if (cursorFollowPreview == null)
@@ -86,13 +112,11 @@ public class BridgePlacer : MonoBehaviour
             cursorFollowPreview = Instantiate(bridgePrefab, position, Quaternion.identity);
             cursorFollowPreview.tag = "Untagged";
 
-            // Отключаем коллайдеры
             foreach (var collider in cursorFollowPreview.GetComponentsInChildren<Collider>())
             {
                 collider.enabled = false;
             }
 
-            // Устанавливаем цвет
             foreach (var renderer in cursorFollowPreview.GetComponentsInChildren<Renderer>())
             {
                 renderer.material.color = cursorFollowColor;
@@ -141,7 +165,7 @@ public class BridgePlacer : MonoBehaviour
         Vector3 position = firstPoint - direction * offset;
         previewParts = new GameObject[bridgeCount];
 
-        Color previewColor = isValidPlacement ? validPlacementColor : invalidPlacementColor;
+        Color previewColor = (isValidPlacement && hasWaterUnderBridge) ? validPlacementColor : invalidPlacementColor;
 
         for (int i = 0; i < bridgeCount; i++)
         {
@@ -190,67 +214,73 @@ public class BridgePlacer : MonoBehaviour
         for (int i = 0; i < bridgeParts.Length; i++)
         {
             GameObject current = bridgeParts[i];
+            Bounds bounds = current.GetComponentInChildren<Renderer>().bounds;
 
-            if (bridgeParts[0] == current)
+            // Create connection to terrain for first and last parts
+            if (i == 0 || i == bridgeParts.Length - 1)
             {
-                Vector3 startPosTer = current.transform.position + current.transform.forward * 2f;
-                Vector3 endPosTer = current.transform.position - current.transform.forward * 3f;
-
-                float raycastLimit = 20f;
-                int groundLayerMask = LayerMask.GetMask("Ground");
-
-                RaycastHit[] hits = Physics.RaycastAll(endPosTer + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
-                if (hits.Length > 0)
-                {
-                    endPosTer = hits[0].point;
-                }
-                else
-                {
-                    RaycastHit[] hits1 = Physics.RaycastAll(endPosTer + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
-                    endPosTer = hits1[0].point;
-                    Debug.LogWarning("Не вдалося знайти землю для початкового NavMeshLink!");
-                }
-                endPosTer.z += 1;
-
-                NavMeshLink linkTer = current.AddComponent<NavMeshLink>();
-                linkTer.startPoint = current.transform.InverseTransformPoint(startPosTer);
-                linkTer.endPoint = current.transform.InverseTransformPoint(endPosTer);
-                linkTer.width = navMeshLinkWidth;
-                linkTer.bidirectional = navMeshLinkBidirectional;
-                linkTer.UpdateLink();
+                CreateTerrainConnection(current, i == 0);
             }
 
-            Vector3 startPos = current.transform.position + current.transform.forward * 1.05f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
-            Vector3 endPos = current.transform.position + current.transform.forward * 1.5f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
-
-            if (bridgeParts.Length - 1 == i)
+            // Create links between bridge parts
+            if (i < bridgeParts.Length - 1)
             {
-                float raycastLimit = 20f;
-                int groundLayerMask = LayerMask.GetMask("Ground");
-
-                RaycastHit[] hits = Physics.RaycastAll(endPos + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
-                if (hits.Length > 0)
-                {
-                    endPos = hits[0].point;
-                }
-                else
-                {
-                    RaycastHit[] hits1 = Physics.RaycastAll(endPos + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
-                    endPos = hits1[0].point;
-                    Debug.LogWarning("Не вдалося знайти землю для початкового NavMeshLink!");
-                }
-                endPos.z += 1;
+                CreateBridgeLink(current, bridgeParts[i + 1]);
             }
+        }
+    }
 
-            NavMeshLink link = current.AddComponent<NavMeshLink>();
-            link.startPoint = current.transform.InverseTransformPoint(startPos);
-            link.endPoint = current.transform.InverseTransformPoint(endPos);
-            link.width = navMeshLinkWidth;
-            link.bidirectional = navMeshLinkBidirectional;
-            link.UpdateLink();
+    private void CreateTerrainConnection(GameObject bridgePart, bool isFirstPart)
+    {
+        Bounds bounds = bridgePart.GetComponentInChildren<Renderer>().bounds;
+        Vector3 direction = isFirstPart ? -bridgePart.transform.forward : bridgePart.transform.forward;
+        Vector3 edgePosition = bridgePart.transform.position + direction * (bounds.size.z / 2);
+
+        Vector3 terrainPoint = FindTerrainConnectionPoint(edgePosition);
+
+        NavMeshLink link = bridgePart.AddComponent<NavMeshLink>();
+        link.startPoint = bridgePart.transform.InverseTransformPoint(edgePosition);
+        link.endPoint = bridgePart.transform.InverseTransformPoint(terrainPoint);
+        link.width = navMeshLinkWidth * 1.5f;
+        link.bidirectional = navMeshLinkBidirectional;
+        link.area = NavMesh.GetAreaFromName("Walkable");
+        link.UpdateLink();
+    }
+
+    private Vector3 FindTerrainConnectionPoint(Vector3 startPosition)
+    {
+        if (Physics.Raycast(startPosition + Vector3.up * 10f, Vector3.down, out RaycastHit hit,
+            connectionSearchDistance * 2, groundLayerMask))
+        {
+            return hit.point + Vector3.up * 0.1f;
         }
 
-        Debug.Log($"Створено {bridgeParts.Length} NavMeshLinks між частинами мосту");
+        if (Physics.Raycast(startPosition, Vector3.up, out hit, connectionSearchDistance, groundLayerMask))
+        {
+            return hit.point - Vector3.up * 0.1f;
+        }
+
+        Debug.LogWarning("No terrain found for connection!");
+        return startPosition;
+    }
+
+    private void CreateBridgeLink(GameObject currentPart, GameObject nextPart)
+    {
+        Bounds currentBounds = currentPart.GetComponentInChildren<Renderer>().bounds;
+        Bounds nextBounds = nextPart.GetComponentInChildren<Renderer>().bounds;
+
+        Vector3 startPos = currentPart.transform.position +
+                         currentPart.transform.forward * (currentBounds.size.z / 2);
+        Vector3 endPos = nextPart.transform.position -
+                       nextPart.transform.forward * (nextBounds.size.z / 2);
+
+        NavMeshLink link = currentPart.AddComponent<NavMeshLink>();
+        link.startPoint = currentPart.transform.InverseTransformPoint(startPos);
+        link.endPoint = currentPart.transform.InverseTransformPoint(endPos);
+        link.width = navMeshLinkWidth;
+        link.bidirectional = navMeshLinkBidirectional;
+        link.area = NavMesh.GetAreaFromName("Walkable");
+        link.UpdateLink();
     }
 
     private void ClearPreview()
