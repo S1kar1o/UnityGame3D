@@ -10,6 +10,7 @@ TagManager:
   - Water
   - Enemy
   - Tower
+  - Bridge
   layers:
   - Default
   - TransparentFX
