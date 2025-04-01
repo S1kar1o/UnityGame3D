@@ -39,10 +39,14 @@ public class VillagerParametrs : MonoBehaviour
     public Vector3 targetPosition;
     void Start()
     {
+
         rb = GetComponent<Rigidbody>();
         agent = GetComponent<NavMeshAgent>();
         Transform child = transform.Find("ColliderForWater");
         hpBarForeground.color = hpBarCollor.Evaluate(hp / 100);
+
+        agent.autoTraverseOffMeshLink = false; // Вимикаємо автоматичну телепортацію
+        StartCoroutine(CheckForNavMeshLink());
         if (child != null)
             colliderForActionsWithWater = child.GetComponent<BoxCollider>();
         else
@@ -54,7 +58,42 @@ public class VillagerParametrs : MonoBehaviour
         }
         catch { };
     }
+    private IEnumerator CheckForNavMeshLink()
+    {
+        while (true)
+        {
+            if (agent.isOnOffMeshLink)
+            {
+                yield return StartCoroutine(MoveAcrossLink()); // Плавний перехід
+            }
+            yield return null;
+        }
+    }
 
+    private IEnumerator MoveAcrossLink()
+    {
+        OffMeshLinkData linkData = agent.currentOffMeshLinkData;
+        Vector3 startPos = agent.transform.position;
+        Vector3 endPos = linkData.endPos;
+
+        float duration = Vector3.Distance(startPos, endPos) / agent.speed; // Розрахунок часу
+        float elapsedTime = 0f;
+
+        agent.updatePosition = false; // Вимикаємо примусове оновлення позиції
+
+        while (elapsedTime < duration)
+        {
+            float t = elapsedTime / duration;
+            Vector3 newPosition = Vector3.Lerp(startPos, endPos, t);
+            agent.transform.position = newPosition;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        agent.transform.position = endPos; // Гарантуємо точне попадання в кінцеву точку
+        agent.CompleteOffMeshLink();
+        agent.updatePosition = true; // Вмикаємо оновлення позиції назад
+    }
     protected void ArchimedPower()
     {
         float depth = depthBefore - buoyancyPoint.position.y; // Перевіряємо, наскільки об'єкт занурений у воду
