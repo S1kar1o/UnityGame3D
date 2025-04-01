@@ -1,73 +1,187 @@
-using Unity.AI.Navigation;
+п»їusing Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class BridgePlacer : MonoBehaviour
 {
-    public GameObject bridgePrefab; // Префаб моста
-    public float navMeshLinkWidth = 2f; // Ширина NavMeshLink
-    public bool navMeshLinkBidirectional = true; // Двосторонній лінк
+    [Header("Bridge Settings")]
+    public GameObject bridgePrefab;
+    public float navMeshLinkWidth = 5f;
+    public bool navMeshLinkBidirectional = true;
+    public float maxSlopeAngle = 15f;
+    public Color validPlacementColor = new Color(0, 1, 0, 0.5f);
+    public Color invalidPlacementColor = new Color(1, 0, 0, 0.5f);
+    public Color cursorFollowColor = new Color(0, 0.5f, 1f, 0.7f); // РќРѕРІС‹Р№ С†РІРµС‚ РґР»СЏ СЌР»РµРјРµРЅС‚Р°, СЃР»РµРґСѓСЋС‰РµРіРѕ Р·Р° РєСѓСЂСЃРѕСЂРѕРј
+
+    [Header("Terrain Connection")]
+    public float connectionSearchDistance = 20f;
+    public LayerMask groundLayerMask;
 
     private Vector3 firstPoint;
     private Vector3 secondPoint;
     private bool isFirstPointSelected = false;
     private bool isPlacingBridge = false;
-    private GameObject[] bridgeParts; // Масив частин мосту
+    private bool isValidPlacement = true;
+    private GameObject[] bridgeParts;
+    private GameObject[] previewParts;
+    private GameObject cursorFollowPreview; // РќРѕРІС‹Р№ РѕР±СЉРµРєС‚ РґР»СЏ РїСЂРµРІСЊСЋ, СЃР»РµРґСѓСЋС‰РµРіРѕ Р·Р° РєСѓСЂСЃРѕСЂРѕРј
 
     void Update()
     {
-        if (!isPlacingBridge) return;
-
-        if (Input.GetMouseButtonDown(0))
+        if (!isPlacingBridge)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            ClearPreview();
+            return;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            if (!isFirstPointSelected)
             {
-                if (!isFirstPointSelected)
+                UpdateCursorFollowPreview(hit.point); // РћР±РЅРѕРІР»СЏРµРј РїРѕР·РёС†РёСЋ РїСЂРµРІСЊСЋ, СЃР»РµРґСѓСЋС‰РµРіРѕ Р·Р° РєСѓСЂСЃРѕСЂРѕРј
+            }
+            else
+            {
+                secondPoint = hit.point;
+                isValidPlacement = CheckPlacementValidity(firstPoint, secondPoint);
+                UpdateBridgePreview();
+            }
+
+            if (Input.GetMouseButtonDown(0) && isValidPlacement)
+            {
+                if (IsValidLocation(hit))
                 {
-                    firstPoint = hit.point;
-                    isFirstPointSelected = true;
-                    Debug.Log("Перша точка обрана: " + firstPoint);
-                }
-                else
-                {
-                    secondPoint = hit.point;
-                    isFirstPointSelected = false;
-                    Debug.Log("Друга точка обрана: " + secondPoint);
-                    PlaceBridge();
+                    if (!isFirstPointSelected)
+                    {
+                        firstPoint = hit.point;
+                        isFirstPointSelected = true;
+                        Destroy(cursorFollowPreview); // РЈРЅРёС‡С‚РѕР¶Р°РµРј РїСЂРµРІСЊСЋ, СЃР»РµРґСѓСЋС‰РµРµ Р·Р° РєСѓСЂСЃРѕСЂРѕРј
+                        cursorFollowPreview = null;
+                    }
+                    else
+                    {
+                        secondPoint = hit.point;
+                        if (CheckPlacementValidity(firstPoint, secondPoint))
+                        {
+                            ClearPreview();
+                            PlaceBridge();
+                            isPlacingBridge = false;
+                        }
+                    }
                 }
             }
         }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            CancelPlacement();
+        }
     }
 
-    public void StartPlacingBridge()
+    private void UpdateCursorFollowPreview(Vector3 position)
     {
-        isPlacingBridge = !isPlacingBridge;
-        isFirstPointSelected = false;
-        Debug.Log("Режим будівництва мосту: " + (isPlacingBridge ? "Увімкнено" : "Вимкнено"));
+        if (cursorFollowPreview == null)
+        {
+            cursorFollowPreview = Instantiate(bridgePrefab, position, Quaternion.identity);
+            cursorFollowPreview.tag = "Untagged";
+
+            // РћС‚РєР»СЋС‡Р°РµРј РєРѕР»Р»Р°Р№РґРµСЂС‹
+            foreach (var collider in cursorFollowPreview.GetComponentsInChildren<Collider>())
+            {
+                collider.enabled = false;
+            }
+
+            // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С†РІРµС‚
+            foreach (var renderer in cursorFollowPreview.GetComponentsInChildren<Renderer>())
+            {
+                renderer.material.color = cursorFollowColor;
+            }
+        }
+        else
+        {
+            cursorFollowPreview.transform.position = position;
+        }
+    }
+
+    private bool IsValidLocation(RaycastHit hit)
+    {
+        return hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground") &&
+               !hit.collider.CompareTag("Water") &&
+               !hit.collider.CompareTag("Bridge");
+    }
+
+    private bool CheckPlacementValidity(Vector3 start, Vector3 end)
+    {
+        Vector3 direction = end - start;
+        float horizontalDistance = new Vector2(direction.x, direction.z).magnitude;
+        float verticalDistance = Mathf.Abs(direction.y);
+        float angle = Mathf.Atan2(verticalDistance, horizontalDistance) * Mathf.Rad2Deg;
+
+        if (angle > maxSlopeAngle)
+        {
+            Debug.LogWarning($"Bridge angle {angle:F1}В° exceeds maximum {maxSlopeAngle}В°");
+            return false;
+        }
+        return true;
+    }
+
+    private void UpdateBridgePreview()
+    {
+        ClearPreview();
+
+        Vector3 direction = (secondPoint - firstPoint).normalized;
+        Quaternion rotation = Quaternion.LookRotation(direction);
+        float distance = Vector3.Distance(firstPoint, secondPoint);
+        float bridgeLength = bridgePrefab.GetComponentInChildren<Renderer>().bounds.size.z;
+
+        int bridgeCount = Mathf.Max(1, Mathf.FloorToInt(distance / bridgeLength) + 1);
+        float offset = (bridgeCount * bridgeLength - distance) / 2;
+
+        Vector3 position = firstPoint - direction * offset;
+        previewParts = new GameObject[bridgeCount];
+
+        Color previewColor = isValidPlacement ? validPlacementColor : invalidPlacementColor;
+
+        for (int i = 0; i < bridgeCount; i++)
+        {
+            previewParts[i] = Instantiate(bridgePrefab, position, rotation);
+            previewParts[i].tag = "Untagged";
+
+            foreach (var collider in previewParts[i].GetComponentsInChildren<Collider>())
+            {
+                collider.enabled = false;
+            }
+
+            foreach (var renderer in previewParts[i].GetComponentsInChildren<Renderer>())
+            {
+                renderer.material.color = previewColor;
+            }
+
+            position += direction * bridgeLength;
+        }
     }
 
     private void PlaceBridge()
     {
         Vector3 direction = (secondPoint - firstPoint).normalized;
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, direction);
+        Quaternion rotation = Quaternion.LookRotation(direction);
         float distance = Vector3.Distance(firstPoint, secondPoint);
         float bridgeLength = bridgePrefab.GetComponentInChildren<Renderer>().bounds.size.z;
 
         int bridgeCount = Mathf.Max(1, Mathf.FloorToInt(distance / bridgeLength) + 1);
-        float p1 = (bridgeCount * bridgeLength - distance) / 2;
+        float offset = (bridgeCount * bridgeLength - distance) / 2;
 
-        Vector3 position = firstPoint - direction * p1;
+        Vector3 position = firstPoint - direction * offset;
         bridgeParts = new GameObject[bridgeCount];
 
-        // Створюємо частини мосту
         for (int i = 0; i < bridgeCount; i++)
         {
             bridgeParts[i] = Instantiate(bridgePrefab, position, rotation);
+            bridgeParts[i].tag = "Bridge";
             position += direction * bridgeLength;
         }
 
-        // Створюємо NavMeshLinks між частинами
         CreateNavMeshLinks();
     }
 
@@ -77,14 +191,12 @@ public class BridgePlacer : MonoBehaviour
         {
             GameObject current = bridgeParts[i];
 
-            if (bridgeParts[0] == current) {
+            if (bridgeParts[0] == current)
+            {
                 Vector3 startPosTer = current.transform.position + current.transform.forward * 2f;
-                Vector3 endPosTer = current.transform.position - current.transform.forward *3f;
+                Vector3 endPosTer = current.transform.position - current.transform.forward * 3f;
 
-                // Ліміт пошуку вгору і вниз
                 float raycastLimit = 20f;
-
-                // Отримуємо шар "Ground"
                 int groundLayerMask = LayerMask.GetMask("Ground");
 
                 RaycastHit[] hits = Physics.RaycastAll(endPosTer + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
@@ -94,10 +206,11 @@ public class BridgePlacer : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Не вдалося знайти землю!");
+                    RaycastHit[] hits1 = Physics.RaycastAll(endPosTer + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
+                    endPosTer = hits1[0].point;
+                    Debug.LogWarning("РќРµ РІРґР°Р»РѕСЃСЏ Р·РЅР°Р№С‚Рё Р·РµРјР»СЋ РґР»СЏ РїРѕС‡Р°С‚РєРѕРІРѕРіРѕ NavMeshLink!");
                 }
                 endPosTer.z += 1;
-
 
                 NavMeshLink linkTer = current.AddComponent<NavMeshLink>();
                 linkTer.startPoint = current.transform.InverseTransformPoint(startPosTer);
@@ -106,15 +219,13 @@ public class BridgePlacer : MonoBehaviour
                 linkTer.bidirectional = navMeshLinkBidirectional;
                 linkTer.UpdateLink();
             }
-            // Визначаємо позиції для лінків
-            Vector3 startPos = current.transform.position + current.transform.forward * 1.05f*(current.GetComponentInChildren<Renderer>().bounds.size.z);
-            Vector3 endPos = current.transform.position + current.transform.forward * 1.5f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
-            if (bridgeParts.Length-1 == i)
-            {
-                // Ліміт пошуку вгору і вниз
-                float raycastLimit = 20f;
 
-                // Отримуємо шар "Ground"
+            Vector3 startPos = current.transform.position + current.transform.forward * 1.05f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
+            Vector3 endPos = current.transform.position + current.transform.forward * 1.5f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
+
+            if (bridgeParts.Length - 1 == i)
+            {
+                float raycastLimit = 20f;
                 int groundLayerMask = LayerMask.GetMask("Ground");
 
                 RaycastHit[] hits = Physics.RaycastAll(endPos + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
@@ -124,11 +235,13 @@ public class BridgePlacer : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Не вдалося знайти землю!");
+                    RaycastHit[] hits1 = Physics.RaycastAll(endPos + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
+                    endPos = hits1[0].point;
+                    Debug.LogWarning("РќРµ РІРґР°Р»РѕСЃСЏ Р·РЅР°Р№С‚Рё Р·РµРјР»СЋ РґР»СЏ РїРѕС‡Р°С‚РєРѕРІРѕРіРѕ NavMeshLink!");
                 }
                 endPos.z += 1;
             }
-            // Створюємо лінк
+
             NavMeshLink link = current.AddComponent<NavMeshLink>();
             link.startPoint = current.transform.InverseTransformPoint(startPos);
             link.endPoint = current.transform.InverseTransformPoint(endPos);
@@ -137,6 +250,40 @@ public class BridgePlacer : MonoBehaviour
             link.UpdateLink();
         }
 
-        Debug.Log($"Створено {bridgeParts.Length} NavMeshLinks між частинами мосту");
+        Debug.Log($"РЎС‚РІРѕСЂРµРЅРѕ {bridgeParts.Length} NavMeshLinks РјС–Р¶ С‡Р°СЃС‚РёРЅР°РјРё РјРѕСЃС‚Сѓ");
+    }
+
+    private void ClearPreview()
+    {
+        if (previewParts != null)
+        {
+            foreach (GameObject part in previewParts)
+            {
+                if (part != null) Destroy(part);
+            }
+            previewParts = null;
+        }
+
+        if (cursorFollowPreview != null)
+        {
+            Destroy(cursorFollowPreview);
+            cursorFollowPreview = null;
+        }
+    }
+
+    private void CancelPlacement()
+    {
+        isPlacingBridge = false;
+        isFirstPointSelected = false;
+        ClearPreview();
+        Debug.Log("Bridge placement canceled");
+    }
+
+    public void StartPlacingBridge()
+    {
+        isPlacingBridge = !isPlacingBridge;
+        isFirstPointSelected = false;
+        ClearPreview();
+        Debug.Log("Bridge placement mode: " + (isPlacingBridge ? "ON" : "OFF"));
     }
 }
