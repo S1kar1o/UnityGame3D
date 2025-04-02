@@ -208,43 +208,72 @@ public class BridgePlacer : MonoBehaviour
 
         CreateNavMeshLinks();
     }
-
     private void CreateNavMeshLinks()
     {
         for (int i = 0; i < bridgeParts.Length; i++)
         {
             GameObject current = bridgeParts[i];
-            Bounds bounds = current.GetComponentInChildren<Renderer>().bounds;
 
-            // Create connection to terrain for first and last parts
-            if (i == 0 || i == bridgeParts.Length - 1)
+            if (bridgeParts[0] == current)
             {
-                CreateTerrainConnection(current, i == 0);
+                Vector3 startPosTer = current.transform.position + current.transform.forward * 2f;
+                Vector3 endPosTer = current.transform.position - current.transform.forward * 3f;
+
+                float raycastLimit = 20f;
+                int groundLayerMask = LayerMask.GetMask("Ground");
+
+                RaycastHit[] hits = Physics.RaycastAll(endPosTer + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
+                if (hits.Length > 0)
+                {
+                    endPosTer = hits[0].point;
+                }
+                else
+                {
+                    RaycastHit[] hits1 = Physics.RaycastAll(endPosTer + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
+                    endPosTer = hits1[0].point;
+                    Debug.LogWarning("Не вдалося знайти землю для початкового NavMeshLink!");
+                }
+                endPosTer.z += 1;
+
+                NavMeshLink linkTer = current.AddComponent<NavMeshLink>();
+                linkTer.startPoint = current.transform.InverseTransformPoint(startPosTer);
+                linkTer.endPoint = current.transform.InverseTransformPoint(endPosTer);
+                linkTer.width = navMeshLinkWidth;
+                linkTer.bidirectional = navMeshLinkBidirectional;
+                linkTer.UpdateLink();
             }
 
-            // Create links between bridge parts
-            if (i < bridgeParts.Length - 1)
+            Vector3 startPos = current.transform.position + current.transform.forward * 1.05f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
+            Vector3 endPos = current.transform.position + current.transform.forward * 1.5f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
+
+            if (bridgeParts.Length - 1 == i)
             {
-                CreateBridgeLink(current, bridgeParts[i + 1]);
+                float raycastLimit = 20f;
+                int groundLayerMask = LayerMask.GetMask("Ground");
+
+                RaycastHit[] hits = Physics.RaycastAll(endPos + Vector3.up * raycastLimit, Vector3.down, raycastLimit * 2, groundLayerMask);
+                if (hits.Length > 0)
+                {
+                    endPos = hits[0].point;
+                }
+                else
+                {
+                    RaycastHit[] hits1 = Physics.RaycastAll(endPos + Vector3.down * raycastLimit, Vector3.up, raycastLimit * 2, groundLayerMask);
+                    endPos = hits1[0].point;
+                    Debug.LogWarning("Не вдалося знайти землю для початкового NavMeshLink!");
+                }
+                endPos.z += 1;
             }
+
+            NavMeshLink link = current.AddComponent<NavMeshLink>();
+            link.startPoint = current.transform.InverseTransformPoint(startPos);
+            link.endPoint = current.transform.InverseTransformPoint(endPos);
+            link.width = navMeshLinkWidth;
+            link.bidirectional = navMeshLinkBidirectional;
+            link.UpdateLink();
         }
-    }
 
-    private void CreateTerrainConnection(GameObject bridgePart, bool isFirstPart)
-    {
-        Bounds bounds = bridgePart.GetComponentInChildren<Renderer>().bounds;
-        Vector3 direction = isFirstPart ? -bridgePart.transform.forward : bridgePart.transform.forward;
-        Vector3 edgePosition = bridgePart.transform.position + direction * (bounds.size.z / 2);
-
-        Vector3 terrainPoint = FindTerrainConnectionPoint(edgePosition);
-
-        NavMeshLink link = bridgePart.AddComponent<NavMeshLink>();
-        link.startPoint = bridgePart.transform.InverseTransformPoint(edgePosition);
-        link.endPoint = bridgePart.transform.InverseTransformPoint(terrainPoint);
-        link.width = navMeshLinkWidth * 1.5f;
-        link.bidirectional = navMeshLinkBidirectional;
-        link.area = NavMesh.GetAreaFromName("Walkable");
-        link.UpdateLink();
+        Debug.Log($"Створено {bridgeParts.Length} NavMeshLinks між частинами мосту");
     }
 
     private Vector3 FindTerrainConnectionPoint(Vector3 startPosition)
@@ -262,25 +291,6 @@ public class BridgePlacer : MonoBehaviour
 
         Debug.LogWarning("No terrain found for connection!");
         return startPosition;
-    }
-
-    private void CreateBridgeLink(GameObject currentPart, GameObject nextPart)
-    {
-        Bounds currentBounds = currentPart.GetComponentInChildren<Renderer>().bounds;
-        Bounds nextBounds = nextPart.GetComponentInChildren<Renderer>().bounds;
-
-        Vector3 startPos = currentPart.transform.position +
-                         currentPart.transform.forward * (currentBounds.size.z / 2);
-        Vector3 endPos = nextPart.transform.position -
-                       nextPart.transform.forward * (nextBounds.size.z / 2);
-
-        NavMeshLink link = currentPart.AddComponent<NavMeshLink>();
-        link.startPoint = currentPart.transform.InverseTransformPoint(startPos);
-        link.endPoint = currentPart.transform.InverseTransformPoint(endPos);
-        link.width = navMeshLinkWidth;
-        link.bidirectional = navMeshLinkBidirectional;
-        link.area = NavMesh.GetAreaFromName("Walkable");
-        link.UpdateLink();
     }
 
     private void ClearPreview()
