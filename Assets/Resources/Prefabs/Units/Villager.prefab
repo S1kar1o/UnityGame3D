@@ -862,6 +862,7 @@ MonoBehaviour:
   hpBarBackground: {fileID: 453200594249305173}
   hpBarForeground: {fileID: 6477984146621369575}
   boxCollider: {fileID: 5391608888426749419}
+  colliderForActionsWithWater: {fileID: 0}
   displaycmentAmount: 2
   buoyancyPoint: {fileID: 141431309543035459}
   Axe: {fileID: 5832665644452845541}
@@ -882,7 +883,7 @@ NavMeshAgent:
   m_Acceleration: 20
   avoidancePriority: 50
   m_AngularSpeed: 300
-  m_StoppingDistance: 30
+  m_StoppingDistance: 20
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
