@@ -4,16 +4,21 @@ using System.Collections;
 using System;
 using UnityEngine.UI;
 using System.Threading.Tasks;
+using Unity.Mathematics;
 public class WarriorParametrs : VillagerParametrs
 {
 
-    protected int Hp = 200;
     protected bool isAttack = false;
     public GameObject targetEnemy;
     protected const float RANGE_ATTACK = 20.0f;
     protected float realDistance;
     protected int damage = 50;
 
+    void Awake()
+    {
+        maxHP = 200;
+        hp = 200; // Ініціалізація при створенні об'єкта
+    }
     void Update()
     {
         if (agent.nextPosition.y > 59.4)
@@ -49,7 +54,6 @@ public class WarriorParametrs : VillagerParametrs
         else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
         {
             isRunning = false;
-            isSwimming = false;
             if (targetEnemy)
             {
                 if (!inWater)
@@ -79,6 +83,7 @@ public class WarriorParametrs : VillagerParametrs
                 else
                 {
                     isStandingInWater = true;
+                    isSwimming = false;
                     ArchimedPower();
 
                 }

@@ -43,6 +43,8 @@ public class UnityTcpClient : MonoBehaviour
         TryLoginWithToken(); // Після підключення намагаємося здійснити вхід за токеном
     }
 
+
+    public UIresourceControll uIresource;
     // Метод для спроби авторизації через токен
     private async void TryLoginWithToken()
     {

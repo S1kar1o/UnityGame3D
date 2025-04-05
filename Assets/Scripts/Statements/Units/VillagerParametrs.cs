@@ -24,20 +24,20 @@ public class VillagerParametrs : MonoBehaviour
     private Coroutine extractionCoroutine; // Змінна для збереження корутини
     protected bool isUpped=false,wasStandingInWater=false,isStandingInWater=false,inWater = false, isStanding = true,isDrow=false,isSwimming = false,
         isRunning = false, isRunningToResource = false, isDie = false;
-    protected BoxCollider colliderForActionsWithWater;
+    public BoxCollider colliderForActionsWithWater;
     private bool isGathering = false;
     protected float fallMultiplier = 2.5f;
 
     protected float depthBefore = 80f; // Глибина, на якій об'єкт починає витісняти воду
-    protected float displaycmentAmount = 6f; // Сила виштовхування
-    protected Transform buoyancyPoint; // Точка, яка визначає рівень занурення
+    public float displaycmentAmount = 6f; // Сила виштовхування
+    public Transform buoyancyPoint; // Точка, яка визначає рівень занурення
     [SerializeField] private GameObject Axe, Pickaxe;
 
 
     public UnityTcpClient utp;
 
     public Vector3 targetPosition;
-    void Start()
+    public void Start()
     {
 
         rb = GetComponent<Rigidbody>();
@@ -58,7 +58,7 @@ public class VillagerParametrs : MonoBehaviour
         }
         catch { };
     }
-    private IEnumerator CheckForNavMeshLink()
+    protected IEnumerator CheckForNavMeshLink()
     {
         while (true)
         {
@@ -70,7 +70,7 @@ public class VillagerParametrs : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveAcrossLink()
+    protected IEnumerator MoveAcrossLink()
     {
         OffMeshLinkData linkData = agent.currentOffMeshLinkData;
         Vector3 startPos = agent.transform.position;
@@ -107,6 +107,7 @@ public class VillagerParametrs : MonoBehaviour
         {
             Debug.Log("Персонаж зайшов у воду!");
             inWater = true;
+            isStanding = false;
             isRunning = false;
         }
     }

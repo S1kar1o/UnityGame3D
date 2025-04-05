@@ -276,6 +276,37 @@ MonoBehaviour:
   m_FillOrigin: 3
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &5178084011995603291
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 141431309543035459}
+  m_Layer: 0
+  m_Name: PositionForWater
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &141431309543035459
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5178084011995603291}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.093, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7824186592622365829}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7478223269217611298
 GameObject:
   m_ObjectHideFlags: 0
@@ -617,6 +648,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -9170702880547031307, guid: f8a97bd330387e841aab2d6424999fc0,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -635,17 +671,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1150
+      value: 269.0784
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 119.13
+      value: 212.1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -444
+      value: 148.14069
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
@@ -722,6 +758,10 @@ PrefabInstance:
         type: 3}
       insertIndex: 2
       addedObject: {fileID: 7486755447705997652}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 141431309543035459}
     - targetCorrespondingSourceObject: {fileID: -1070350730909333850, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       insertIndex: -1
@@ -822,13 +862,11 @@ MonoBehaviour:
   hpBarBackground: {fileID: 453200594249305173}
   hpBarForeground: {fileID: 6477984146621369575}
   boxCollider: {fileID: 5391608888426749419}
-  targetResource: {fileID: 0}
-  fallMultiplier: 2.5
-  depthBefore: 47.6
-  displaycmentAmount: 6
-  buoyancyPoint: {fileID: 7486755447705997652}
+  displaycmentAmount: 2
+  buoyancyPoint: {fileID: 141431309543035459}
   Axe: {fileID: 5832665644452845541}
   Pickaxe: {fileID: 5640421330491535255}
+  utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
 --- !u!195 &8467033966034923416
 NavMeshAgent:
@@ -839,9 +877,9 @@ NavMeshAgent:
   m_GameObject: {fileID: 7484640550819272255}
   m_Enabled: 1
   m_AgentTypeID: 0
-  m_Radius: 1
-  m_Speed: 50
-  m_Acceleration: 30
+  m_Radius: 0.4
+  m_Speed: 30
+  m_Acceleration: 20
   avoidancePriority: 50
   m_AngularSpeed: 300
   m_StoppingDistance: 30
@@ -897,7 +935,7 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!4 &7824186592622365829 stripped
