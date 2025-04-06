@@ -101,7 +101,11 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\RiverManager.cs" />
+
     <Compile Include="Assets\Scripts\BildingWall\WallGenerator.cs" />
+
+    <Compile Include="Assets\Scripts\UIresourceControll.cs" />
+
     <Compile Include="Assets\IroNice19\IroNiceScripts\CreateSphereOnTerrain.cs" />
     <Compile Include="Assets\Scripts\FpsCounter.cs" />
     <Compile Include="Assets\IgniteCoders\Simple Water Shader\Resources\WaterReflection.cs" />
@@ -135,6 +139,7 @@
     <Compile Include="Assets\Forst\CTI Runtime Components\CTI Runtime Components URP 14plus\Scripts\CTI_URP_CustomWind.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\Scripts\TimeLighting.cs" />
+    <Compile Include="Assets\Scripts\RandomGeneratorPlayerInStart.cs" />
     <Compile Include="Assets\Scripts\ButtonCreatingWall.cs" />
     <Compile Include="Assets\Animation\Scripts\WarriorAnimation.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />

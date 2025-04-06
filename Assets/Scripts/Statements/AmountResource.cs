@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AmountResource : MonoBehaviour
 {
-    public int Amount; // Максимальний рівень HP
+    public int Amount; 
     public string typeResource;
     public UnityTcpClient utp;
     private int instanceID;
@@ -43,12 +43,15 @@ public class AmountResource : MonoBehaviour
         {
             case "Wood":
                 utp.woodAmount += damage;
+                utp.uIresource.UpdateAmoundOWood();
                 break;
             case "Rock":
                 utp.rockAmount += damage;
+                utp.uIresource.UpdateAmoundOfRocks();
                 break;
             default:
                 utp.goldAmount += damage;
+                utp.uIresource.UpdateAmoundOfGold();
                 break;
         }
 

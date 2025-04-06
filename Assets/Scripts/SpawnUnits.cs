@@ -18,7 +18,6 @@ public class SpawnUnits : MonoBehaviour
 
         GameObject ut = GameObject.Find("UnityTcpClient");
         tcpClient = ut.GetComponent<UnityTcpClient>();
-        // Знайти Canvas
        
         indexUnit = tcpClient.IDclient;
     }

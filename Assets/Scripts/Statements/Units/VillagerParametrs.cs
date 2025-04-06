@@ -24,20 +24,20 @@ public class VillagerParametrs : MonoBehaviour
     private Coroutine extractionCoroutine; // Змінна для збереження корутини
     protected bool isUpped=false,wasStandingInWater=false,isStandingInWater=false,inWater = false, isStanding = true,isDrow=false,isSwimming = false,
         isRunning = false, isRunningToResource = false, isDie = false;
-    protected BoxCollider colliderForActionsWithWater;
+    public BoxCollider colliderForActionsWithWater;
     private bool isGathering = false;
     protected float fallMultiplier = 2.5f;
 
     protected float depthBefore = 80f; // Глибина, на якій об'єкт починає витісняти воду
-    protected float displaycmentAmount = 6f; // Сила виштовхування
-    protected Transform buoyancyPoint; // Точка, яка визначає рівень занурення
+    public float displaycmentAmount = 6f; // Сила виштовхування
+    public Transform buoyancyPoint; // Точка, яка визначає рівень занурення
     [SerializeField] private GameObject Axe, Pickaxe;
 
 
     public UnityTcpClient utp;
 
     public Vector3 targetPosition;
-    void Start()
+    public void Start()
     {
 
         rb = GetComponent<Rigidbody>();
@@ -58,7 +58,7 @@ public class VillagerParametrs : MonoBehaviour
         }
         catch { };
     }
-    private IEnumerator CheckForNavMeshLink()
+    protected IEnumerator CheckForNavMeshLink()
     {
         while (true)
         {
@@ -70,7 +70,7 @@ public class VillagerParametrs : MonoBehaviour
         }
     }
 
-    private IEnumerator MoveAcrossLink()
+    protected IEnumerator MoveAcrossLink()
     {
         OffMeshLinkData linkData = agent.currentOffMeshLinkData;
         Vector3 startPos = agent.transform.position;
@@ -107,6 +107,7 @@ public class VillagerParametrs : MonoBehaviour
         {
             Debug.Log("Персонаж зайшов у воду!");
             inWater = true;
+            isStanding = false;
             isRunning = false;
         }
     }
@@ -245,20 +246,7 @@ public class VillagerParametrs : MonoBehaviour
         }
     }
    
-    void CallMethod(Component component, string methodName)
-    {
-        Type type = component.GetType();
-        var method = type.GetMethod(methodName);
-
-        if (method != null)
-        {
-            method.Invoke(component, null); // Виклик методу без параметрів
-        }
-        else
-        {
-            Debug.LogWarning($"Метод '{methodName}' не знайдено в {type.Name}");
-        }
-    }
+    
     public void MoveToResource(GameObject resource)
     {
         if (isExtracting)
@@ -308,21 +296,39 @@ public class VillagerParametrs : MonoBehaviour
 
     private Vector3 GetClosestPointOnResource(GameObject resource, BoxCollider resourceCollider, BoxCollider agentCollider)
     {
-        Vector3 resourceCenter = resourceCollider.transform.TransformPoint(resourceCollider.center);
-        Vector3 resourceHalfSize = Vector3.Scale(resourceCollider.size * 0.5f, resourceCollider.transform.lossyScale);
-        Vector3 agentHalfSize = Vector3.Scale(agentCollider.size * 0.5f, agentCollider.transform.lossyScale);
-        Vector3 agentPosition = agentCollider.transform.position;
+        // Отримуємо світові координати центру ресурсу
+        Vector3 resourceCenter = resourceCollider.bounds.center;
 
-        float clampedX = Mathf.Clamp(agentPosition.x, resourceCenter.x - resourceHalfSize.x, resourceCenter.x + resourceHalfSize.x);
-        float clampedY = Mathf.Clamp(agentPosition.y, resourceCenter.y - resourceHalfSize.y, resourceCenter.y + resourceHalfSize.y);
-        float clampedZ = Mathf.Clamp(agentPosition.z, resourceCenter.z - resourceHalfSize.z, resourceCenter.z + resourceHalfSize.z);
+        // Отримуємо розміри об'єктів у світових координатах
+        Vector3 resourceSize = resourceCollider.bounds.size;
+        Vector3 agentSize = agentCollider.bounds.size;
 
-        Vector3 adjustedPoint = new Vector3(clampedX, clampedY, clampedZ);
-        Debug.Log($"Resource Center: {resourceCenter}, Adjusted Point: {adjustedPoint}");
+        // Визначаємо напрямок від агента до ресурсу
+        Vector3 directionToResource = (resourceCenter - agentCollider.transform.position).normalized;
 
-        return adjustedPoint;
+        // Розраховуємо точку на поверхні ресурсу з урахуванням розмірів обох об'єктів
+        Vector3 closestPoint = resourceCenter - directionToResource * (resourceSize.magnitude + agentSize.magnitude) * 0.5f;
+
+        // Обмежуємо точку межами ресурсу
+        closestPoint.x = Mathf.Clamp(
+            closestPoint.x,
+            resourceCenter.x - resourceSize.x * 0.5f,
+            resourceCenter.x + resourceSize.x * 0.5f
+        );
+        closestPoint.y = Mathf.Clamp(
+            closestPoint.y,
+            resourceCenter.y - resourceSize.y * 0.5f,
+            resourceCenter.y + resourceSize.y * 0.5f
+        );
+        closestPoint.z = Mathf.Clamp(
+            closestPoint.z,
+            resourceCenter.z - resourceSize.z * 0.5f,
+            resourceCenter.z + resourceSize.z * 0.5f
+        );
+
+        Debug.Log($"Resource Center: {resourceCenter}, Closest Point: {closestPoint}");
+        return closestPoint;
     }
-
     private IEnumerator ExtractResourceCoroutine()
     {
         if (targetResource == null)

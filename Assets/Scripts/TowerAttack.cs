@@ -5,10 +5,11 @@ using UnityEngine;
 public class TowerAttack : MonoBehaviour
 {
     public GameObject arrowPref; // Префаб стріли
-    private List<string> tegAttack = new List<string> { "Enemy", "Unit" }; // Теги цілей
+    public string[] attackTags = { "Enemy", "Unit" }; // Теги для пошуку
     public GameObject target; // Поточна ціль
     public float attackRange = 200f; // Дальність атаки вежі
     public float attackCooldown = 1f; // Затримка між пострілами
+    private bool isSearching;
 
     private float lastAttackTime; // Час останнього пострілу
 
@@ -19,30 +20,37 @@ public class TowerAttack : MonoBehaviour
 
     void Update()
     {
-        // Шукаємо ціль, якщо її немає
-        if (target == null)
+        if (target == null && !isSearching)
         {
-            FindTarget();
+            StartCoroutine(FindTargetCoroutine());
         }
-
-        // Якщо є ціль і минув час затримки, стріляємо
-        if (target != null && Time.time >= lastAttackTime + attackCooldown)
+        else if (target != null)
         {
-            Shoot();
-            lastAttackTime = Time.time;
+            // Якщо ціль вийшла за діапазон
+            if (Vector3.Distance(transform.position, target.transform.position) > attackRange)
+            {
+                target = null;
+            }
+            // Атака, якщо готові
+            else if (Time.time >= lastAttackTime + attackCooldown)
+            {
+                Shoot();
+                lastAttackTime = Time.time;
+            }
         }
     }
-
     // Пошук найближчої цілі
-    void FindTarget()
+    IEnumerator FindTargetCoroutine()
     {
+        isSearching = true;
         Collider[] hits = Physics.OverlapSphere(transform.position, attackRange);
-        float closestDistance = 200;
         GameObject closestTarget = null;
+        float closestDistance = Mathf.Infinity;
 
         foreach (Collider hit in hits)
         {
-            if (tegAttack.Contains(hit.tag)) // Перевіряємо тег
+            // Перевірка тегу (оптимізовано через HashSet)
+            if (System.Array.IndexOf(attackTags, hit.tag) != -1)
             {
                 float distance = Vector3.Distance(transform.position, hit.transform.position);
                 if (distance < closestDistance)
@@ -51,9 +59,16 @@ public class TowerAttack : MonoBehaviour
                     closestTarget = hit.gameObject;
                 }
             }
+
+            // Пропускаємо кадр кожні 10 об'єктів
+            if (System.Array.IndexOf(hits, hit) % 10 == 0)
+            {
+                yield return null;
+            }
         }
 
         target = closestTarget;
+        isSearching = false;
     }
 
     // Стрілянина

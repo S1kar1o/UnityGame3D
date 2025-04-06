@@ -26,7 +26,7 @@ public class MovingObjects : MonoBehaviour
     public GameObject spawnBuilding;
     public List<GameObject> selectedUnits = new List<GameObject>(); // Список вибраних юнітів
     private float holdTime=0.0f; // Час утримання кнопки
-    public float holdThreshold = 0.3f; // Час (у секундах), після якого вважаємо, що кнопку утримують
+    public float holdThreshold = 0.5f; // Час (у секундах), після якого вважаємо, що кнопку утримують
 
     void Start()
     {
@@ -304,7 +304,7 @@ public class MovingObjects : MonoBehaviour
     {
         // Створення променя з екранних координат
         Ray ray = mainCamera.ScreenPointToRay(screenPosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        if (Physics.Raycast(ray, out RaycastHit hit, 2000f, groundLayer))
         {
             // Перетворення в світові координати; y = 0 для площини xz
             return new Vector3(hit.point.x, 0, hit.point.z);
