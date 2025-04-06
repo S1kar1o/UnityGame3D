@@ -63,7 +63,6 @@
     <Compile Include="Assets\IroNice19\IroNiceScripts\LineRiverGenerator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextEventHandler.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexShakeA.cs" />
-    <Compile Include="Assets\Scripts\BildingBrige\BridgeBuilderUI.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\RiverGenerator.cs" />
     <Compile Include="Assets\Scripts\Statements\AmountResource.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\EnvMapAnimator.cs" />
@@ -102,6 +101,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\RiverManager.cs" />
+    <Compile Include="Assets\Scripts\BildingWall\WallGenerator.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\CreateSphereOnTerrain.cs" />
     <Compile Include="Assets\Scripts\FpsCounter.cs" />
     <Compile Include="Assets\IgniteCoders\Simple Water Shader\Resources\WaterReflection.cs" />
@@ -120,6 +120,7 @@
     <Compile Include="Assets\Scripts\TowerAttack.cs" />
     <Compile Include="Assets\Scripts\LoadingScene\SceneLoader.cs" />
     <Compile Include="Assets\Scripts\CameraMoving.cs" />
+    <Compile Include="Assets\Scripts\BuldingManager\BildingButtonManager.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\MovingObjects1.cs" />
     <Compile Include="Assets\Scripts\Server\UnityTcpClient.cs" />
     <Compile Include="Assets\Scripts\ArrowController.cs" />
