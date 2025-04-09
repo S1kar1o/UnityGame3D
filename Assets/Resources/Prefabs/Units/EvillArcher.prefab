@@ -485,7 +485,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
       propertyPath: m_Name
-      value: archerSTAND
+      value: EvillArcher
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
@@ -533,6 +533,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 685973670289044936}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 23e364d7dc70b674985f12f753f9af1c,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1755321177798478528}
   m_SourcePrefab: {fileID: 100100000, guid: 23e364d7dc70b674985f12f753f9af1c, type: 3}
 --- !u!1 &6018281669264991452 stripped
 GameObject:
@@ -599,8 +603,12 @@ MonoBehaviour:
   hpBarBackground: {fileID: 4020486991528336072}
   hpBarForeground: {fileID: 3168079338871608080}
   boxCollider: {fileID: 5998978778922972813}
+  colliderForActionsWithWater: {fileID: 0}
+  displaycmentAmount: 6
+  buoyancyPoint: {fileID: 0}
   Axe: {fileID: 0}
   Pickaxe: {fileID: 0}
+  utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
 --- !u!65 &5998978778922972813
@@ -673,6 +681,19 @@ NavMeshAgent:
   m_BaseOffset: 0.15
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &1755321177798478528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6018281669264991452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69e4d2b1399e1149abb002e90d09173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverId: 0
 --- !u!4 &6399311494226951782 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 23e364d7dc70b674985f12f753f9af1c,

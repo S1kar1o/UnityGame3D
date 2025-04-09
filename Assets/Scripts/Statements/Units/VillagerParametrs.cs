@@ -351,10 +351,11 @@ public class VillagerParametrs : MonoBehaviour
             }
 
             yield return new WaitForSeconds(extractionInterval);
-
-            amrsc.Extraction(resourceAmountPerCycle);
-            Debug.Log(amrsc.Amount);
-
+            if (gameObject.tag == utp.tagOwner[utp.IDclient])
+            {
+                amrsc.Extraction(resourceAmountPerCycle);
+                Debug.Log(amrsc.Amount);
+            }
             if (amrsc.Amount <= 0)
             {
                 targetResource = null;

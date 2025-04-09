@@ -1,21 +1,23 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using TMPro; // Для TextMeshPro
-using UnityEngine.UI; // Для Slider
+using Esper.Freeloader; // Додано простір імен Freeloader
+using TMPro;
+using UnityEngine.UI;
 using System.Collections;
 
 public class SceneLoader : MonoBehaviour
 {
-    public Slider loadingSlider;         // UI Slider для показу прогресу завантаження
-    public TextMeshProUGUI progressText; // TextMeshPro для відображення відсотків
-    public string sceneToLoad;           // Сцена, яку треба завантажити
-    public UnityTcpClient unityTcp;      // TCP клієнт для отримання сцени
+    public TextMeshProUGUI progressText; // TextMeshPro для відображення статусу
+    public string sceneToLoad="Playble";          // Сцена, яку треба завантажити
+    public UnityTcpClient unityTcp;     // TCP клієнт для отримання сцени
+
+    private static float _additionalProgress; // Для додаткового прогресу
+    private LoadingProgressTracker _tracker;  // Трекер прогресу Freeloader
 
     void Start()
     {
-        unityTcp = FindObjectOfType<UnityTcpClient>();   // Знаходимо скрипт UnityTcpClient
-        sceneToLoad = unityTcp.SceneToMove;              // отримуємо сцену для завантаження
-        Debug.Log("Scene to load: " + sceneToLoad);      // Перевірка того, яку сцену ви передаєте
+        unityTcp = FindObjectOfType<UnityTcpClient>();
+        sceneToLoad = unityTcp.SceneToMove;
+        Debug.Log("Scene to load: " + sceneToLoad);
 
         if (string.IsNullOrEmpty(sceneToLoad))
         {
@@ -23,49 +25,50 @@ public class SceneLoader : MonoBehaviour
             return;
         }
 
-        StartCoroutine(LoadAsync(sceneToLoad));          // Починаємо завантаження сцени
+        // Ініціалізація трекера прогресу
+        _tracker = new LoadingProgressTracker(
+            "Завантаження...",
+            () => _additionalProgress
+        );
+
+        // Початок завантаження сцени з трекером
+        LoadingScreen.Instance.Load(sceneToLoad, _tracker);
+
+        // Запуск додаткового завантаження (приклад)
+        StartCoroutine(SimulateAdditionalLoading());
     }
 
-    private IEnumerator LoadAsync(string sceneName)
+    IEnumerator SimulateAdditionalLoading()
     {
-        // Логіка завантаження сцени з початковим статусом
-        AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
+        _additionalProgress = 0f;
 
-        if (operation == null)
+        // Симуляція завантаження додаткових ресурсів
+        while (_additionalProgress < 1f)
         {
-            Debug.LogError("Failed to load scene: " + sceneName);
-            yield break; // Завантаження сцени не відбулося, виходимо з корутини
+            _additionalProgress += 0.05f;
+
+            if (progressText != null)
+            {
+                progressText.text = $"Завантаження: {Mathf.Floor(_additionalProgress * 100)}%";
+            }
+
+            yield return new WaitForSeconds(0.1f);
         }
 
-        operation.allowSceneActivation = false;
-
-        // Очікуємо, поки сцена завантажиться
-        while (!operation.isDone)
+        // Оновлення тексту після завершення
+        if (progressText != null)
         {
-            float progress = Mathf.Clamp01(operation.progress / 0.9f); // Завантаження прогресу
+            progressText.text = "Натисніть будь-яку клавішу...";
+        }
+    }
 
-            if (loadingSlider != null && progressText != null)
-            {
-                loadingSlider.value = progress;
-                progressText.text = Mathf.FloorToInt(progress * 100) + "%";
-            }
-
-            // Якщо прогрес більше або дорівнює 0.9, дозволити активацію сцени
-            if (operation.progress >= 0.9f)
-            {
-                if (progressText.text != "Press any key to continue...")
-                {
-                    progressText.text = "Press any key to continue...";
-                }
-
-                if (Input.anyKeyDown)
-                {
-                    operation.allowSceneActivation = true;  // Зміна активації
-                    Debug.Log("Scene activated: " + sceneName); // Лог, що сцена активувалася
-                }
-            }
-
-            yield return null;
+    void Update()
+    {
+        // Активація сцени після повного завантаження
+        if (_additionalProgress >= 1f && Input.anyKeyDown)
+        {
+            // Freeloader автоматично активує сцену при завершенні
+            // Цей код потрібен лише для відображення підказки
         }
     }
 }

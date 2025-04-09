@@ -19,7 +19,7 @@ MonoBehaviour:
   backgroundScaleAnimatorPseudoClassName: scaleUp
   hideBar: 0
   defaultLoadingText: "\u0417\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0435\u043D\u043D\u044F..."
-  showPercentage: 1
+  showPercentage: 0
   showSpinner: 1
   spinnerSpeed: 1
   spinnerIcon: {fileID: 2800000, guid: 416b48e90c3069846bc6e1569dc3b7d7, type: 3}

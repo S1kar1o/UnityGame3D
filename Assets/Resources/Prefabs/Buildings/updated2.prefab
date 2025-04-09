@@ -255,8 +255,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabUnit:
-  - {fileID: 5931614773281016572, guid: 0caa875d631ae8d45865fbf9293d56d1, type: 3}
-  - {fileID: 6005752067914174407, guid: 249ae0efcdb430341ae5ab35fe19e4ae, type: 3}
+  - {fileID: 7484640550819272255, guid: 16a3b09fc84f14d428ef2b5619ead64c, type: 3}
+  - {fileID: 5337644537852469130, guid: da785106a7b27174fbbd55d5b2eeb5f3, type: 3}
   indexUnit: 0
-  hirePanel: {fileID: 0}
-  hireButton: {fileID: 0}

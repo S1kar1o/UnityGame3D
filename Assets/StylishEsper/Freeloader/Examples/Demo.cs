@@ -1,70 +1,107 @@
-﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
+using TMPro;
+using System.Collections;
+using UnityEngine.UI;
 
-namespace Esper.Freeloader.Examples
+public class LoadingSceneController : MonoBehaviour
 {
-    public class Demo : MonoBehaviour
+    [SerializeField] private string sceneToLoad = "MainScene";
+    [SerializeField] private Slider progressBar;
+    [SerializeField] private TMP_Text progressText;
+
+    [Header("������������ ������������")]
+    [SerializeField] private float minLoadTime = 3f;
+    [SerializeField] private float fakeLoadSpeed = 0.5f;
+    [SerializeField] private float activationDelay = 0.5f;
+
+    private float loadStartTime;
+    private float currentProgress = 0f;
+    private UnityTcpClient tcpClient;
+    private bool readyMessageSent = false;
+
+    private void Start()
     {
-        public string sceneToLoad;
+        loadStartTime = Time.time;
+        InitializeTcpClient();
+        StartCoroutine(LoadSceneAsync());
+    }
 
-        private void Awake()
+    private void InitializeTcpClient()
+    {
+        GameObject obj = GameObject.Find("UnityTcpClient");
+        if (obj != null)
         {
-            DontDestroyOnLoad(this);
+            tcpClient = obj.GetComponent<UnityTcpClient>();
         }
-
-        private void Start()
+        else
         {
-            StartCoroutine(LoadSceneWithProgress());
+            Debug.LogWarning("UnityTcpClient �� �������� - ����� ������");
         }
+    }
 
-        private IEnumerator LoadSceneWithProgress()
+    private IEnumerator LoadSceneAsync()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
+        asyncLoad.allowSceneActivation = false;
+
+        while (!asyncLoad.isDone)
         {
-            UIDocument uiDocument = LoadingScreen.Instance.GetComponent<UIDocument>();
-            uiDocument.enabled = true;
-            Debug.Log("UI увімкнено");
+            UpdateProgress(asyncLoad);
+            yield return null;
 
-            if (!LoadingScreen.Instance.IsLoading)
+            if (ShouldActivateScene(asyncLoad))
             {
-                AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
-                asyncLoad.allowSceneActivation = false; // Затримуємо активацію
-                Debug.Log("Запущено завантаження сцени: " + sceneToLoad);
-
-                // Імітація плавного прогресу
-                float simulatedProgress = 0f;
-                float loadingDuration = 3f; // Тривалість завантаження в секундах
-                float timeElapsed = 0f;
-
-                var process = new LoadingProgressTracker("Loading...", () =>
-                {
-                    return simulatedProgress; // Використовуємо лише симульований прогрес
-                });
-                LoadingScreen.Instance.Load(sceneToLoad, process);
-
-                while (!asyncLoad.isDone)
-                {
-                    timeElapsed += Time.deltaTime;
-                    simulatedProgress = Mathf.Clamp01(timeElapsed / loadingDuration) * 100f; // Плавний прогрес від 0 до 100
-                    float progress = process.Progress;
-                    Debug.Log("Прогрес завантаження: " + progress);
-
-                    // Активуємо сцену лише після завершення симуляції
-                    if (simulatedProgress >= 100f && asyncLoad.progress >= 0.9f)
-                    {
-                        asyncLoad.allowSceneActivation = true;
-                    }
-                    yield return null;
-                }
-
-                Debug.Log("Сцена повністю завантажена");
-                uiDocument.enabled = false;
-                Debug.Log("UI вимкнено");
-            }
-            else
-            {
-                Debug.LogWarning("Завантаження вже триває!");
+                yield return FinalizeSceneActivation(asyncLoad);
+                yield break;
             }
         }
+    }
+
+    private void UpdateProgress(AsyncOperation asyncLoad)
+    {
+        float realProgress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
+        currentProgress = Mathf.MoveTowards(currentProgress, realProgress,
+                          fakeLoadSpeed * Time.deltaTime);
+
+        if (progressBar != null) progressBar.value = currentProgress;
+        if (progressText != null) progressText.text = $"{currentProgress * 100f:0}%";
+
+        SendReadyMessage(realProgress);
+    }
+
+    private void SendReadyMessage(float realProgress)
+    {
+        if (realProgress >= 0.9f && !readyMessageSent && tcpClient != null)
+        {
+            tcpClient.SendMessage("LOADED");
+            readyMessageSent = true;
+            Debug.Log("³��������� ����������� ��� ����������");
+        }
+    }
+
+    private bool ShouldActivateScene(AsyncOperation asyncLoad)
+    {
+        bool minTimePassed = Time.time - loadStartTime >= minLoadTime;
+        bool progressComplete = currentProgress >= 0.99f && asyncLoad.progress >= 0.9f;
+        bool networkReady = tcpClient == null || tcpClient.enemyReady;
+
+        return minTimePassed && progressComplete && networkReady;
+    }
+
+    private IEnumerator FinalizeSceneActivation(AsyncOperation asyncLoad)
+    {
+        // Գ������ ��������� ����� ����������
+        UpdateProgressUI(1f);
+        yield return new WaitForSeconds(activationDelay);
+
+        asyncLoad.allowSceneActivation = true;
+        Debug.Log("��������� �����: �� ����� ��������");
+    }
+
+    private void UpdateProgressUI(float progress)
+    {
+        if (progressBar != null) progressBar.value = progress;
+        if (progressText != null) progressText.text = $"{progress * 100f:0}%";
     }
 }

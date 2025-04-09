@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -12,28 +13,65 @@ public class RandomGeneratorPlayerInStart : MonoBehaviour
     public int indexUnit = 0;
     void Start()
     {
-        /*GameObject ut = GameObject.Find("UnityTcpClient");
-        tcpClient = ut.GetComponent<UnityTcpClient>();*/
-        Debug.Log(120);
+        StartCoroutine(InitializeAfterDelay());
+    }
 
+    IEnumerator InitializeAfterDelay()
+    {
+        // Пауза 1 секунда
+        yield return new WaitForSeconds(1f);
+
+        // Пошук об'єкта UnityTcpClient
+        GameObject ut = GameObject.Find("UnityTcpClient");
+        if (ut == null)
+        {
+            Debug.LogError("UnityTcpClient object not found!");
+            yield break;
+        }
+
+        // Отримання компонента
+        tcpClient = ut.GetComponent<UnityTcpClient>();
+        if (tcpClient == null)
+        {
+            Debug.LogError("UnityTcpClient component not found!");
+            yield break;
+        }
+
+        // Основна логіка
+        indexUnit = tcpClient.IDclient;
         Vector3 randomPos = GetRandomNavMeshPosition();
         Debug.Log(randomPos);
-        transform.Translate(randomPos);
+
+        // Переміщення об'єкта
+        transform.position = randomPos;
         GenerateMessageToServer(randomPos);
-        Vector3 cameraPos= new Vector3 (randomPos.x-160, gameObject.transform.position.y, randomPos.z-420);
-        gameObject.transform.position=cameraPos;
+
+        // Встановлення позиції камери
+        Vector3 cameraPos = new Vector3(randomPos.x - 160,gameObject.transform.position.y, randomPos.z - 420);
+        Camera.main.transform.position = cameraPos;
     }
 
     private async void GenerateMessageToServer(Vector3 position)
     {
         string name = objectToSpawn[indexUnit].name.Replace("(Clone)", "").Trim();
-        string spawnMessage = $"SPAWN {name} {position.x:F2} {position.y:F2} {position.z:F2} {0} {0} {0}\n";
+        int id = 993+tcpClient.IDclient;
+
+        string spawnMessage = $"SPAWN {id} {name} {position.x:F2} {position.y:F2} {position.z:F2} {0} {0} {0}\n";
 
         bool sendResult = await SpawnUnitOnServer(spawnMessage);
 
         if (sendResult)
         {
-            Instantiate(objectToSpawn[indexUnit], position, Quaternion.Euler(0, 0, 0));
+            GameObject spawnedUnit = Instantiate(objectToSpawn[indexUnit], position, Quaternion.Euler(0, 0, 0));
+            ServerId serverIdComponent = spawnedUnit.GetComponent<ServerId>();
+            if (serverIdComponent != null)
+            {
+                serverIdComponent.serverId = id;
+            }
+            else
+            {
+                Debug.LogWarning("Компонент ServerId не знайдено на об'єкті.");
+            }
         }
         else
         {
@@ -43,26 +81,24 @@ public class RandomGeneratorPlayerInStart : MonoBehaviour
 
     private async Task<bool> SpawnUnitOnServer(string information)
     {
-        return true;
-
-        /* if (tcpClient != null)
-         {
-             try
-             {
-                 await tcpClient.SendMessage(information);
-                 return true;
-             }
-             catch (Exception e)
-             {
-                 Debug.LogError("Error sending spawn command: " + e.Message);
-                 return false;
-             }
-         }
-         else
-         {
-             Debug.LogError("TCPClient is null. Make sure it's assigned.");
-             return false;
-         }*/
+        if (tcpClient != null)
+        {
+            try
+            {
+                await tcpClient.SendMessage(information);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error sending spawn command: " + e.Message);
+                return false;
+            }
+        }
+        else
+        {
+            Debug.LogError("TCPClient is null. Make sure it's assigned.");
+            return false;
+        }
     }
 
     Vector3 GetRandomNavMeshPosition()
