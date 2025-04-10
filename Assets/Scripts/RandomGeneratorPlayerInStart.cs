@@ -18,9 +18,6 @@ public class RandomGeneratorPlayerInStart : MonoBehaviour
 
     IEnumerator InitializeAfterDelay()
     {
-        // Пауза 1 секунда
-        yield return new WaitForSeconds(1f);
-
         // Пошук об'єкта UnityTcpClient
         GameObject ut = GameObject.Find("UnityTcpClient");
         if (ut == null)
@@ -43,12 +40,11 @@ public class RandomGeneratorPlayerInStart : MonoBehaviour
         Debug.Log(randomPos);
 
         // Переміщення об'єкта
-        transform.position = randomPos;
         GenerateMessageToServer(randomPos);
 
         // Встановлення позиції камери
-        Vector3 cameraPos = new Vector3(randomPos.x - 160,gameObject.transform.position.y, randomPos.z - 420);
-        Camera.main.transform.position = cameraPos;
+        Vector3 cameraPos = new Vector3(randomPos.x ,gameObject.transform.position.y+100, randomPos.z - 740);
+       gameObject.transform.position = cameraPos;
     }
 
     private async void GenerateMessageToServer(Vector3 position)

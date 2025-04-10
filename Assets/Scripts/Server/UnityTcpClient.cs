@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,9 @@ public class UnityTcpClient : MonoBehaviour
     private bool isReconnecting = false;
     private bool isFirstConnectionLog = true;
     private readonly byte[] buffer = new byte[1024];
-    private static UnityTcpClient instance;
+    private static UnityTcpClient _instance;
+    private static readonly object _lock = new object();
+
     private bool isConnected = false;
     // Stores movement information for objects in 3D space
     public int IDclient;
@@ -27,7 +30,7 @@ public class UnityTcpClient : MonoBehaviour
     public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
     private string _sceneToMove;
     public TokenManager tokenManager;
-    public int idUnitGeneratedAtServer=0;
+    public int idUnitGeneratedAtServer = 0;
     public string SceneToMove
     {
         get => _sceneToMove;
@@ -61,19 +64,53 @@ public class UnityTcpClient : MonoBehaviour
             }
         }
     }
+    // Публічний доступ до екземпляра
+    public static UnityTcpClient Instance
+    {
+        get
+        {
+            lock (_lock)
+            {
+                if (_instance == null)
+                {
+                    // Пошук існуючого екземпляра на сцені
+                    _instance = FindObjectOfType<UnityTcpClient>();
+
+                    if (_instance == null)
+                    {
+                        // Створення нового об'єкта, якщо не знайдено
+                        GameObject singletonObject = new GameObject(typeof(UnityTcpClient).Name);
+                        _instance = singletonObject.AddComponent<UnityTcpClient>();
+                        DontDestroyOnLoad(singletonObject);
+                    }
+                }
+                return _instance;
+            }
+        }
+    }
+
     void Awake()
     {
-        if (instance == null)
+        lock (_lock)
         {
-            instance = this;
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _instance = this;
             DontDestroyOnLoad(gameObject);
-            Application.runInBackground = true; // Дозволяє виконання у фоновому режимі
-            ConnectToServer(); // Підключення до сервера
+            Application.runInBackground = true;
+
+            Initialize();
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+    }
+
+    private void Initialize()
+    {
+        // Тут ініціалізація підключення
+        ConnectToServer();
     }
 
     public async Task ConnectToServer(string ipAddress = "127.0.0.1", int port = 8080)
@@ -91,8 +128,9 @@ public class UnityTcpClient : MonoBehaviour
             stream = client.GetStream();
             isConnected = true;
             Debug.Log("Connected to server.");
-/*            await SendMessage("Hello from Unity client!\n");
-*/            OnConnectedToServer();
+            /*            await SendMessage("Hello from Unity client!\n");
+            */
+            OnConnectedToServer();
 
             ReceiveMessages();
         }
@@ -113,7 +151,7 @@ public class UnityTcpClient : MonoBehaviour
         {
             try
             {
-                byte[] data = Encoding.UTF8.GetBytes(message+"\n");
+                byte[] data = Encoding.UTF8.GetBytes(message + "\n");
                 await stream.WriteAsync(data, 0, data.Length);
                 Debug.Log("Message sent to server: " + message);
             }
@@ -209,8 +247,8 @@ public class UnityTcpClient : MonoBehaviour
                                 unit.GetComponent<NavMeshAgent>().SetDestination(position);
                                 Debug.Log($"Оновлено позицію юніта {unitId} до {position}");
                                 break;
-                                    
-                                
+
+
                             }
                         }
                         else if (message.StartsWith("ATTACK"))
@@ -232,7 +270,8 @@ public class UnityTcpClient : MonoBehaviour
                         else if (message.StartsWith("DIE"))
                         {
                             ProcessDieMessage(message);
-                        }else if (message.StartsWith("GOEXTRACT"))
+                        }
+                        else if (message.StartsWith("GOEXTRACT"))
                         {
                             Debug.Log(1);
                             ProcessExtractByUnitMessage(message);
@@ -316,7 +355,7 @@ public class UnityTcpClient : MonoBehaviour
 
         if (parts.Length == 9 && parts[0] == "SPAWN")
         {
-            int id= int.Parse(parts[1]);
+            int id = int.Parse(parts[1]);
             string unitName = parts[2];
             string objX = parts[3].Replace(',', '.');
             string objY = parts[4].Replace(',', '.');
@@ -325,7 +364,7 @@ public class UnityTcpClient : MonoBehaviour
             string rotY = parts[7].Replace(',', '.');
             string rotZ = parts[8];
 
-            Debug.Log(id+" "+unitName + " " + objX + " " + objY + " " + objZ + " " + rotX + " " + rotY + " " + rotZ);
+            Debug.Log(id + " " + unitName + " " + objX + " " + objY + " " + objZ + " " + rotX + " " + rotY + " " + rotZ);
 
             if (float.TryParse(objX, NumberStyles.Float, CultureInfo.InvariantCulture, out float BuildX) &&
                 float.TryParse(objY, NumberStyles.Float, CultureInfo.InvariantCulture, out float BuildY) &&
@@ -341,11 +380,11 @@ public class UnityTcpClient : MonoBehaviour
                 if (!IsNavMeshReady(spawnPosition))
                 {
                     Debug.LogWarning($"NavMesh не готовий для позиції {spawnPosition}. Відкладений спавн...");
-                    StartCoroutine(SpawnWhenNavMeshReady(id,unitName, spawnPosition, spawnRotation));
+                    StartCoroutine(SpawnWhenNavMeshReady(id, unitName, spawnPosition, spawnRotation));
                     return;
                 }
 
-                SpawnUnit(id ,unitName, spawnPosition, spawnRotation);
+                SpawnUnit(id, unitName, spawnPosition, spawnRotation);
             }
             else
             {
@@ -364,7 +403,7 @@ public class UnityTcpClient : MonoBehaviour
         return NavMesh.SamplePosition(position, out NavMeshHit hit, 10f, NavMesh.AllAreas);
     }
 
-    private IEnumerator SpawnWhenNavMeshReady(int id,string unitName, Vector3 spawnPosition, Quaternion spawnRotation)
+    private IEnumerator SpawnWhenNavMeshReady(int id, string unitName, Vector3 spawnPosition, Quaternion spawnRotation)
     {
         int maxAttempts = 50; // Максимальна кількість спроб (5 секунд при 10 спробах/сек)
         float delayBetweenAttempts = 0.1f;
@@ -373,7 +412,7 @@ public class UnityTcpClient : MonoBehaviour
         {
             if (IsNavMeshReady(spawnPosition))
             {
-                SpawnUnit(id,unitName, spawnPosition, spawnRotation);
+                SpawnUnit(id, unitName, spawnPosition, spawnRotation);
                 yield break;
             }
             yield return new WaitForSeconds(delayBetweenAttempts);
@@ -384,14 +423,14 @@ public class UnityTcpClient : MonoBehaviour
         SpawnUnit(id, unitName, spawnPosition, spawnRotation, forceSpawn: true);
     }
 
-    private void SpawnUnit(int id ,string unitName, Vector3 spawnPosition, Quaternion spawnRotation, bool forceSpawn = false)
+    private void SpawnUnit(int id, string unitName, Vector3 spawnPosition, Quaternion spawnRotation, bool forceSpawn = false)
     {
         GameObject unitPrefab = Resources.Load<GameObject>("Prefabs/Units/" + unitName);
         if (unitPrefab != null)
         {
             GameObject unit = Instantiate(unitPrefab, spawnPosition, spawnRotation);
-            ServerId ID=unit.GetComponent<ServerId>();
-            ID.serverId=id;
+            ServerId ID = unit.GetComponent<ServerId>();
+            ID.serverId = id;
             if (!forceSpawn)
             {
                 NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
@@ -533,14 +572,15 @@ public class UnityTcpClient : MonoBehaviour
         GameObject[] allObjects = FindObjectsOfType<GameObject>();
         foreach (var obj in allObjects)
         {
-            ServerId sr= obj.GetComponent<ServerId>();
-            if (sr != null && sr.serverId == objectID){
+            ServerId sr = obj.GetComponent<ServerId>();
+            if (sr != null && sr.serverId == objectID)
+            {
                 return obj;
             }
         }
         return null;
     }
-    private void ProcessAttackMessage(string message )
+    private void ProcessAttackMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 4)
@@ -553,7 +593,7 @@ public class UnityTcpClient : MonoBehaviour
         int damage = int.Parse(parts[3]);
 
         GameObject attacker = FindObjectByID(attackerId);
-        WarriorParametrs attackerObj= attacker.GetComponent<WarriorParametrs>();
+        WarriorParametrs attackerObj = attacker.GetComponent<WarriorParametrs>();
         GameObject target = FindObjectByID(targetId);
         attackerObj.AttackEnemy(target);
     }
@@ -573,8 +613,36 @@ public class UnityTcpClient : MonoBehaviour
     private void ProcessBuiltMessage(string message)
     {
         string[] parts = message.Split(' ');
+        if (parts.Length == 8 && parts[0] == "BUILT" && parts[1] == "Bridge3")
+        {
+            GameObject bridgePlacer = GameObject.Find("BridgePlacer");
+            BridgePlacer bp = bridgePlacer.GetComponent<BridgePlacer>();
+            string prefabName = parts[1];
+            string buildXStr = parts[2];
+            string buildYStr = parts[3];
+            string buildZStr = parts[4];
+            string buildXEnd = parts[5];
+            string buildYEnd = parts[6];
+            string buildZEnd = parts[7];
+            Debug.Log(buildXStr + " "+ buildYStr + " "+ buildZStr + " "+ buildXEnd + " " + buildYEnd + " " + buildZEnd);
+            buildXStr = buildXStr.Replace(',', '.');
+            buildYStr = buildYStr.Replace(',', '.');
+            buildZStr = buildZStr.Replace(',', '.');
+            buildXEnd = buildXEnd.Replace(',', '.');
+            buildYEnd = buildYEnd.Replace(',', '.');
+            buildZEnd = buildZEnd.Replace(',', '.');
+            Debug.Log(buildXStr + " " + buildYStr + " " + buildZStr + " " + buildXEnd + " " + buildYEnd + " " + buildZEnd);
 
-        if (parts.Length == 8 && parts[0] == "BUILT")
+            bp.messageFromServer = true;
+            bp.firstPoint = new Vector3(float.Parse(buildXStr, CultureInfo.InvariantCulture), float.Parse(buildYStr, CultureInfo.InvariantCulture), float.Parse(buildZStr, CultureInfo.InvariantCulture));
+            bp.secondPoint = new Vector3(float.Parse(buildXEnd, CultureInfo.InvariantCulture), float.Parse(buildYEnd, CultureInfo.InvariantCulture), float.Parse(buildZEnd, CultureInfo.InvariantCulture));
+            bp.PlaceBridge();
+            bp.messageFromServer = false;
+            bp.firstPoint = Vector3.zero;
+            bp.secondPoint = Vector3.zero;
+
+        }
+        else if (parts.Length == 8 && parts[0] == "BUILT")
         {
             string prefabName = parts[1];
             string buildXStr = parts[2];
@@ -629,7 +697,7 @@ public class UnityTcpClient : MonoBehaviour
                 Vector3 buildPosition = new Vector3(buildX, buildY, buildZ);
                 Quaternion buildRotation = Quaternion.Euler(rotX, rotY, rotZ);
                 GameObject newBuilding = Instantiate(buildingPrefab, buildPosition, buildRotation);
-                newBuilding.tag = "Enemy"; 
+                newBuilding.tag = "Enemy";
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");
             }
             else
