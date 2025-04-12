@@ -7,30 +7,11 @@ public class AmountResource : MonoBehaviour
     public int Amount; 
     public string typeResource;
     public UnityTcpClient utp;
-    private int instanceID;
 
-    public void Start()
+    private void Start()
     {
-        instanceID = gameObject.GetInstanceID();
-
-        try
-        {
-            GameObject obj = GameObject.Find("UnityTcpClient");
-            if (obj != null)
-            {
-                utp = obj.GetComponent<UnityTcpClient>();
-            }
-            else
-            {
-                Debug.LogError("UnityTcpClient not found in the scene!");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Помилка в Start: {ex.Message}");
-        }
+        utp = UnityTcpClient.Instance;
     }
-
     public void Extraction(int damage)
     {
         if (damage > Amount)
@@ -67,7 +48,8 @@ public class AmountResource : MonoBehaviour
 
     private async Task SendMessageAmoutExtraction(int amount)
     {
-        string message = $"EXTRACTED {instanceID} {amount} \n";
+        ServerId serverId = gameObject.GetComponent<ServerId>();
+        string message = $"EXTRACTED {serverId.serverId} {amount} \n";
 
         if (utp != null)
         {
@@ -90,7 +72,8 @@ public class AmountResource : MonoBehaviour
 
     private async Task Die()
     {
-        string message = $"DIE {instanceID} \n";
+        ServerId serverId = gameObject.GetComponent<ServerId>();
+        string message = $"DIE {serverId.serverId} \n";
 
         if (utp != null)
         {

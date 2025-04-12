@@ -506,10 +506,11 @@ public class UnityTcpClient : MonoBehaviour
             int amount = int.Parse(parts[2]);    // Кількість ресурсу
 
             // Знаходимо об'єкт ресурсу за ID (припустимо, що ID зберігається в компоненті AmountResource)
-            AmountResource resource = FindResourceByID(resourceID);
+            GameObject resource = FindObjectByServerID(resourceID);
+            AmountResource amountResource = resource.GetComponent<AmountResource>();
             if (resource != null)
             {
-                resource.Extraction(amount);
+                amountResource.Extraction(amount);
                 Debug.Log($"Видобуто {amount} одиниць ресурсу з об'єкта ID {resourceID}.");
             }
             else

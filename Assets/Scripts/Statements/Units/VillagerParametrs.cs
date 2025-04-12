@@ -124,83 +124,86 @@ public class VillagerParametrs : MonoBehaviour
     }
   
     private void Update(){
-
-        if (agent.nextPosition.y > 59.4 && hp>=0)
+        if (agent.isOnNavMesh && agent.isActiveAndEnabled)
         {
-            agent.updatePosition = true;
-
-        }
-        else
-        {            
-            agent.updatePosition = false; // Не оновлювати позицію агента
-            Vector3 nextPos = agent.nextPosition;
-            nextPos.y = rb.position.y;
-            rb.MovePosition(nextPos);
-        }
-
-        if (hp <= 0)
-        {
-            if (!inWater)
+            if (agent.nextPosition.y > 59.4 && hp >= 0)
             {
-                isDie = true;
-                isRunning = false;
-                isStanding = false;
-                isGathering = false;
+                agent.updatePosition = true;
+
             }
             else
             {
-                isDrow = true;
+                agent.updatePosition = false; // Не оновлювати позицію агента
+                Vector3 nextPos = agent.nextPosition;
+                nextPos.y = rb.position.y;
+                rb.MovePosition(nextPos);
             }
-            agent.isStopped = true;
 
-        }
-        else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
-        {
-            isRunning = false;
-            isSwimming = false;
-            if (isRunningToResource)
+            if (hp <= 0)
             {
-                isGathering = true;
-                if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
+                if (!inWater)
                 {
-                    Axe.SetActive(true);
-
+                    isDie = true;
+                    isRunning = false;
+                    isStanding = false;
+                    isGathering = false;
                 }
                 else
                 {
-                    Pickaxe.SetActive(true);
-
+                    isDrow = true;
                 }
+                agent.isStopped = true;
+
+            }
+            else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
+            {
+                isRunning = false;
+                isSwimming = false;
+                if (isRunningToResource)
+                {
+                    isGathering = true;
+                    if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
+                    {
+                        Axe.SetActive(true);
+
+                    }
+                    else
+                    {
+                        Pickaxe.SetActive(true);
+
+                    }
+                }
+                else
+                {
+                    if (!inWater)
+                    {
+                        isStanding = true;
+                    }
+                    else
+                    {
+                        isStandingInWater = true;
+                        ArchimedPower();
+
+                    }
+                }
+                agent.isStopped = true;
             }
             else
             {
                 if (!inWater)
                 {
-                    isStanding = true;
+                    isRunning = true;
                 }
                 else
                 {
-                    isStandingInWater = true;
                     ArchimedPower();
-
+                    isSwimming = true;
                 }
+                isStanding = false;
+                isStandingInWater = false;
+                isGathering = false;
+                agent.isStopped = false;
             }
-            agent.isStopped = true;
-        } 
-        else
-        {
-            if (!inWater) { 
-                isRunning = true;
-            }
-            else
-            {
-                ArchimedPower();
-                isSwimming = true;
-            }
-            isStanding = false;
-            isStandingInWater=false;
-            isGathering = false;
-            agent.isStopped = false;
         }
     }
     protected IEnumerator UpdateHPBar(float newHP)
