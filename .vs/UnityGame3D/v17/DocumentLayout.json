@@ -3,24 +3,24 @@
   "WorkspaceRootPath": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\bildingwall\\wallgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\bildingwall\\wallgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\bildingwall\\wallgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\bildingbrige\\bridgeplacer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\bildingbrige\\bridgeplacer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\buldingmanager\\bildingbuttonmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\buldingmanager\\bildingbuttonmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\building.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\building.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\building.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\buildingmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\buildingmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\bildingbrige\\bridgeplacer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\bildingbrige\\bridgeplacer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\ironice19\\ironicescripts\\rivergenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -42,7 +42,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Building.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Building.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Building.cs",
@@ -50,12 +50,11 @@
               "RelativeToolTip": "Assets\\Scripts\\Building.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T19:29:19.414Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-03T19:29:19.414Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "BuildingManager.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BuildingManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BuildingManager.cs",
@@ -79,7 +78,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "BildingButtonManager.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BuldingManager\\BildingButtonManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BuldingManager\\BildingButtonManager.cs",
@@ -87,8 +86,7 @@
               "RelativeToolTip": "Assets\\Scripts\\BuldingManager\\BildingButtonManager.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T17:41:51.658Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-03T17:41:51.658Z"
             },
             {
               "$type": "Document",
@@ -98,14 +96,14 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\BildingWall\\WallGenerator.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BildingWall\\WallGenerator.cs",
               "RelativeToolTip": "Assets\\Scripts\\BildingWall\\WallGenerator.cs",
-              "ViewState": "AgIAAEcBAAAAAAAAAAAAAOcAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAAEBAAAAAAAAAAAAABABAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-03T17:30:46.701Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "BridgePlacer.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BildingBrige\\BridgePlacer.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BildingBrige\\BridgePlacer.cs",

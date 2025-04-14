@@ -6,6 +6,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 {
     [Header("Wall Settings")] // Заголовок для налаштувань мосту
     public GameObject wallPrefab; // Префаб стіни
+    public GameObject wallConectorPrefab; // Префаб стіни
     public float navMeshLinkWidth = 5f; // Ширина посилання навігаційної сітки
     public bool navMeshLinkBidirectional = true; // Чи є посилання двонаправленим
     public float maxSlopeAngle = 15f; // Максимальний кут нахилу
@@ -24,7 +25,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
     private bool isFirstPointSelected = false; // Чи обрана перша точка
     private bool isPlacingWall = false; // Чи йде процес розміщення
     private bool isValidPlacement = true; // Чи валідне розміщення
-   
+    private bool isWall = false;
+    private bool isWallSecondPoint = false;
+
     private GameObject[] WallParts; // Масив частин мосту
     private GameObject[] previewParts; // Масив частин прев'ю
     private GameObject cursorFollowPreview; // Прев'ю, що слідує за курсором
@@ -45,7 +48,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         {
             if (!isFirstPointSelected) // Якщо перша точка не обрана
             {
+                
                 UpdateCursorFollowPreview(hit.point); // Оновити прев'ю під курсором
+
             }
             else // Якщо перша точка обрана
             {
@@ -57,20 +62,43 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
             if (Input.GetMouseButtonDown(0)) // При натисканні лівої кнопки миші
             {
-                if (IsValidLocation(hit)) // Якщо місце валідне
+                if (hit.collider.CompareTag("Wall"))
                 {
+                    isWall = true;
+                    Debug.Log("СтІНА");
+                }
+
+                if (hit.collider.CompareTag("Wall") && isFirstPointSelected)
+                {
+                    isWallSecondPoint = true;
+                    Debug.Log("СтІН_DWAА");
+                }
+
+
+
+
+
+                if (IsValidLocation(hit) || isWall) // Якщо місце валідне
+                {
+                    Debug.Log("СтІНА_0");
                     if (!isFirstPointSelected) // Якщо перша точка не обрана
                     {
+                        Debug.Log("СтІНА_1");
                         firstPoint = hit.point; // Запам'ятати першу точку
                         isFirstPointSelected = true; // Позначити, що перша точка обрана
                         Destroy(cursorFollowPreview); // Видалити прев'ю під курсором
                         cursorFollowPreview = null; // Очистити посилання
+
+                        Debug.Log("СтІНА_2");
                     }
-                    else if (isValidPlacement) // Якщо розміщення валідне і є вода
+                    else if (isValidPlacement || isWallSecondPoint) // Якщо розміщення валідне і є вода
                     {
+                        
                         ClearPreview(); // Очистити прев'ю
                         PlaceWall(); // Розмістити міст
                         isPlacingWall = false; // Вийти з режиму розміщення
+                        isWall = false;
+                        isWallSecondPoint = false;
                     }
                 }
             }
@@ -81,6 +109,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             CancelPlacement(); // Скасувати розміщення
         }
     }
+
+    
+
     private void UpdateCursorFollowPreview(Vector3 position) // Оновлення прев'ю під курсором
     {
         if (cursorFollowPreview == null) // Якщо прев'ю ще не створене
@@ -138,16 +169,31 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1); // Кількість сегментів
         float offset = (wallCount * wallLength - distance) / 2; // Відступ для центрування
 
-        Vector3 currentPosition = firstPoint - direction * offset; // Початкова позиція
+        Vector3 currentPosition = firstPoint - direction * (offset - 20);
+        Vector3 currentPosition1 = firstPoint - direction * (offset);// Початкова позиція
         previewParts = new GameObject[wallCount]; // Ініціалізація масиву прев'ю
 
         Color previewColor = isValidPlacement ? validPlacementColor : invalidPlacementColor; // Вибір кольору
         bool allSegmentsValid = true; // Чи всі сегменти мають валідне розміщення
 
+
+
+
+
+
         for (int i = 0; i < wallCount; i++) // Для кожного сегменту
         {
+            if (i == 0 && isWall)
+            {
+                previewParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                previewParts[i].tag = "Untagged";
+                continue;
+            }
+
             // Визначаємо позицію на рельєфі
             Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
+
+            
 
             // Створюємо прев'ю сегмента
             previewParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
@@ -195,18 +241,42 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1);
         float offset = (wallCount * wallLength - distance) / 2;
 
-        Vector3 currentPosition = firstPoint - direction * offset;
+        Vector3 currentPosition = firstPoint - direction * (offset - 20);
+        Vector3 currentPosition1 = firstPoint - direction * (offset);
+
+        
         WallParts = new GameObject[wallCount];
 
         for (int i = 0; i < wallCount; i++)
         {
+
+            if (i == 0 && isWall)
+            {
+                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                WallParts[i].tag = "Wall";
+                
+                continue;
+            }
+
+            
+
+            
             // Визначаємо висоту для поточного сегмента
             Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
 
             WallParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
             WallParts[i].tag = "Wall";
+            if (i == (wallCount - 1) && isWallSecondPoint)
+            {
+                currentPosition = currentPosition + direction * 20f;
+                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition, wallConectorPrefab.transform.rotation);
+                WallParts[i].tag = "Wall";
+
+                continue;
+            }
 
             currentPosition += direction * wallLength;
+            
         }
     }
 
@@ -246,6 +316,8 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
                 return false;
             }
         }
+
+
 
         // 3. Перевірка кута нахилу поверхні (чи не надто крутий схил)
         Ray slopeCheckRay = new Ray(position + Vector3.up * 0.5f, Vector3.down);
