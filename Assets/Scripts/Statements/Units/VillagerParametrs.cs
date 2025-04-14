@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using System.Net.Sockets;
 public class VillagerParametrs : MonoBehaviour
 {
     [SerializeField] public Gradient hpBarCollor;
@@ -33,7 +34,7 @@ public class VillagerParametrs : MonoBehaviour
     public Transform buoyancyPoint; // Точка, яка визначає рівень занурення
     [SerializeField] private GameObject Axe, Pickaxe;
 
-
+    public bool animationOfDeathEnded = false;
     public UnityTcpClient utp;
 
     public Vector3 targetPosition;
@@ -53,8 +54,8 @@ public class VillagerParametrs : MonoBehaviour
             Debug.Log("Дочірній об'єкт не знайдено!");
         try
         {
-            GameObject obj = GameObject.Find("UnityTcpClient");
-            utp = obj.GetComponent<UnityTcpClient>();
+            utp = UnityTcpClient.Instance;
+
         }
         catch { };
     }

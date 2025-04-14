@@ -1,11 +1,10 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -19,13 +18,12 @@ public class UnityTcpClient : MonoBehaviour
     private readonly byte[] buffer = new byte[1024];
     private static UnityTcpClient _instance;
     private static readonly object _lock = new object();
-
+    public ButtonControler buttonControler;
     private bool isConnected = false;
     // Stores movement information for objects in 3D space
     public int IDclient;
     public int goldAmount = 50, woodAmount = 50, rockAmount = 50;
 
-    private Dictionary<int, GameObject> spawnedObjects = new Dictionary<int, GameObject>(); // Мапінг serverID -> GameObject
     public bool enemyReady = false;
     public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
     private string _sceneToMove;
@@ -302,6 +300,11 @@ public class UnityTcpClient : MonoBehaviour
                         {
                             StartCoroutine(LoadSceneAsync("SampleScene"));
                         }
+                        else if(message.StartsWith("WON") || message.StartsWith("LOSE")|| message.StartsWith("Opponent disconnected"))
+                        {
+                            buttonControler.endGamePanelIsActive=true;
+                            buttonControler.PanelEndGameButton();
+                        }
                         else
                         {
                             Debug.LogWarning($"Unknown message type: {message}");
@@ -428,6 +431,7 @@ public class UnityTcpClient : MonoBehaviour
         GameObject unitPrefab = Resources.Load<GameObject>("Prefabs/Units/" + unitName);
         if (unitPrefab != null)
         {
+            CameraMoving cameraMoving = FindObjectOfType<CameraMoving>();
             GameObject unit = Instantiate(unitPrefab, spawnPosition, spawnRotation);
             ServerId ID = unit.GetComponent<ServerId>();
             ID.serverId = id;
@@ -439,6 +443,8 @@ public class UnityTcpClient : MonoBehaviour
                     Debug.LogWarning($"Юніт {unitName} створений, але не розміщений на NavMesh!");
                 }
             }
+            cameraMoving.enemys.Add(unitPrefab);
+
             Debug.Log($"Unit spawned: {unitName} at position {spawnPosition}");
         }
         else
@@ -599,18 +605,6 @@ public class UnityTcpClient : MonoBehaviour
         attackerObj.AttackEnemy(target);
     }
     // Допоміжна функція для пошуку ресурсу за ID
-    private AmountResource FindResourceByID(int resourceID)
-    {
-        AmountResource[] resources = FindObjectsOfType<AmountResource>();
-        foreach (var resource in resources)
-        {
-            if (resource.GetInstanceID() == resourceID)
-            {
-                return resource;
-            }
-        }
-        return null;
-    }
     private void ProcessBuiltMessage(string message)
     {
         string[] parts = message.Split(' ');
@@ -711,10 +705,6 @@ public class UnityTcpClient : MonoBehaviour
             Debug.LogError("Invalid number format received from server.");
         }
     }
-
-    // ... (в коді, де ви викликаєте LoadAndInstantiateBuilding)
-    // Замість float передавайте рядки:
-    // LoadAndInstantiateBuilding(prefabName, buildX.ToString(), buildY.ToString(), buildZ.ToString(), rotX.ToString(), rotY.ToString(), rotZ.ToString());
     private async Task Reconnect(string ipAddress, int port)
     {
         Debug.Log("Reconnecting...");
@@ -741,5 +731,12 @@ public class UnityTcpClient : MonoBehaviour
         {
             Debug.LogError($"Error closing connection: {ex.Message}");
         }
+    }
+
+    public void ReloadRscClient()
+    {
+        goldAmount = 0;
+        woodAmount = 0;
+        rockAmount = 0;
     }
 }
