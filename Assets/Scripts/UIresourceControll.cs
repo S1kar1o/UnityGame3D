@@ -9,8 +9,9 @@ public class UIresourceControll : MonoBehaviour
     private UnityTcpClient utp;
     void Start()
     {
-        GameObject obj = GameObject.Find("UnityTcpClient");
-        utp = obj.GetComponent<UnityTcpClient>();
+        utp = UnityTcpClient.Instance;
+        
+        utp.uIresource=this;
         AmoundOfGold.text = utp.goldAmount.ToString();
         AmoundOfWood.text = utp.woodAmount.ToString();
         AmoundOfRocks.text = utp.rockAmount.ToString();

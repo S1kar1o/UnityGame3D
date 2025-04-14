@@ -1,70 +1,270 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
+using TMPro;
+using System.Collections;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
-namespace Esper.Freeloader.Examples
+public class LoadingSceneController : MonoBehaviour
 {
-    public class Demo : MonoBehaviour
+    [Header("Основні налаштування")]
+    [SerializeField] private string sceneToLoad = "MainScene";
+    [SerializeField] private Image progressBar;  // Changed to Image
+    [SerializeField] private TMP_Text progressText;
+    [SerializeField] private Image backgroundImage;
+
+    [Header("Налаштування завантаження")]
+    [SerializeField] private float minLoadTime = 3f;
+    [SerializeField] private float fakeLoadSpeed = 0.5f;
+    [SerializeField] private float activationDelay = 0.5f;
+
+    [Header("Анімація фону")]
+    [SerializeField] private List<Sprite> backgroundSprites;
+    [SerializeField] private float animationSpeed = 0.5f;
+
+    [Header("Підказки")]
+    [SerializeField] private GameObject tooltipPrefab;
+    [SerializeField] private Transform tooltipContainer;
+    [SerializeField] private List<string> tooltipMessages;
+    [SerializeField] private float tooltipDelay = 1f;
+
+    private float loadStartTime;
+    private float currentProgress = 0f;
+    private UnityTcpClient tcpClient;
+    private bool readyMessageSent = false;
+    private int currentSpriteIndex = 0;
+    private float lastTooltipTime;
+    private GameObject activeTooltip;
+    private bool tooltipIsFading = false;
+    private Coroutine tooltipCoroutine;
+
+    private void Start()
     {
-        public string sceneToLoad;
+        loadStartTime = Time.time;
+        lastTooltipTime = Time.time;
 
-        private void Awake()
+        InitializeTcpClient();
+
+        if (backgroundSprites.Count > 0)
         {
-            DontDestroyOnLoad(this);
+            StartCoroutine(AnimateBackground());
         }
 
-        private void Start()
+        // 👇 Показати першу підказку одразу
+        if (tooltipMessages.Count > 0)
         {
-            StartCoroutine(LoadSceneWithProgress());
+            string randomMessage = tooltipMessages[Random.Range(0, tooltipMessages.Count)];
+            ShowTooltip(randomMessage);
         }
 
-        private IEnumerator LoadSceneWithProgress()
-        {
-            UIDocument uiDocument = LoadingScreen.Instance.GetComponent<UIDocument>();
-            uiDocument.enabled = true;
-            Debug.Log("UI увімкнено");
+        StartCoroutine(ShowRandomTooltips());
+        StartCoroutine(LoadSceneAsync());
+    }
 
-            if (!LoadingScreen.Instance.IsLoading)
+    private IEnumerator AnimateBackground()
+    {
+        while (true)
+        {
+            if (backgroundImage != null && backgroundSprites.Count > 0)
             {
-                AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
-                asyncLoad.allowSceneActivation = false; // Затримуємо активацію
-                Debug.Log("Запущено завантаження сцени: " + sceneToLoad);
+                Sprite nextSprite = backgroundSprites[currentSpriteIndex];
+                yield return StartCoroutine(FadeToSprite(nextSprite, 1f));
 
-                // Імітація плавного прогресу
-                float simulatedProgress = 0f;
-                float loadingDuration = 3f; // Тривалість завантаження в секундах
-                float timeElapsed = 0f;
-
-                var process = new LoadingProgressTracker("Loading...", () =>
-                {
-                    return simulatedProgress; // Використовуємо лише симульований прогрес
-                });
-                LoadingScreen.Instance.Load(sceneToLoad, process);
-
-                while (!asyncLoad.isDone)
-                {
-                    timeElapsed += Time.deltaTime;
-                    simulatedProgress = Mathf.Clamp01(timeElapsed / loadingDuration) * 100f; // Плавний прогрес від 0 до 100
-                    float progress = process.Progress;
-                    Debug.Log("Прогрес завантаження: " + progress);
-
-                    // Активуємо сцену лише після завершення симуляції
-                    if (simulatedProgress >= 100f && asyncLoad.progress >= 0.9f)
-                    {
-                        asyncLoad.allowSceneActivation = true;
-                    }
-                    yield return null;
-                }
-
-                Debug.Log("Сцена повністю завантажена");
-                uiDocument.enabled = false;
-                Debug.Log("UI вимкнено");
+                currentSpriteIndex = (currentSpriteIndex + 1) % backgroundSprites.Count;
+                yield return new WaitForSeconds(animationSpeed);
             }
             else
             {
-                Debug.LogWarning("Завантаження вже триває!");
+                yield return null;
             }
         }
+    }
+
+    private IEnumerator FadeToSprite(Sprite newSprite, float fadeDuration)
+    {
+        float time = 0f;
+        Color originalColor = backgroundImage.color;
+
+        // Fade out
+        while (time < fadeDuration)
+        {
+            float t = time / fadeDuration;
+            backgroundImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, Mathf.Lerp(1f, 0f, t));
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        backgroundImage.sprite = newSprite;
+        time = 0f;
+
+        // Fade in
+        while (time < fadeDuration)
+        {
+            float t = time / fadeDuration;
+            backgroundImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, Mathf.Lerp(0f, 1f, t));
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        backgroundImage.color = new Color(originalColor.r, originalColor.g, originalColor.b, 1f);
+    }
+
+    private IEnumerator ShowRandomTooltips()
+    {
+        while (true)
+        {
+            if (tooltipMessages.Count > 0 && tooltipPrefab != null && tooltipContainer != null)
+            {
+                if (Time.time - lastTooltipTime >= tooltipDelay)
+                {
+                    string randomMessage = tooltipMessages[Random.Range(0, tooltipMessages.Count)];
+                    ShowTooltip(randomMessage);
+                    lastTooltipTime = Time.time;
+                }
+            }
+            yield return new WaitForSeconds(0.1f); // не перевіряй кожен кадр
+        }
+    }
+
+    private void ShowTooltip(string message)
+    {
+        if (tooltipIsFading) return;
+
+        if (activeTooltip == null)
+        {
+            activeTooltip = Instantiate(tooltipPrefab, tooltipContainer);
+        }
+
+        TMP_Text tooltipText = activeTooltip.GetComponentInChildren<TMP_Text>();
+        CanvasGroup canvasGroup = activeTooltip.GetComponent<CanvasGroup>();
+
+        if (tooltipText != null)
+        {
+            tooltipText.text = message;
+        }
+
+        if (canvasGroup != null)
+        {
+            if (tooltipCoroutine != null)
+            {
+                StopCoroutine(tooltipCoroutine);
+            }
+
+            canvasGroup.alpha = 0f;
+            activeTooltip.SetActive(true);
+
+            tooltipCoroutine = StartCoroutine(FadeInThenOutTooltip(canvasGroup, 1f, 2f));
+        }
+    }
+
+    private IEnumerator FadeInThenOutTooltip(CanvasGroup canvasGroup, float fadeInTime, float stayTime)
+    {
+        tooltipIsFading = true;
+
+        float elapsedTime = 0f;
+
+        // Fade In
+        while (elapsedTime < fadeInTime)
+        {
+            canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsedTime / fadeInTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        canvasGroup.alpha = 1f;
+
+        // Зачекати, поки показана
+        yield return new WaitForSeconds(stayTime);
+
+        // Fade Out
+        elapsedTime = 0f;
+        float fadeOutTime = 1f;
+        while (elapsedTime < fadeOutTime)
+        {
+            canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsedTime / fadeOutTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        canvasGroup.alpha = 0f;
+        activeTooltip.SetActive(false);
+
+        tooltipIsFading = false;
+    }
+
+    private void InitializeTcpClient()
+    {
+        tcpClient = UnityTcpClient.Instance;
+    }
+
+    private IEnumerator LoadSceneAsync()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
+        asyncLoad.allowSceneActivation = false;
+
+        while (!asyncLoad.isDone)
+        {
+            UpdateProgress(asyncLoad);
+            yield return null;
+
+            if (ShouldActivateScene(asyncLoad))
+            {
+                yield return FinalizeSceneActivation(asyncLoad);
+                yield break;
+            }
+        }
+    }
+
+    private void UpdateProgress(AsyncOperation asyncLoad)
+    {
+        // Реальний прогрес, переведений до діапазону від 0 до 1
+        float realProgress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
+        currentProgress = Mathf.MoveTowards(currentProgress, realProgress, fakeLoadSpeed * Time.deltaTime);
+
+        // Оновлення fillAmount для заповнення прогрес-бару
+        if (progressBar != null)
+        {
+            progressBar.fillAmount = currentProgress;
+        }
+
+        if (progressText != null)
+        {
+            progressText.text = $"{currentProgress * 100f:0}%";
+        }
+
+        SendReadyMessage(realProgress);
+    }
+
+
+    private void SendReadyMessage(float realProgress)
+    {
+        if (realProgress >= 0.9f && !readyMessageSent && tcpClient != null)
+        {
+            tcpClient.SendMessage("LOADED");
+            readyMessageSent = true;
+            Debug.Log("Відправлено повідомлення про готовність");
+        }
+    }
+
+    private bool ShouldActivateScene(AsyncOperation asyncLoad)
+    {
+        bool minTimePassed = Time.time - loadStartTime >= minLoadTime;
+        bool progressComplete = currentProgress >= 0.99f && asyncLoad.progress >= 0.9f;
+        bool networkReady = tcpClient == null || tcpClient.enemyReady;
+
+        return minTimePassed && progressComplete && networkReady;
+    }
+
+    private IEnumerator FinalizeSceneActivation(AsyncOperation asyncLoad)
+    {
+        UpdateProgressUI(1f);
+        yield return new WaitForSeconds(activationDelay);
+
+        asyncLoad.allowSceneActivation = true;
+        Debug.Log("Активація сцени: всі умови виконані");
+    }
+
+    private void UpdateProgressUI(float progress)
+    {
+        if (progressBar != null) progressBar.fillAmount = progress;
+        if (progressText != null) progressText.text = $"{progress * 100f:0}%";
     }
 }

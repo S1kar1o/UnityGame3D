@@ -15,7 +15,7 @@ public class Conecting : MonoBehaviour
     }
     void Start()
     {
-        tcpClient = FindObjectOfType<UnityTcpClient>();
+        tcpClient = UnityTcpClient.Instance;
     }
 
     

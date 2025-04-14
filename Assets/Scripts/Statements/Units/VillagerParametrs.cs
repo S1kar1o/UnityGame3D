@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using System.Collections;
 using System;
 using UnityEngine.UI;
+using System.Net.Sockets;
 public class VillagerParametrs : MonoBehaviour
 {
     [SerializeField] public Gradient hpBarCollor;
@@ -33,7 +34,7 @@ public class VillagerParametrs : MonoBehaviour
     public Transform buoyancyPoint; // Точка, яка визначає рівень занурення
     [SerializeField] private GameObject Axe, Pickaxe;
 
-
+    public bool animationOfDeathEnded = false;
     public UnityTcpClient utp;
 
     public Vector3 targetPosition;
@@ -53,8 +54,8 @@ public class VillagerParametrs : MonoBehaviour
             Debug.Log("Дочірній об'єкт не знайдено!");
         try
         {
-            GameObject obj = GameObject.Find("UnityTcpClient");
-            utp = obj.GetComponent<UnityTcpClient>();
+            utp = UnityTcpClient.Instance;
+
         }
         catch { };
     }
@@ -124,83 +125,86 @@ public class VillagerParametrs : MonoBehaviour
     }
   
     private void Update(){
-
-        if (agent.nextPosition.y > 59.4 && hp>=0)
+        if (agent.isOnNavMesh && agent.isActiveAndEnabled)
         {
-            agent.updatePosition = true;
-
-        }
-        else
-        {            
-            agent.updatePosition = false; // Не оновлювати позицію агента
-            Vector3 nextPos = agent.nextPosition;
-            nextPos.y = rb.position.y;
-            rb.MovePosition(nextPos);
-        }
-
-        if (hp <= 0)
-        {
-            if (!inWater)
+            if (agent.nextPosition.y > 59.4 && hp >= 0)
             {
-                isDie = true;
-                isRunning = false;
-                isStanding = false;
-                isGathering = false;
+                agent.updatePosition = true;
+
             }
             else
             {
-                isDrow = true;
+                agent.updatePosition = false; // Не оновлювати позицію агента
+                Vector3 nextPos = agent.nextPosition;
+                nextPos.y = rb.position.y;
+                rb.MovePosition(nextPos);
             }
-            agent.isStopped = true;
 
-        }
-        else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
-        {
-            isRunning = false;
-            isSwimming = false;
-            if (isRunningToResource)
+            if (hp <= 0)
             {
-                isGathering = true;
-                if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
+                if (!inWater)
                 {
-                    Axe.SetActive(true);
-
+                    isDie = true;
+                    isRunning = false;
+                    isStanding = false;
+                    isGathering = false;
                 }
                 else
                 {
-                    Pickaxe.SetActive(true);
-
+                    isDrow = true;
                 }
+                agent.isStopped = true;
+
+            }
+            else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
+            {
+                isRunning = false;
+                isSwimming = false;
+                if (isRunningToResource)
+                {
+                    isGathering = true;
+                    if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
+                    {
+                        Axe.SetActive(true);
+
+                    }
+                    else
+                    {
+                        Pickaxe.SetActive(true);
+
+                    }
+                }
+                else
+                {
+                    if (!inWater)
+                    {
+                        isStanding = true;
+                    }
+                    else
+                    {
+                        isStandingInWater = true;
+                        ArchimedPower();
+
+                    }
+                }
+                agent.isStopped = true;
             }
             else
             {
                 if (!inWater)
                 {
-                    isStanding = true;
+                    isRunning = true;
                 }
                 else
                 {
-                    isStandingInWater = true;
                     ArchimedPower();
-
+                    isSwimming = true;
                 }
+                isStanding = false;
+                isStandingInWater = false;
+                isGathering = false;
+                agent.isStopped = false;
             }
-            agent.isStopped = true;
-        } 
-        else
-        {
-            if (!inWater) { 
-                isRunning = true;
-            }
-            else
-            {
-                ArchimedPower();
-                isSwimming = true;
-            }
-            isStanding = false;
-            isStandingInWater=false;
-            isGathering = false;
-            agent.isStopped = false;
         }
     }
     protected IEnumerator UpdateHPBar(float newHP)
@@ -351,10 +355,11 @@ public class VillagerParametrs : MonoBehaviour
             }
 
             yield return new WaitForSeconds(extractionInterval);
-
-            amrsc.Extraction(resourceAmountPerCycle);
-            Debug.Log(amrsc.Amount);
-
+            if (gameObject.tag == utp.tagOwner[utp.IDclient])
+            {
+                amrsc.Extraction(resourceAmountPerCycle);
+                Debug.Log(amrsc.Amount);
+            }
             if (amrsc.Amount <= 0)
             {
                 targetResource = null;

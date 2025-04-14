@@ -1,17 +1,17 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
 public class ButtonControler : MonoBehaviour
 {
-    public GameObject PanelResearch;
-    public Button ResearchButton;
-    public bool researchPanelActive = false;
-    public GameObject UnityTcpClient;
+    public GameObject PanelResearch,PanelEndGame;
+    public Button ResearchButton,ButtonEndGame;
+    public bool researchPanelActive = false, endGamePanelIsActive = false;
     public bool hirePanel=false;
-
+    private UnityTcpClient utp;
     void Start()
     {
-        UnityTcpClient = GameObject.Find("UnityTcpClient");
+        utp = UnityTcpClient.Instance;
+        utp.buttonControler = this;
         PanelResearch.SetActive(false); 
     }
     public  void PanelResearchButton()
@@ -20,6 +20,16 @@ public class ButtonControler : MonoBehaviour
         researchPanelActive = !researchPanelActive;
         PanelResearch.SetActive(researchPanelActive);
     }
-  
+    public void PanelEndGameButton()
+    {
+        PanelEndGame.SetActive(endGamePanelIsActive);
+    }
+    public void EndGameButton()
+    {
+        utp.SendMessage("WON");
+        utp.enemyReady = false;
+        utp.ReloadRscClient();
+        SceneManager.LoadScene("SampleScene");
+    }
 }
 

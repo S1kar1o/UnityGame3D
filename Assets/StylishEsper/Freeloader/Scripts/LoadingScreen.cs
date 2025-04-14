@@ -458,24 +458,58 @@ namespace Esper.Freeloader
         /// <returns>Yields until all processes are complete.</returns>
         protected IEnumerator LoadingCoroutine(string sceneName, params LoadingProgressTracker[] processes)
         {
+            // Wait for loading screen animation
+            yield return new WaitForSeconds(0.5f);
+
             IsLoading = true;
             onStart.Invoke();
 
-            this.processes = processes;
-
-            while (this.processes.Length > 0 && this.processes[0].Progress < 100f)
+            // Add loading scene progress tracker
+            if (!string.IsNullOrEmpty(sceneName))
             {
-                float progress = this.processes[0].Progress;
-                Progress = progress;
-                onProgressChanged.Invoke(Progress);
-                UpdateLoadingBar();
-                Debug.Log("UI Прогрес: " + Progress);
-                yield return null;
+                this.processes = new LoadingProgressTracker[processes.Length + 1];
+                var operation = SceneManager.LoadSceneAsync(sceneName);
+
+                this.processes[0] = new LoadingProgressTracker(settings.defaultLoadingText, () => operation.progress * 100f);
+
+                for (int i = 0; i < processes.Length; i++)
+                {
+                    this.processes[i + 1] = processes[i];
+                }
+            }
+            else
+            {
+                this.processes = processes;
+            }
+
+            // Wait for all processes to complete
+            for (int i = 0; i < this.processes.Length; i++)
+            {
+                currentProcessIndex = i;
+                var process = this.processes[i];
+                float previousProgress = 0;
+
+                var waitForProcess = new WaitUntil(() =>
+                {
+                    Progress = (process.Progress + (100 * i)) / (100 * this.processes.Length) * 100;
+
+                    if (Progress != previousProgress)
+                    {
+                        previousProgress = Progress;
+                        onProgressChanged.Invoke(Progress);
+                        UpdateLoadingBar();
+                    }
+
+                    return process.Progress >= 100f;
+                });
+
+                yield return waitForProcess;
             }
 
             IsLoading = false;
             onComplete.Invoke();
 
+            // End loading
             if (settings.requireInputToContinue)
             {
                 ShowContinueContent();
@@ -484,9 +518,11 @@ namespace Esper.Freeloader
             {
                 Close();
             }
-        }/// <summary>
-         /// Opens the loading screen.
-         /// </summary>
+        }
+
+        /// <summary>
+        /// Opens the loading screen.
+        /// </summary>
         public virtual void Open()
         {
             // Register events

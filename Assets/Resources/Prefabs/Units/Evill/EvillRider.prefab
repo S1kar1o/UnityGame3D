@@ -506,6 +506,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3294791955875817355}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bc4199b6057f4ee47b76b11210fd6f4a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3367493391640864336}
   m_SourcePrefab: {fileID: 100100000, guid: bc4199b6057f4ee47b76b11210fd6f4a, type: 3}
 --- !u!1 &524242966294373640 stripped
 GameObject:
@@ -571,8 +575,12 @@ MonoBehaviour:
   hpBarBackground: {fileID: 5761281994598372618}
   hpBarForeground: {fileID: 4838091912697235968}
   boxCollider: {fileID: 8989866806198796559}
+  colliderForActionsWithWater: {fileID: 0}
+  displaycmentAmount: 6
+  buoyancyPoint: {fileID: 0}
   Axe: {fileID: 0}
   Pickaxe: {fileID: 0}
+  utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
 --- !u!195 &6689273470074701178
@@ -645,6 +653,19 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &-3367493391640864336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524242966294373640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e69e4d2b1399e1149abb002e90d09173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverId: 0
 --- !u!4 &868540105798287282 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bc4199b6057f4ee47b76b11210fd6f4a,

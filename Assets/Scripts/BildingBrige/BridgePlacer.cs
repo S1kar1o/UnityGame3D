@@ -1,6 +1,11 @@
-﻿using Unity.AI.Navigation;
+﻿using System.Net.Http;
+using System;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class BridgePlacer : MonoBehaviour
 {
@@ -19,8 +24,8 @@ public class BridgePlacer : MonoBehaviour
     public float waterCheckDistance = 10f;
     public int waterCheckPoints = 1; // Кількість точок для перевірки води
 
-    private Vector3 firstPoint;
-    private Vector3 secondPoint;
+    public Vector3 firstPoint;
+    public Vector3 secondPoint;
     private bool isFirstPointSelected = false;
     private bool isPlacingBridge = false;
     private bool isValidPlacement = true;
@@ -29,6 +34,8 @@ public class BridgePlacer : MonoBehaviour
     private GameObject[] previewParts;
     private GameObject cursorFollowPreview;
 
+
+    public bool messageFromServer=false;
     void Update()
     {
         if (!isPlacingBridge)
@@ -186,7 +193,7 @@ public class BridgePlacer : MonoBehaviour
         }
     }
 
-    private void PlaceBridge()
+    public async void PlaceBridge()
     {
         Vector3 direction = (secondPoint - firstPoint).normalized;
         Quaternion rotation = Quaternion.LookRotation(direction);
@@ -198,7 +205,33 @@ public class BridgePlacer : MonoBehaviour
 
         Vector3 position = firstPoint - direction * offset;
         bridgeParts = new GameObject[bridgeCount];
+        /*
+                string requestIdMessage = "ID_GENERATED";
 
+                // Відправляємо запит на ID і чекаємо відповіді
+                bool sendRequestResult = await SpawnObjectOnServer(requestIdMessage);
+
+                if (!sendRequestResult)
+                {
+                    Debug.LogError("Failed to notify server, Unit will NOT be spawned.");
+                    return;
+                }
+
+                // Чекаємо отримання ID від сервера
+                bool idReceived = await WaitForIDAsync();
+
+                if (!idReceived)
+                {
+                    Debug.LogError("Failed to receive ID from server.");
+                    return;
+                }*/
+        if (!messageFromServer)
+        {
+            string name = bridgePrefab.name.Replace("(Clone)", "").Trim();
+
+            string spawnMessage = $"BUILT {name} {firstPoint.x:F2} {firstPoint.y:F2} {firstPoint.z:F2} {secondPoint.x:F2} {secondPoint.y:F2} {secondPoint.z:F2}\n";
+            UnityTcpClient.Instance.SendMessage(spawnMessage);
+        }
         for (int i = 0; i < bridgeCount; i++)
         {
             bridgeParts[i] = Instantiate(bridgePrefab, position, rotation);
@@ -210,14 +243,16 @@ public class BridgePlacer : MonoBehaviour
     }
     private void CreateNavMeshLinks()
     {
+       
         for (int i = 0; i < bridgeParts.Length; i++)
         {
+            Debug.Log(120);
             GameObject current = bridgeParts[i];
-
             if (bridgeParts[0] == current)
             {
                 Vector3 startPosTer = current.transform.position + current.transform.forward * 2f;
                 Vector3 endPosTer = current.transform.position - current.transform.forward * 3f;
+                Debug.Log(120);
 
                 float raycastLimit = 20f;
                 int groundLayerMask = LayerMask.GetMask("Ground");
@@ -226,6 +261,8 @@ public class BridgePlacer : MonoBehaviour
                 if (hits.Length > 0)
                 {
                     endPosTer = hits[0].point;
+                    Debug.Log(120);
+
                 }
                 else
                 {
@@ -234,6 +271,7 @@ public class BridgePlacer : MonoBehaviour
                     Debug.LogWarning("Не вдалося знайти землю для початкового NavMeshLink!");
                 }
                 endPosTer.z += 1;
+                Debug.Log(120);
 
                 NavMeshLink linkTer = current.AddComponent<NavMeshLink>();
                 linkTer.startPoint = current.transform.InverseTransformPoint(startPosTer);
@@ -241,6 +279,8 @@ public class BridgePlacer : MonoBehaviour
                 linkTer.width = navMeshLinkWidth;
                 linkTer.bidirectional = navMeshLinkBidirectional;
                 linkTer.UpdateLink();
+                Debug.Log(120);
+
             }
 
             Vector3 startPos = current.transform.position + current.transform.forward * 1.05f * (current.GetComponentInChildren<Renderer>().bounds.size.z);
@@ -276,23 +316,6 @@ public class BridgePlacer : MonoBehaviour
         Debug.Log($"Створено {bridgeParts.Length} NavMeshLinks між частинами мосту");
     }
 
-    private Vector3 FindTerrainConnectionPoint(Vector3 startPosition)
-    {
-        if (Physics.Raycast(startPosition + Vector3.up * 10f, Vector3.down, out RaycastHit hit,
-            connectionSearchDistance * 2, groundLayerMask))
-        {
-            return hit.point + Vector3.up * 0.1f;
-        }
-
-        if (Physics.Raycast(startPosition, Vector3.up, out hit, connectionSearchDistance, groundLayerMask))
-        {
-            return hit.point - Vector3.up * 0.1f;
-        }
-
-        Debug.LogWarning("No terrain found for connection!");
-        return startPosition;
-    }
-
     private void ClearPreview()
     {
         if (previewParts != null)
@@ -325,5 +348,45 @@ public class BridgePlacer : MonoBehaviour
         isFirstPointSelected = false;
         ClearPreview();
         Debug.Log("Bridge placement mode: " + (isPlacingBridge ? "ON" : "OFF"));
+    }
+    private async Task<bool> WaitForIDAsync()
+    {
+        float timeout = 5f; // Таймаут 5 секунд
+        float startTime = Time.time;
+
+        while (UnityTcpClient.Instance.idUnitGeneratedAtServer == 0)
+        {
+            if (Time.time - startTime > timeout)
+            {
+                Debug.LogError("Timeout waiting for ID");
+                return false;
+            }
+
+            await Task.Yield(); // Аналог yield return null для async/await
+        }
+
+        return true;
+    }
+    private async Task<bool> SpawnObjectOnServer(string information)
+    {
+        if (UnityTcpClient.Instance != null)
+        {
+            try
+            {
+                await UnityTcpClient.Instance.SendMessage(information);
+                return true; // Indicate success
+
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error sending spawn command: " + e.Message);
+                return false; // Indicate failure
+            }
+        }
+        else
+        {
+            Debug.LogError("TCPClient is null.  Make sure it's assigned.");
+            return false;
+        }
     }
 }

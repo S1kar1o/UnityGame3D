@@ -85,6 +85,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\Logining\TokenManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark03.cs" />
+    <Compile Include="Assets\Scripts\ServerId.cs" />
     <Compile Include="Assets\StylishEsper\Freeloader\Examples\Demo.cs" />
     <Compile Include="Assets\Scripts\Logining\LoginingToDB.cs" />
     <Compile Include="Assets\Scripts\BuildingManager.cs" />
@@ -101,6 +102,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\DropdownSample.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\VertexColorCycler.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\RiverManager.cs" />
+    <Compile Include="Assets\Scripts\Server\GenerateIDforServer.cs" />
     <Compile Include="Assets\Scripts\BildingWall\WallGenerator.cs" />
     <Compile Include="Assets\Scripts\UIresourceControll.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\CreateSphereOnTerrain.cs" />

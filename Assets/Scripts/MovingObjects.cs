@@ -109,6 +109,7 @@ public class MovingObjects : MonoBehaviour
                             {
                                 extractor.IsRunningToResource(true);
                                 extractor.MoveToResource(resource); // Рух до ресурсу
+                                SendExtractMessage(obj,resource);
                             }
                         }
                     }
@@ -182,6 +183,33 @@ public class MovingObjects : MonoBehaviour
             endScreenPosition = Input.mousePosition;
         }
     }
+    public async Task SendExtractMessage(GameObject unit, GameObject target)
+    {
+        if (utp == null)
+        {
+            Debug.LogError("UnityTcpClient не ініціалізований!");
+            return;
+        }
+
+        ServerId sr = unit.GetComponent<ServerId>();
+        int unitId = sr.serverId;
+        ServerId si = target.GetComponent<ServerId>();
+        int targetId = si.serverId;
+
+
+        string message = $"GOEXTRACT {unitId} {targetId}";
+        Debug.Log($"Надсилаю повідомлення про видобування: {message}");
+
+        try
+        {
+            await utp.SendMessage(message);
+            Debug.Log($"Повідомлення про видобування для юніта {unitId} успішно відправлено.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Помилка при відправці повідомлення про видобування: {e.Message}");
+        }
+    }
     public async Task SendAttackMessage(GameObject unit, GameObject target, int damage)
     {
         if (utp == null)
@@ -190,8 +218,11 @@ public class MovingObjects : MonoBehaviour
             return;
         }
 
-        int unitId = unit.GetInstanceID();
-        int targetId = target.GetInstanceID();
+        ServerId sr = unit.GetComponent<ServerId>();
+        int unitId = sr.serverId;
+
+        ServerId sr2 = target.GetComponent<ServerId>();
+        int targetId = sr2.serverId;
         string message = $"ATTACK {unitId} {targetId} {damage}";
         Debug.Log($"Надсилаю повідомлення про атаку: {message}");
 
@@ -214,7 +245,8 @@ public class MovingObjects : MonoBehaviour
         }
 
         // Створення повідомлення про рух
-        int unitId = unit.GetInstanceID();
+        ServerId si= unit.GetComponent<ServerId>();
+        int unitId = si.serverId;
         string message = $"MOVE {unitId} {destination.x} {destination.y} {destination.z}";
         Debug.Log($"Надсилаю повідомлення про рух: {message}");
 
@@ -277,7 +309,8 @@ public class MovingObjects : MonoBehaviour
 
         // Очищення попереднього вибору
         selectedUnits.Clear();
-        foreach (GameObject unit in GameObject.FindGameObjectsWithTag("Unit"))
+        string[] tagOwner = new string[] { "Unit", "Enemy" };
+        foreach (GameObject unit in GameObject.FindGameObjectsWithTag(tagOwner[utp.IDclient]))
         {
             Vector3 unitPosition = unit.transform.position;
             // Перевірка, чи потрапляє юніт у рамку
