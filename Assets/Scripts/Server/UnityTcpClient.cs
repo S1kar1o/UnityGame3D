@@ -302,8 +302,10 @@ public class UnityTcpClient : MonoBehaviour
                         }
                         else if(message.StartsWith("WON") || message.StartsWith("LOSE")|| message.StartsWith("Opponent disconnected"))
                         {
+                            Debug.Log(102);
+
                             buttonControler.endGamePanelIsActive=true;
-                            buttonControler.PanelEndGameButton();
+                            buttonControler.PanelEndGameFromServerButton();
                         }
                         else
                         {
@@ -599,9 +601,9 @@ public class UnityTcpClient : MonoBehaviour
         int targetId = int.Parse(parts[2]);
         int damage = int.Parse(parts[3]);
 
-        GameObject attacker = FindObjectByID(attackerId);
+        GameObject attacker = FindObjectByServerID(attackerId);
         WarriorParametrs attackerObj = attacker.GetComponent<WarriorParametrs>();
-        GameObject target = FindObjectByID(targetId);
+        GameObject target = FindObjectByServerID(targetId);
         attackerObj.AttackEnemy(target);
     }
     // Допоміжна функція для пошуку ресурсу за ID
@@ -637,15 +639,17 @@ public class UnityTcpClient : MonoBehaviour
             bp.secondPoint = Vector3.zero;
 
         }
-        else if (parts.Length == 8 && parts[0] == "BUILT")
+        else if (parts.Length == 9 && parts[0] == "BUILT")
         {
             string prefabName = parts[1];
-            string buildXStr = parts[2];
-            string buildYStr = parts[3];
-            string buildZStr = parts[4];
-            string rotXStr = parts[5];
-            string rotYStr = parts[6];
-            string rotZStr = parts[7];
+            string prefabId = parts[2];
+
+            string buildXStr = parts[3];
+            string buildYStr = parts[4];
+            string buildZStr = parts[5];
+            string rotXStr = parts[6];
+            string rotYStr = parts[7];
+            string rotZStr = parts[8];
 
             // Заміна коми на крапку
             buildXStr = buildXStr.Replace(',', '.');
@@ -663,7 +667,7 @@ public class UnityTcpClient : MonoBehaviour
                 float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
                 float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
             {
-                LoadAndInstantiateBuilding(prefabName, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr); // Рядок 302, який потрібно змінити
+                LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr); 
             }
             else
             {
@@ -676,10 +680,11 @@ public class UnityTcpClient : MonoBehaviour
         }
     }
 
-    private void LoadAndInstantiateBuilding(string prefabName, string buildXStr, string buildYStr, string buildZStr, string rotXStr, string rotYStr, string rotZStr)
+    private void LoadAndInstantiateBuilding(string prefabName,string idStr, string buildXStr, string buildYStr, string buildZStr, string rotXStr, string rotYStr, string rotZStr)
     {
         // Парсинг рядків у числа
         if (float.TryParse(buildXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildX) &&
+            int.TryParse(idStr, NumberStyles.Integer, CultureInfo.InvariantCulture,out int id)&&
             float.TryParse(buildYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildY) &&
             float.TryParse(buildZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildZ) &&
             float.TryParse(rotXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotX) &&
@@ -693,6 +698,8 @@ public class UnityTcpClient : MonoBehaviour
                 Quaternion buildRotation = Quaternion.Euler(rotX, rotY, rotZ);
                 GameObject newBuilding = Instantiate(buildingPrefab, buildPosition, buildRotation);
                 newBuilding.tag = "Enemy";
+                ServerId serverId = newBuilding.GetComponent<ServerId>();
+                serverId.serverId = id;
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");
             }
             else
