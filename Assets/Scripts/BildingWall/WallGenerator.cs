@@ -28,6 +28,10 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
     private bool isWall = false;
     private bool isWallSecondPoint = false;
 
+    public int priceWall = 1;
+    private int wallCount = 0;
+    private bool priceValid = false;
+
     private GameObject[] WallParts; // Масив частин мосту
     private GameObject[] previewParts; // Масив частин прев'ю
     private GameObject cursorFollowPreview; // Прев'ю, що слідує за курсором
@@ -46,9 +50,10 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); // Отримати промінь від камери до курсора
         if (Physics.Raycast(ray, out RaycastHit hit)) // Якщо промінь перетинає об'єкт
         {
+
             if (!isFirstPointSelected) // Якщо перша точка не обрана
             {
-                
+
                 UpdateCursorFollowPreview(hit.point); // Оновити прев'ю під курсором
 
             }
@@ -56,8 +61,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             {
                 secondPoint = hit.point; // Запам'ятати другу точку
                 isValidPlacement = CheckPlacementValidity(firstPoint, secondPoint); // Перевірити валідність розміщення
-                
+
                 UpdateWallPreview(); // Оновити прев'ю мосту
+
             }
 
             if (Input.GetMouseButtonDown(0)) // При натисканні лівої кнопки миші
@@ -80,6 +86,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
                 if (IsValidLocation(hit) || isWall) // Якщо місце валідне
                 {
+                    priceValid = UnityTcpClient.Instance.goldAmount < wallCount * priceWall;
                     Debug.Log("СтІНА_0");
                     if (!isFirstPointSelected) // Якщо перша точка не обрана
                     {
@@ -91,9 +98,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
                         Debug.Log("СтІНА_2");
                     }
-                    else if (isValidPlacement || isWallSecondPoint) // Якщо розміщення валідне і є вода
+                    else if ((isValidPlacement || isWallSecondPoint) && !priceValid) // Якщо розміщення валідне і є вода
                     {
-                        
+
                         ClearPreview(); // Очистити прев'ю
                         PlaceWall(); // Розмістити міст
                         isPlacingWall = false; // Вийти з режиму розміщення
@@ -110,7 +117,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         }
     }
 
-    
+
 
     private void UpdateCursorFollowPreview(Vector3 position) // Оновлення прев'ю під курсором
     {
@@ -167,6 +174,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         float wallLength = wallPrefab.GetComponentInChildren<Renderer>().bounds.size.z; // Довжина сегменту
 
         int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1); // Кількість сегментів
+        this.wallCount = wallCount;
         float offset = (wallCount * wallLength - distance) / 2; // Відступ для центрування
 
         Vector3 currentPosition = firstPoint - direction * (offset - 20);
@@ -178,8 +186,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
 
 
+        bool priceValid = UnityTcpClient.Instance.goldAmount < wallCount * priceWall;
 
-
+        if (priceValid) previewColor = invalidPlacementColor;
 
         for (int i = 0; i < wallCount; i++) // Для кожного сегменту
         {
@@ -193,7 +202,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             // Визначаємо позицію на рельєфі
             Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
 
-            
+
 
             // Створюємо прев'ю сегмента
             previewParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
@@ -205,6 +214,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
             // Встановлюємо колір (можна зробити індивідуальний для кожного сегмента)
             Color segmentColor = segmentValid ? validPlacementColor : invalidPlacementColor;
+            if (priceValid) segmentColor = invalidPlacementColor;
 
             // Налаштування прев'ю
             foreach (var collider in previewParts[i].GetComponentsInChildren<Collider>())
@@ -245,39 +255,44 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         Vector3 currentPosition1 = firstPoint - direction * (offset);
 
         
+
+
         WallParts = new GameObject[wallCount];
 
         for (int i = 0; i < wallCount; i++)
         {
 
-            if (i == 0 && isWall)
-            {
-                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                if (i == 0 && isWall)
+                {
+                    WallParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                    WallParts[i].tag = "Wall";
+
+                    continue;
+                }
+
+
+
+
+                // Визначаємо висоту для поточного сегмента
+                Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
+
+                WallParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
                 WallParts[i].tag = "Wall";
-                
-                continue;
-            }
+                if (i == (wallCount - 1) && isWallSecondPoint)
+                {
+                    currentPosition = currentPosition + direction * 20f;
+                    WallParts[i] = Instantiate(wallConectorPrefab, currentPosition, wallConectorPrefab.transform.rotation);
+                    WallParts[i].tag = "Wall";
 
-            
+                    continue;
+                }
 
-            
-            // Визначаємо висоту для поточного сегмента
-            Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
+                currentPosition += direction * wallLength;
 
-            WallParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
-            WallParts[i].tag = "Wall";
-            if (i == (wallCount - 1) && isWallSecondPoint)
-            {
-                currentPosition = currentPosition + direction * 20f;
-                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition, wallConectorPrefab.transform.rotation);
-                WallParts[i].tag = "Wall";
-
-                continue;
-            }
-
-            currentPosition += direction * wallLength;
-            
         }
+        UnityTcpClient.Instance.goldAmount = UnityTcpClient.Instance.goldAmount - priceWall * wallCount;
+        UnityTcpClient.Instance.uIresource.UpdateAmoundOfGold();
+
     }
 
     private Vector3 GetPositionOnTerrain(Vector3 position)

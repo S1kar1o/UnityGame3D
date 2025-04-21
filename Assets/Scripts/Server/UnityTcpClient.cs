@@ -22,13 +22,15 @@ public class UnityTcpClient : MonoBehaviour
     private bool isConnected = false;
     // Stores movement information for objects in 3D space
     public int IDclient;
-    public int goldAmount = 50, woodAmount = 50, rockAmount = 50;
+    public int goldAmount = 10, woodAmount = 5, rockAmount = 5;
 
     public bool enemyReady = false;
     public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
     private string _sceneToMove;
     public TokenManager tokenManager;
     public int idUnitGeneratedAtServer = 0;
+
+
     public string SceneToMove
     {
         get => _sceneToMove;
