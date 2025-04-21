@@ -1,6 +1,8 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Threading.Tasks; // Додайте цей рядок, щоб використовувати Task
+using System.Threading.Tasks;
+using UnityEngine.UI;
+using System; // Додайте цей рядок, щоб використовувати Task
 
 public class Building : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class Building : MonoBehaviour
     private Color validColor = Color.green;
     private Color invalidColor = Color.red;
     private Color[] originalColors; // Початкові кольори для відновлення
+    public int costOfTree, costOfRock, costOfGold;
 
     void Start()
     {
@@ -82,6 +85,11 @@ public class Building : MonoBehaviour
         try
         {
             await PlaceBuildingAsync();
+            UnityTcpClient.Instance.woodAmount -= costOfTree;
+            UnityTcpClient.Instance.rockAmount -= costOfRock;
+            UnityTcpClient.Instance.goldAmount -= costOfGold;
+            UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
+
             Destroy(this); // Знищення скрипта після успішного розміщення будівлі та відправки повідомлення
         }
         catch (System.Exception e)
@@ -97,24 +105,40 @@ public class Building : MonoBehaviour
         isPlaced = true;
         RestoreOriginalColors();
         child.gameObject.SetActive(true);
-        SpawnUnits sp = this.GetComponent<SpawnUnits>();
-        if(sp != null)
+        SpawnUnits sp = gameObject.GetComponent<SpawnUnits>();
+        if (sp != null)
             sp.enabled = true;
         string prefabName = gameObject.name.Replace("(Clone)", "").Trim();
         float rotationX = gameObject.transform.rotation.x;
         float rotationY = gameObject.transform.rotation.y;
         float rotationZ = gameObject.transform.rotation.z;
-        string message = $"BUILT {prefabName} {gameObject.transform.position.x} {gameObject.transform.position.y} {gameObject.transform.position.z} {rotationX} {rotationY} {rotationZ}\n";
 
-   
-        UnityTcpClient tcp = FindAnyObjectByType<UnityTcpClient>();
-        if (tcp != null)
+
+        if (UnityTcpClient.Instance != null)
         {
-              Debug.Log(message);
             try
             {
-                await tcp.SendMessage(message);
-                
+                string requestIdMessage = "ID_GENERATED";
+
+                // Відправляємо запит на ID і чекаємо відповіді
+                bool sendRequestResult = await SpawnUnitOnServer(requestIdMessage);
+
+                if (!sendRequestResult)
+                {
+                    Debug.LogError("Failed to notify server, Unit will NOT be spawned.");
+                    return;
+                }
+                bool idReceived = await WaitForIDAsync();
+
+                ServerId sr = gameObject.GetComponent<ServerId>();
+                sr.serverId = UnityTcpClient.Instance.idUnitGeneratedAtServer;
+                UnityTcpClient.Instance.idUnitGeneratedAtServer = 0;
+
+                string message = $"BUILT {prefabName} {sr.serverId} {gameObject.transform.position.x} {gameObject.transform.position.y} {gameObject.transform.position.z} {rotationX} {rotationY} {rotationZ}\n";
+                gameObject.transform.GetChild(0).gameObject.SetActive(true);
+
+                await UnityTcpClient.Instance.SendMessage(message);
+
             }
             catch (System.Exception e)
             {
@@ -130,6 +154,47 @@ public class Building : MonoBehaviour
             // Можливо, тут варто передбачити якусь альтернативну дію, якщо TCP клієнт не знайдено.
             return;
         }
+    }
+
+    private async Task<bool> SpawnUnitOnServer(string information)
+    {
+        if (UnityTcpClient.Instance != null)
+        {
+            try
+            {
+                await UnityTcpClient.Instance.SendMessage(information);
+                return true; // Indicate success
+
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Error sending spawn command: " + e.Message);
+                return false; // Indicate failure
+            }
+        }
+        else
+        {
+            Debug.LogError("TCPClient is null.  Make sure it's assigned.");
+            return false;
+        }
+    }
+    private async Task<bool> WaitForIDAsync()
+    {
+        float timeout = 5f; // Таймаут 5 секунд
+        float startTime = Time.time;
+
+        while (UnityTcpClient.Instance.idUnitGeneratedAtServer == 0)
+        {
+            if (Time.time - startTime > timeout)
+            {
+                Debug.LogError("Timeout waiting for ID");
+                return false;
+            }
+
+            await Task.Yield(); // Аналог yield return null для async/await
+        }
+
+        return true;
     }
     private void RotateObject()
     {
@@ -151,27 +216,30 @@ public class Building : MonoBehaviour
 
     private bool IsValidPosition()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
+        if (UnityTcpClient.Instance.rockAmount >= costOfRock && UnityTcpClient.Instance.goldAmount>=costOfGold && UnityTcpClient.Instance.woodAmount >= costOfTree)
         {
-            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-            return slopeAngle <= maxSlopeAngle;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
+            {
+                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                return slopeAngle <= maxSlopeAngle;
+            }
+            return false;
         }
         return false;
     }
-
     private void UpdatePositionIndicator()
     {
         foreach (Renderer renderer in renderers)
         {
-            if (IsValidPosition())
+            Color targetColor = IsValidPosition() ? validColor : invalidColor;
+
+            // Пройтися по всіх матеріалах рендера
+            Material[] materials = renderer.materials;
+            for (int i = 0; i < materials.Length; i++)
             {
-                renderer.material.color = validColor; // Зелений колір
-            }
-            else
-            {
-                renderer.material.color = invalidColor; // Червоний колір
+                materials[i].color = targetColor;
             }
         }
     }
@@ -180,78 +248,13 @@ public class Building : MonoBehaviour
     {
         for (int i = 0; i < renderers.Length; i++)
         {
-            renderers[i].material.color = originalColors[i]; // Повернення початкових кольорів
-        }
-    }
+            Material[] materials = renderers[i].materials;
 
-   /* private void AdjustTerrainUnderBuilding()
-    {
-        if (terrainData == null) return;
-
-        Collider collider = GetComponent<Collider>();
-        if (collider == null)
-        {
-            Debug.LogError("Collider is missing on the building.");
-            return;
-        }
-
-        Vector3 buildingCenter = collider.bounds.center - terrain.transform.position;
-        int terrainX = Mathf.RoundToInt((buildingCenter.x / terrainData.size.x) * terrainData.heightmapResolution);
-        int terrainZ = Mathf.RoundToInt((buildingCenter.z / terrainData.size.z) * terrainData.heightmapResolution);
-
-        int radiusX = Mathf.CeilToInt((collider.bounds.size.x * flattenScale / terrainData.size.x) * terrainData.heightmapResolution / 2);
-        int radiusZ = Mathf.CeilToInt((collider.bounds.size.z * flattenScale / terrainData.size.z) * terrainData.heightmapResolution / 2);
-
-        int startX = Mathf.Clamp(terrainX - radiusX, 0, terrainData.heightmapResolution - 1);
-        int startZ = Mathf.Clamp(terrainZ - radiusZ, 0, terrainData.heightmapResolution - 1);
-        int endX = Mathf.Clamp(terrainX + radiusX, 0, terrainData.heightmapResolution - 1);
-        int endZ = Mathf.Clamp(terrainZ + radiusZ, 0, terrainData.heightmapResolution - 1);
-
-        float[,] heights = terrainData.GetHeights(startX, startZ, endX - startX, endZ - startZ);
-
-        float averageHeight = 0f;
-        foreach (float height in heights)
-        {
-            averageHeight += height;
-        }
-        averageHeight /= heights.Length;
-
-        for (int x = 0; x < heights.GetLength(0); x++)
-        {
-            for (int z = 0; z < heights.GetLength(1); z++)
+            // Якщо початкові кольори лише одного матеріалу, застосовуй для всіх
+            for (int j = 0; j < materials.Length; j++)
             {
-                if (Mathf.Abs(heights[x, z] - averageHeight) <= maxHeightDifference)
-                {
-                    heights[x, z] = averageHeight;
-                }
+                materials[j].color = originalColors[i];
             }
         }
-
-        terrainData.SetHeights(startX, startZ, heights);
-
-        SmoothTerrain(startX, startZ, endX - startX, endZ - startZ);
     }
-
-    private void SmoothTerrain(int startX, int startZ, int width, int height)
-    {
-        for (int i = 0; i < smoothIterations; i++)
-        {
-            float[,] heights = terrainData.GetHeights(startX, startZ, width, height);
-            float[,] smoothed = (float[,])heights.Clone();
-
-            for (int x = 1; x < heights.GetLength(0) - 1; x++)
-            {
-                for (int z = 1; z < heights.GetLength(1) - 1; z++)
-                {
-                    smoothed[x, z] = (
-                        heights[x - 1, z] + heights[x + 1, z] +
-                        heights[x, z - 1] + heights[x, z + 1] +
-                        heights[x, z]
-                    ) / 5f;
-                }
-            }
-
-            terrainData.SetHeights(startX, startZ, smoothed);
-        }
-    }*/
 }

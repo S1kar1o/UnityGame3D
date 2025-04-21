@@ -42,12 +42,25 @@ public class WarriorAnimation : VillagerAnimation
                     if (warriorParametrs.targetEnemy != null)
                     {
                         VillagerParametrs target = warriorParametrs.targetEnemy.GetComponent<VillagerParametrs>();
-                        target.getDamage(50);
-
-                        if (target.GetHp() <= 0)
+                        if (target != null)
                         {
-                            warriorParametrs.targetEnemy = null;
-                            warriorParametrs.SetAttack(false);
+                            BuildingStats bd= warriorParametrs.targetEnemy.GetComponent<BuildingStats>();
+                            target.getDamage(50);
+                            if (target.GetHp() <= 0)
+                            {
+                                warriorParametrs.targetEnemy = null;
+                                warriorParametrs.SetAttack(false);
+                            }
+                        }
+                        else
+                        {
+                            BuildingStats bd = warriorParametrs.targetEnemy.GetComponent<BuildingStats>();
+                            bd.getDamage(50);
+                            if (bd.GetHp() <= 0)
+                            {
+                                warriorParametrs.targetEnemy = null;
+                                warriorParametrs.SetAttack(false);
+                            }
                         }
                     }
                 }
