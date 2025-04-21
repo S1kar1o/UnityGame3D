@@ -16,6 +16,12 @@ public class UIresourceControll : MonoBehaviour
         AmoundOfWood.text = utp.woodAmount.ToString();
         AmoundOfRocks.text = utp.rockAmount.ToString();
     }
+    public void UpdateAmoundOfResource()
+    {
+        AmoundOfGold.text = utp.goldAmount.ToString();
+        AmoundOfWood.text = utp.woodAmount.ToString();
+        AmoundOfRocks.text = utp.rockAmount.ToString();
+    }
     public void UpdateAmoundOfGold()
     {
         AmoundOfGold.text = utp.goldAmount.ToString();

@@ -20,6 +20,7 @@ public class Building : MonoBehaviour
     private Color validColor = Color.green;
     private Color invalidColor = Color.red;
     private Color[] originalColors; // Початкові кольори для відновлення
+    public int costOfTree, costOfRock, costOfGold;
 
     void Start()
     {
@@ -84,6 +85,11 @@ public class Building : MonoBehaviour
         try
         {
             await PlaceBuildingAsync();
+            UnityTcpClient.Instance.woodAmount -= costOfTree;
+            UnityTcpClient.Instance.rockAmount -= costOfRock;
+            UnityTcpClient.Instance.goldAmount -= costOfGold;
+            UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
+
             Destroy(this); // Знищення скрипта після успішного розміщення будівлі та відправки повідомлення
         }
         catch (System.Exception e)
@@ -210,12 +216,16 @@ public class Building : MonoBehaviour
 
     private bool IsValidPosition()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
+        if (UnityTcpClient.Instance.rockAmount >= costOfRock && UnityTcpClient.Instance.goldAmount>=costOfGold && UnityTcpClient.Instance.woodAmount >= costOfTree)
         {
-            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-            return slopeAngle <= maxSlopeAngle;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
+            {
+                float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+                return slopeAngle <= maxSlopeAngle;
+            }
+            return false;
         }
         return false;
     }
