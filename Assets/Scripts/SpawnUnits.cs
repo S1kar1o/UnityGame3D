@@ -9,7 +9,6 @@ public class SpawnUnits : MonoBehaviour
     [SerializeField] private int indexUnit = 0;
     [SerializeField] private UnityTcpClient tcpClient;
 
-
     void Start()
     {
 
@@ -26,7 +25,7 @@ public class SpawnUnits : MonoBehaviour
             string name = prefabUnit[indexUnit].name.Replace("(Clone)", "").Trim();
 
             Vector3 position = new Vector3(
-                transform.GetChild(1).position.x + UnityEngine.Random.Range(3f, 10f),
+                transform.GetChild(1).position.x + UnityEngine.Random.Range(1f, 5f),
                 transform.GetChild(1).position.y,
                 transform.GetChild(1).position.z + UnityEngine.Random.Range(3f, 10f)
             );

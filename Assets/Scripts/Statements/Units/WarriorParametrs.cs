@@ -59,6 +59,7 @@ public class WarriorParametrs : VillagerParametrs
                 if (!inWater)
                 {
                     isAttack = true;
+                    updateTargetPosition();
                 }
                 else
                 {
@@ -110,21 +111,6 @@ public class WarriorParametrs : VillagerParametrs
         }
     }
 
-
-    void CallMethod(Component component, string methodName)
-    {
-        Type type = component.GetType();
-        var method = type.GetMethod(methodName);
-
-        if (method != null)
-        {
-            method.Invoke(component, null); // Виклик методу без параметрів
-        }
-        else
-        {
-            Debug.LogWarning($"Метод '{methodName}' не знайдено в {type.Name}");
-        }
-    }
     private void updateTargetPosition()
     {
         Debug.Log(targetEnemy.transform.position);
