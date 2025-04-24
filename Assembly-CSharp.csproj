@@ -81,6 +81,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\SpawnUnits.cs" />
+    <Compile Include="Assets\Animation\Scripts\ArcherAnimation.cs" />
     <Compile Include="Assets\Scripts\Statements\Buildings\Barrack.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\Logining\TokenManager.cs" />
@@ -142,6 +143,8 @@
     <Compile Include="Assets\Scripts\RandomGeneratorPlayerInStart.cs" />
     <Compile Include="Assets\Scripts\ButtonCreatingWall.cs" />
     <Compile Include="Assets\Animation\Scripts\WarriorAnimation.cs" />
+    <Compile Include="Assets\Scripts\Statements\Units\ArcherParametrs.cs" />
+    <Compile Include="Assets\Scripts\Statements\Units\RiderParametrs.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
   </ItemGroup>
   <ItemGroup>

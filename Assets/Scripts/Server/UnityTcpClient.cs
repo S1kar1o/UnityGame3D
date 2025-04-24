@@ -23,15 +23,13 @@ public class UnityTcpClient : MonoBehaviour
     private bool isConnected = false;
     // Stores movement information for objects in 3D space
     public int IDclient;
-    public int goldAmount = 1000, woodAmount = 500, rockAmount = 500;
+    public int goldAmount = 500, woodAmount = 500, rockAmount = 500;
 
     public bool enemyReady = false;
     public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
     private string _sceneToMove;
     public TokenManager tokenManager;
     public int idUnitGeneratedAtServer = 0;
-
-
     public string SceneToMove
     {
         get => _sceneToMove;
@@ -710,6 +708,7 @@ public class UnityTcpClient : MonoBehaviour
                 float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
                 float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
             {
+                Debug.Log(120);
                 LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr);
             }
             else
@@ -734,6 +733,7 @@ public class UnityTcpClient : MonoBehaviour
             float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
             float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
         {
+            Debug.Log(121);
             GameObject buildingPrefab = Resources.Load<GameObject>("Prefabs/Buildings/" + prefabName);
             if (buildingPrefab != null)
             {
@@ -744,7 +744,8 @@ public class UnityTcpClient : MonoBehaviour
                 ServerId serverId = newBuilding.GetComponent<ServerId>();
                 serverId.serverId = id;
                 TowerAttack ta = newBuilding.GetComponent<TowerAttack>();
-                ta.enabled = true;
+                if( ta != null )
+                     ta.enabled = true;
 
 
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");
