@@ -3,11 +3,19 @@
   "WorkspaceRootPath": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\cameramoving.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\cameramoving.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\bildingwall\\wallgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\bildingwall\\wallgenerator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\uiresourcecontroll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\uiresourcecontroll.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -18,30 +26,54 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "CameraMoving.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\CameraMoving.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CameraMoving.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\CameraMoving.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CameraMoving.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAQwEUAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-23T20:22:25.531Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UIresourceControll.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\UIresourceControll.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\UIresourceControll.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\UIresourceControll.cs",
+              "RelativeToolTip": "Assets\\Scripts\\UIresourceControll.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBIAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-21T09:30:52.574Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "UnityTcpClient.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "RelativeToolTip": "Assets\\Scripts\\Server\\UnityTcpClient.cs",
-              "ViewState": "AgIAABIAAAAAAAAAAAAlwBgAAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAACkAAAAAAAAAAAAuwDYAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-21T08:15:52.66Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-21T08:15:52.66Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "WallGenerator.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BildingWall\\WallGenerator.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BildingWall\\WallGenerator.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\BildingWall\\WallGenerator.cs",
               "RelativeToolTip": "Assets\\Scripts\\BildingWall\\WallGenerator.cs",
-              "ViewState": "AgIAAF4AAAAAAAAAAAAAwGQAAABJAAAAAAAAAA==",
+              "ViewState": "AgIAABABAAAAAAAAAAAowCUBAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-03T17:30:46.701Z",
               "EditorCaption": ""
