@@ -2625,11 +2625,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c1630d2ce1bf6e44a3ea8c641904a08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  buttonControler: {fileID: 0}
   IDclient: 0
-  goldAmount: 50
-  woodAmount: 50
-  rockAmount: 50
+  goldAmount: 500
+  woodAmount: 500
+  rockAmount: 500
+  enemyReady: 0
   tokenManager: {fileID: 1576720665}
+  idUnitGeneratedAtServer: 0
+  tagOwner:
+  - Unit
+  - Enemy
+  uIresource: {fileID: 0}
 --- !u!4 &1576720664
 Transform:
   m_ObjectHideFlags: 0

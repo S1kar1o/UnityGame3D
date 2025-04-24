@@ -1,24 +1,14 @@
-using UnityEngine;
-using UnityEngine.AI;
 using System.Collections;
-using System;
-using UnityEngine.UI;
-using System.Threading.Tasks;
-using Unity.Mathematics;
-public class WarriorParametrs : VillagerParametrs
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ArcherParametrs : WarriorParametrs
 {
-
-    protected bool isAttack = false;
-    public GameObject targetEnemy;
-    protected float RANGE_ATTACK = 20.0f;
-    protected float realDistance;
-    protected int damage = 50;
-    [SerializeField] private float attackRange = 10f; // Радіус атаки лучника
-
     void Awake()
     {
-        maxHP = 200;
-        hp = 200; 
+        RANGE_ATTACK = 100;
+        maxHP = 150;
+        hp = 150; 
     }
     private void Update()
     {
@@ -119,41 +109,10 @@ public class WarriorParametrs : VillagerParametrs
         Vector3 directionToEnemy = (enemyPosition - transform.position).normalized;
 
         // Віднімаємо від позиції ворога вектор напрямку, помножений на радіус атаки
-        Vector3 targetPosition = enemyPosition - directionToEnemy * attackRange;
+        Vector3 targetPosition = enemyPosition - directionToEnemy * RANGE_ATTACK;
 
         agent.SetDestination(targetPosition);
 
         Debug.DrawLine(transform.position, targetPosition, Color.red); // Для візуалізації в редакторі
-    }
-    public void AttackEnemy(GameObject target)
-    {
-        targetEnemy = target;
-        updateTargetPosition();
-    }
-    public bool getDistance()
-    {
-        if (targetEnemy != null)
-        {
-            Vector3 closestPointA = targetEnemy.GetComponent<BoxCollider>().ClosestPoint(boxCollider.transform.position);
-            Vector3 closestPointB = boxCollider.ClosestPoint(targetEnemy.GetComponent<BoxCollider>().transform.position);
-
-            float distance = Vector3.Distance(closestPointA, closestPointB);
-            realDistance = distance;
-
-            return realDistance <= RANGE_ATTACK;
-        }
-        else return false;
-    }
-    public void SetAttack(bool state)
-    {
-        isAttack = state;
-    }
-    public bool IsAttack()
-    {
-        return isAttack;
-    }
-    public int GetDamage()
-    {
-        return damage;
     }
 }
