@@ -28,7 +28,7 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
     private bool isWall = false;
     private bool isWallSecondPoint = false;
 
-    public int priceWall = 1;
+    
     private int wallCount = 0;
     private bool priceValid = false;
 
@@ -38,6 +38,9 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
     public float maxAllowedSlopeAngle = 45f;
     public float maxHeightDifference = 0.5f;
+
+    private int costOfTreeWall, costOfRockWall, costOfGoldWall;
+
 
     void Update() // Оновлення кожного кадру
     {
@@ -86,7 +89,10 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
                 if (IsValidLocation(hit) || isWall) // Якщо місце валідне
                 {
-                    priceValid = UnityTcpClient.Instance.goldAmount < wallCount * priceWall;
+                    priceValid = 
+                        UnityTcpClient.Instance.goldAmount < wallCount * costOfGoldWall ||
+                        UnityTcpClient.Instance.rockAmount < wallCount * costOfRockWall ||
+                        UnityTcpClient.Instance.woodAmount < wallCount * costOfTreeWall;
                     Debug.Log("СтІНА_0");
                     if (!isFirstPointSelected) // Якщо перша точка не обрана
                     {
@@ -186,7 +192,10 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
 
 
-        bool priceValid = UnityTcpClient.Instance.goldAmount < wallCount * priceWall;
+        bool priceValid = 
+            UnityTcpClient.Instance.goldAmount < wallCount * costOfGoldWall ||
+            UnityTcpClient.Instance.rockAmount < wallCount * costOfRockWall || 
+            UnityTcpClient.Instance.woodAmount < wallCount * costOfTreeWall;
 
         if (priceValid) previewColor = invalidPlacementColor;
 
@@ -290,8 +299,10 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
                 currentPosition += direction * wallLength;
 
         }
-        UnityTcpClient.Instance.goldAmount = UnityTcpClient.Instance.goldAmount - priceWall * wallCount;
-        UnityTcpClient.Instance.uIresource.UpdateAmoundOfGold();
+        UnityTcpClient.Instance.goldAmount = UnityTcpClient.Instance.goldAmount - costOfGoldWall * wallCount;
+        UnityTcpClient.Instance.woodAmount = UnityTcpClient.Instance.woodAmount - costOfTreeWall * wallCount;
+        UnityTcpClient.Instance.rockAmount = UnityTcpClient.Instance.rockAmount - costOfRockWall * wallCount;
+        UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
 
     }
 
@@ -405,8 +416,12 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
         Debug.Log("Wall placement canceled"); // Логування
     }
 
-    public void StartPlacingWall() // Початок розміщення мосту
+    public void StartPlacingWall(int costOfTreeWall, int costOfRockWall, int costOfGoldWall) // Початок розміщення мосту
+        
     {
+        this.costOfTreeWall = costOfTreeWall;
+        this.costOfRockWall = costOfRockWall;
+        this.costOfGoldWall = costOfGoldWall;
         isPlacingWall = !isPlacingWall; // Перемкнути режим розміщення
         isFirstPointSelected = false; // Скинути вибір точки
         ClearPreview(); // Очистити прев'ю

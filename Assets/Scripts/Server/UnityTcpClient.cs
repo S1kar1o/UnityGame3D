@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Sockets;
 using System.Text;
@@ -22,7 +23,7 @@ public class UnityTcpClient : MonoBehaviour
     private bool isConnected = false;
     // Stores movement information for objects in 3D space
     public int IDclient;
-    public int goldAmount = 10, woodAmount = 5, rockAmount = 5;
+    public int goldAmount = 1000, woodAmount = 500, rockAmount = 500;
 
     public bool enemyReady = false;
     public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
@@ -232,24 +233,22 @@ public class UnityTcpClient : MonoBehaviour
                         }
                         else if (message.StartsWith("MOVE"))
                         {
-                            string[] parts = message.Split(' ');
-                            if (parts.Length == 5)
+                            string message2 = message.Replace(',', '.');
+                            string[] parts = message2.Split(' ');
+                            int unitId = int.Parse(parts[1]);
+                            List<Vector3> pathPoints = new List<Vector3>();
+                            for (int i = 2; i < parts.Length; i += 3)
                             {
-                                int unitId = int.Parse(parts[1]);
-                                Vector3 position = new Vector3(
-                                    float.Parse(parts[2]),
-                                    float.Parse(parts[3]),
-                                    float.Parse(parts[4])
-                                );
-
-                                // Знаходимо об’єкт за ID і оновлюємо його позицію
-                                GameObject unit = FindObjectByServerID(unitId);
-                                unit.GetComponent<NavMeshAgent>().SetDestination(position);
-                                Debug.Log($"Оновлено позицію юніта {unitId} до {position}");
-                                break;
-
-
+                                float x = float.Parse(parts[i], CultureInfo.InvariantCulture);
+                                float y = float.Parse(parts[i + 1], CultureInfo.InvariantCulture);
+                                float z = float.Parse(parts[i + 2], CultureInfo.InvariantCulture);
+                                pathPoints.Add(new Vector3(x, y, z));
                             }
+
+                            GameObject unit = FindObjectByServerID(unitId);
+                            StartCoroutine(MoveStepByStep(unit, pathPoints));
+
+
                         }
                         else if (message.StartsWith("ATTACK"))
                         {
@@ -302,11 +301,11 @@ public class UnityTcpClient : MonoBehaviour
                         {
                             StartCoroutine(LoadSceneAsync("SampleScene"));
                         }
-                        else if(message.StartsWith("WON") || message.StartsWith("LOSE")|| message.StartsWith("Opponent disconnected"))
+                        else if (message.StartsWith("WON") || message.StartsWith("LOSE") || message.StartsWith("Opponent disconnected"))
                         {
                             Debug.Log(102);
 
-                            buttonControler.endGamePanelIsActive=true;
+                            buttonControler.endGamePanelIsActive = true;
                             buttonControler.PanelEndGameFromServerButton();
                         }
                         else
@@ -356,6 +355,48 @@ public class UnityTcpClient : MonoBehaviour
         IDclient = id - '0';
         Debug.Log(id + ":::::::");
     }
+    IEnumerator MoveStepByStep(GameObject unit, List<Vector3> pathPoints, float threshold = 0.5f)
+    {
+        if (unit == null || !unit.activeInHierarchy)
+        {
+            Debug.LogWarning("Об'єкт не активний або не існує.");
+            yield break;
+        }
+
+        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
+        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
+        {
+            Debug.LogWarning("NavMeshAgent не готовий або не на NavMesh.");
+            yield break;
+        }
+
+        agent.ResetPath();
+
+        foreach (var target in pathPoints)
+        {
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(target, out hit, 1.0f, NavMesh.AllAreas))
+            {
+                agent.SetDestination(hit.position);
+                Debug.Log($"[MOVE] Встановлена ціль: {hit.position}");
+
+                yield return new WaitUntil(() => !agent.pathPending);
+
+                if (agent.pathStatus != NavMeshPathStatus.PathComplete)
+                {
+                    Debug.LogWarning($"[MOVE] Шлях до {hit.position} неможливий: {agent.pathStatus}");
+                    continue;
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"[MOVE] Точка {target} поза NavMesh.");
+                continue;
+            }
+        }
+            Debug.Log("Маршрут завершено.");
+    }
+
     private void ProcessSpawnMessage(string message)
     {
         string[] parts = message.Split(' ');
@@ -623,7 +664,7 @@ public class UnityTcpClient : MonoBehaviour
             string buildXEnd = parts[5];
             string buildYEnd = parts[6];
             string buildZEnd = parts[7];
-            Debug.Log(buildXStr + " "+ buildYStr + " "+ buildZStr + " "+ buildXEnd + " " + buildYEnd + " " + buildZEnd);
+            Debug.Log(buildXStr + " " + buildYStr + " " + buildZStr + " " + buildXEnd + " " + buildYEnd + " " + buildZEnd);
             buildXStr = buildXStr.Replace(',', '.');
             buildYStr = buildYStr.Replace(',', '.');
             buildZStr = buildZStr.Replace(',', '.');
@@ -669,7 +710,7 @@ public class UnityTcpClient : MonoBehaviour
                 float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
                 float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
             {
-                LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr); 
+                LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr);
             }
             else
             {
@@ -682,11 +723,11 @@ public class UnityTcpClient : MonoBehaviour
         }
     }
 
-    private void LoadAndInstantiateBuilding(string prefabName,string idStr, string buildXStr, string buildYStr, string buildZStr, string rotXStr, string rotYStr, string rotZStr)
+    private void LoadAndInstantiateBuilding(string prefabName, string idStr, string buildXStr, string buildYStr, string buildZStr, string rotXStr, string rotYStr, string rotZStr)
     {
         // Парсинг рядків у числа
         if (float.TryParse(buildXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildX) &&
-            int.TryParse(idStr, NumberStyles.Integer, CultureInfo.InvariantCulture,out int id)&&
+            int.TryParse(idStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int id) &&
             float.TryParse(buildYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildY) &&
             float.TryParse(buildZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildZ) &&
             float.TryParse(rotXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotX) &&
@@ -702,6 +743,10 @@ public class UnityTcpClient : MonoBehaviour
                 newBuilding.tag = "Enemy";
                 ServerId serverId = newBuilding.GetComponent<ServerId>();
                 serverId.serverId = id;
+                TowerAttack ta = newBuilding.GetComponent<TowerAttack>();
+                ta.enabled = true;
+
+
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");
             }
             else

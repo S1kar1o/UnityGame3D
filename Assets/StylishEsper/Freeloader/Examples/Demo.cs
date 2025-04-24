@@ -194,7 +194,6 @@ public class LoadingSceneController : MonoBehaviour
     {
         tcpClient = UnityTcpClient.Instance;
     }
-
     private IEnumerator LoadSceneAsync()
     {
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneToLoad);
@@ -203,15 +202,26 @@ public class LoadingSceneController : MonoBehaviour
         while (!asyncLoad.isDone)
         {
             UpdateProgress(asyncLoad);
-            yield return null;
 
-            if (ShouldActivateScene(asyncLoad))
+            // Чекай, поки Unity реально завантажить все до 0.9
+            if (asyncLoad.progress >= 0.9f && !readyMessageSent)
+            {
+                tcpClient.SendMessage("LOADED");
+                readyMessageSent = true;
+                Debug.Log("Повідомлення LOADED на 90%, чекаємо підтвердження");
+            }
+
+            // Чекаємо, поки інший клієнт теж буде готовий
+            if (readyMessageSent && tcpClient.enemyReady && asyncLoad.progress >= 0.9f)
             {
                 yield return FinalizeSceneActivation(asyncLoad);
                 yield break;
             }
+
+            yield return null;
         }
     }
+
 
     private void UpdateProgress(AsyncOperation asyncLoad)
     {
@@ -252,14 +262,12 @@ public class LoadingSceneController : MonoBehaviour
 
         return minTimePassed && progressComplete && networkReady;
     }
-
     private IEnumerator FinalizeSceneActivation(AsyncOperation asyncLoad)
     {
         UpdateProgressUI(1f);
-        yield return new WaitForSeconds(activationDelay);
-
         asyncLoad.allowSceneActivation = true;
-        Debug.Log("Активація сцени: всі умови виконані");
+        Debug.Log("Активація сцени — обидва гравці готові");
+        yield return null;
     }
 
     private void UpdateProgressUI(float progress)

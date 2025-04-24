@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using static System.Net.WebRequestMethods;
 using System;
 using System.Threading.Tasks;
+using System.Text;
 
 public class MovingObjects : MonoBehaviour
 {
@@ -137,7 +138,7 @@ public class MovingObjects : MonoBehaviour
 
                         }
                     }
-                    else if (hit.collider.CompareTag("Enemy"))
+                    else if (hit.collider.CompareTag(UnityTcpClient.Instance.tagOwner[1 - UnityTcpClient.Instance.IDclient]))
                     {
                         GameObject enemy = hit.collider.gameObject;
                         if (enemy != null)
@@ -238,28 +239,25 @@ public class MovingObjects : MonoBehaviour
     }
     public async Task SendMoveMessage(GameObject unit, Vector3 destination)
     {
-        if (utp == null)
-        {
-            Debug.LogError("UnityTcpClient не ініціалізований!");
-            return;
-        }
+        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
+        agent.SetDestination(destination);
 
-        // Створення повідомлення про рух
-        ServerId si= unit.GetComponent<ServerId>();
+        // Почекай трохи, щоб шлях розрахувався (або використовуй колбек NavMesh)
+        await Task.Delay(50);
+
+        Vector3[] corners = agent.path.corners;
+        ServerId si = unit.GetComponent<ServerId>();
         int unitId = si.serverId;
-        string message = $"MOVE {unitId} {destination.x} {destination.y} {destination.z}";
-        Debug.Log($"Надсилаю повідомлення про рух: {message}");
 
-        try
+        StringBuilder sb = new StringBuilder();
+        sb.Append($"MOVE {unitId}");
+        foreach (var point in corners)
         {
-            // Асинхронна відправка повідомлення на сервер
-            await utp.SendMessage(message);
-            Debug.Log($"Повідомлення про рух успішно відправлено: unitId={unitId}, destination={destination}");
+            sb.AppendFormat(" {0:0.00} {1:0.00} {2:0.00}", point.x, point.y, point.z);
         }
-        catch (Exception e)
-        {
-            Debug.LogError($"Помилка при відправці повідомлення про рух: {e.Message}");
-        }
+
+        string message = sb.ToString();
+        await utp.SendMessage(message);
     }
     bool ColisionBuildings()
     {
