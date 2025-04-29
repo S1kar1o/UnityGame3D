@@ -22,7 +22,7 @@ public class CameraMoving : MonoBehaviour
     {
         if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
 
-        isLocked = checkEnemy();
+        isLocked = false;
 
         if (!isLocked)
         {

@@ -13,7 +13,7 @@ public class WarriorParametrs : VillagerParametrs
     protected float RANGE_ATTACK = 20.0f;
     protected float realDistance;
     protected int damage = 50;
-    [SerializeField] private float attackRange = 10f; // Радіус атаки лучника
+    [SerializeField] protected float attackRange = 10f; // Радіус атаки лучника
 
     void Awake()
     {
