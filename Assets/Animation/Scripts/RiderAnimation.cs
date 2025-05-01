@@ -34,7 +34,7 @@ public class RiderAnimator : MonoBehaviour
             // Переконуємось, що анімація атаки IsAttack уже запущена
             if (stateInfo.IsName("Base Layer.IsAttack"))
             {
-               
+
                 if (stateInfo.normalizedTime >= 0.5f && Time.time >= nextActionTime)
                 {
                     nextActionTime = Time.time + interval;
@@ -43,7 +43,7 @@ public class RiderAnimator : MonoBehaviour
                     {
                         VillagerParametrs target = riderParametrs.targetEnemy.GetComponent<VillagerParametrs>();
                         target.getDamage(50);
-
+                        Debug.Log(120);
                         if (target.GetHp() <= 0)
                         {
                             riderParametrs.targetEnemy = null;

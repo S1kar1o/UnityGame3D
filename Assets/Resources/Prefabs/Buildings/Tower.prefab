@@ -502,9 +502,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowPref: {fileID: 49179064026371086, guid: 0384832b71d8d144aa6384cafd660bfa, type: 3}
-  attackTags:
-  - Enemy
-  - Unit
   target: {fileID: 0}
   attackRange: 200
   attackCooldown: 3

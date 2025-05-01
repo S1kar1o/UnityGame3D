@@ -378,7 +378,7 @@ PrefabInstance:
     - target: {fileID: -3910990755373119420, guid: a5a009ecfe5642e45be4275557740fa2,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 5.8
       objectReference: {fileID: 0}
     - target: {fileID: -3910990755373119420, guid: a5a009ecfe5642e45be4275557740fa2,
         type: 3}
@@ -548,7 +548,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefabUnit:
-  - {fileID: 6018281669264991452, guid: 1cd7182f26d62454394808b4d17f701d, type: 3}
+  - {fileID: 1874863815990878275, guid: 2d87e1226fc6f6c4b9d6a7ec2158a496, type: 3}
   - {fileID: 524242966294373640, guid: 936ec1d759ff537458c74e93c5468a70, type: 3}
   indexUnit: 0
   tcpClient: {fileID: 0}

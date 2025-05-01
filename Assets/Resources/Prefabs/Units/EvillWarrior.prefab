@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8905598700289623828}
   - component: {fileID: 2710760998527967134}
   m_Layer: 0
-  m_Name: WaterControler
+  m_Name: ColliderForWater
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 149955954262608190}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.7600007, z: 0}
+  m_LocalPosition: {x: 0, y: 3.91, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -612,6 +612,7 @@ MonoBehaviour:
   utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
+  attackRange: 20
 --- !u!114 &-972495928537673912
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -746,7 +746,7 @@ MonoBehaviour:
   hpBarBackground: {fileID: 8580459822577650596}
   hpBarForeground: {fileID: 9082383616071436606}
   boxCollider: {fileID: 5650575472459051738}
-  colliderForActionsWithWater: {fileID: 0}
+  colliderForActionsWithWater: {fileID: 7511933541874698539}
   displaycmentAmount: 6
   buoyancyPoint: {fileID: 0}
   Axe: {fileID: 0}
@@ -755,6 +755,7 @@ MonoBehaviour:
   utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
+  attackRange: 20
 --- !u!65 &5650575472459051738
 BoxCollider:
   m_ObjectHideFlags: 0

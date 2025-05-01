@@ -879,11 +879,12 @@ MonoBehaviour:
   hpBarBackground: {fileID: 453200594249305173}
   hpBarForeground: {fileID: 6477984146621369575}
   boxCollider: {fileID: 5391608888426749419}
-  colliderForActionsWithWater: {fileID: 0}
+  colliderForActionsWithWater: {fileID: 7655824579007566369}
   displaycmentAmount: 2
   buoyancyPoint: {fileID: 141431309543035459}
   Axe: {fileID: 5832665644452845541}
   Pickaxe: {fileID: 5640421330491535255}
+  animationOfDeathEnded: 0
   utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
 --- !u!195 &8467033966034923416

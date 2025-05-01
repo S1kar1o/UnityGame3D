@@ -75,6 +75,59 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!1 &2142559000923131686
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3121000685215408220}
+  - component: {fileID: 1135819935748976089}
+  m_Layer: 0
+  m_Name: ColliderForWater
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3121000685215408220
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142559000923131686}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.405, z: 0}
+  m_LocalScale: {x: 0.40604, y: 0.40604, z: 0.40604}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4708741841517823280}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1135819935748976089
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142559000923131686}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2477298569559679334
 GameObject:
   m_ObjectHideFlags: 0
@@ -1765,6 +1818,10 @@ PrefabInstance:
         type: 3}
       insertIndex: 1
       addedObject: {fileID: 2902171463249485845}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: a3447652b7340a54f8352cc2c29bc43d,
+        type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 3121000685215408220}
     - targetCorrespondingSourceObject: {fileID: -2340486579253294872, guid: a3447652b7340a54f8352cc2c29bc43d,
         type: 3}
       insertIndex: -1
@@ -1854,8 +1911,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.45266283, y: 0.7822222, z: 0.26200384}
-  m_Center: {x: -0.015245074, y: 1.2488595, z: -0.02689516}
+  m_Size: {x: 0.4759236, y: 1.8761649, z: 0.26200384}
+  m_Center: {x: -0.02687546, y: 0.70188934, z: -0.026895156}
 --- !u!114 &2632870011462350141
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1901,11 +1958,12 @@ MonoBehaviour:
   hpBarBackground: {fileID: 2475113847721279171}
   hpBarForeground: {fileID: 3807677480351170303}
   boxCollider: {fileID: 3615112850166634072}
-  colliderForActionsWithWater: {fileID: 0}
+  colliderForActionsWithWater: {fileID: 1135819935748976089}
   displaycmentAmount: 6
   buoyancyPoint: {fileID: 0}
   Axe: {fileID: 5824464539726793166}
   Pickaxe: {fileID: 8869850471179575272}
+  animationOfDeathEnded: 0
   utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &365022418978493464

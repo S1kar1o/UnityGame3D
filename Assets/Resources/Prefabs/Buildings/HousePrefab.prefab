@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 423805818950842747}
   - component: {fileID: 39489797721344482}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Obstracle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -226,7 +226,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7267859146778686759}
   m_LocalRotation: {x: 0.000000081460335, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 40.042007}
+  m_LocalPosition: {x: 0, y: 0, z: -2.95}
   m_LocalScale: {x: 0.088, y: 0.088, z: 0.18398}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -236,7 +236,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 57.427994, y: 43.90242}
+  m_AnchoredPosition: {x: 0, y: 22.8}
   m_SizeDelta: {x: 100, y: 11.0279}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6270264620612885433
@@ -400,11 +400,11 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 33dfec4fde3ae7741abafc57d420b33f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5561009680784023139}
+      addedObject: {fileID: 423805818950842747}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 33dfec4fde3ae7741abafc57d420b33f,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 423805818950842747}
+      addedObject: {fileID: 5561009680784023139}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 33dfec4fde3ae7741abafc57d420b33f,
         type: 3}
@@ -456,6 +456,9 @@ MonoBehaviour:
   smoothIterations: 4
   maxHeightDifference: 0.1
   rotationSpeed: 90
+  costOfTree: 0
+  costOfRock: 0
+  costOfGold: 0
 --- !u!65 &4439552071394977945
 BoxCollider:
   m_ObjectHideFlags: 0

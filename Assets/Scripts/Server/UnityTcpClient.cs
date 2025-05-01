@@ -708,7 +708,6 @@ public class UnityTcpClient : MonoBehaviour
                 float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
                 float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
             {
-                Debug.Log(120);
                 LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr);
             }
             else
@@ -733,21 +732,20 @@ public class UnityTcpClient : MonoBehaviour
             float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
             float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
         {
-            Debug.Log(121);
             GameObject buildingPrefab = Resources.Load<GameObject>("Prefabs/Buildings/" + prefabName);
             if (buildingPrefab != null)
             {
                 Vector3 buildPosition = new Vector3(buildX, buildY, buildZ);
                 Quaternion buildRotation = Quaternion.Euler(rotX, rotY, rotZ);
                 GameObject newBuilding = Instantiate(buildingPrefab, buildPosition, buildRotation);
-                newBuilding.tag = "Enemy";
+                newBuilding.tag = UnityTcpClient.Instance.tagOwner[1-UnityTcpClient.Instance.IDclient];
                 ServerId serverId = newBuilding.GetComponent<ServerId>();
                 serverId.serverId = id;
                 TowerAttack ta = newBuilding.GetComponent<TowerAttack>();
                 if( ta != null )
                      ta.enabled = true;
-
-
+                GameObject obstracle = newBuilding.transform.GetChild(0).gameObject;
+                obstracle.SetActive(true);
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");
             }
             else
@@ -790,8 +788,8 @@ public class UnityTcpClient : MonoBehaviour
 
     public void ReloadRscClient()
     {
-        goldAmount = 0;
-        woodAmount = 0;
-        rockAmount = 0;
+        goldAmount = 500;
+        woodAmount = 500;
+        rockAmount = 500;
     }
 }

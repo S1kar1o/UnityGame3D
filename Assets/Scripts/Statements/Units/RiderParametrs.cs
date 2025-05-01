@@ -7,8 +7,9 @@ public class RiderParametrs : WarriorParametrs
     void Awake()
     {
         RANGE_ATTACK = 40;
+        attackRange = 40;
         maxHP = 400;
-        hp = 400; // Ініціалізація при створенні об'єкта
+        hp = 400;
     }
     private void Update()
     {
