@@ -716,7 +716,7 @@ MonoBehaviour:
   utp: {fileID: 0}
   targetPosition: {x: 0, y: 0, z: 0}
   targetEnemy: {fileID: 0}
-  attackRange: 100
+  attackRange: 300
 --- !u!114 &2720238934422388250
 MonoBehaviour:
   m_ObjectHideFlags: 0

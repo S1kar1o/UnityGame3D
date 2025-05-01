@@ -117,10 +117,19 @@ public class WarriorParametrs : VillagerParametrs
 
         Vector3 enemyPosition = targetEnemy.transform.position;
         Vector3 directionToEnemy = (enemyPosition - transform.position).normalized;
+        float distanceToEnemy = Vector3.Distance(transform.position, enemyPosition);
 
-        // Віднімаємо від позиції ворога вектор напрямку, помножений на радіус атаки
-        Vector3 targetPosition = enemyPosition - directionToEnemy * attackRange;
+        // Якщо вже в радіусі атаки - зупиняємося і атакуємо
+        if (distanceToEnemy <= RANGE_ATTACK)
+        {
+            agent.ResetPath(); // Зупиняємо рух
+                               // Тут можна додати виклик методу атаки, наприклад:
+                               // Attack();
+            return;
+        }
 
+        // Якщо не в радіусі атаки - рухаємось до цільової позиції
+        Vector3 targetPosition = enemyPosition - directionToEnemy * RANGE_ATTACK;
         agent.SetDestination(targetPosition);
 
         Debug.DrawLine(transform.position, targetPosition, Color.red); // Для візуалізації в редакторі

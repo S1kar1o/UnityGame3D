@@ -6,7 +6,7 @@ public class ArcherParametrs : WarriorParametrs
 {
     void Awake()
     {
-        RANGE_ATTACK = 100;
+        RANGE_ATTACK = 300;
         maxHP = 150;
         hp = 150; 
     }
@@ -101,18 +101,5 @@ public class ArcherParametrs : WarriorParametrs
             agent.isStopped = false;
         }
     }
-    protected void updateTargetPosition()
-    {
-        if (targetEnemy == null) return;
-
-        Vector3 enemyPosition = targetEnemy.transform.position;
-        Vector3 directionToEnemy = (enemyPosition - transform.position).normalized;
-
-        // Віднімаємо від позиції ворога вектор напрямку, помножений на радіус атаки
-        Vector3 targetPosition = enemyPosition - directionToEnemy * RANGE_ATTACK;
-
-        agent.SetDestination(targetPosition);
-
-        Debug.DrawLine(transform.position, targetPosition, Color.red); // Для візуалізації в редакторі
-    }
+  
 }
