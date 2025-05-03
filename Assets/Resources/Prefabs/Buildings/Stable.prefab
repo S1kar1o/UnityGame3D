@@ -552,6 +552,12 @@ MonoBehaviour:
   - {fileID: 524242966294373640, guid: 936ec1d759ff537458c74e93c5468a70, type: 3}
   indexUnit: 0
   tcpClient: {fileID: 0}
+  priceOfGold: 50
+  priceOfWood: 30
+  priceOfRock: 20
+  textCostOfTree: {fileID: 0}
+  textCostOfRock: {fileID: 0}
+  textCostOfGold: {fileID: 0}
 --- !u!114 &6738039855976805045
 MonoBehaviour:
   m_ObjectHideFlags: 0
