@@ -50,6 +50,7 @@ public class WarriorParametrs : VillagerParametrs
                 isDrow = true;
             }
             agent.isStopped = true;
+            UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
 
         }
         else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))

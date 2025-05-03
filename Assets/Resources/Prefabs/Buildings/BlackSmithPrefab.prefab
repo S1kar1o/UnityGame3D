@@ -266,7 +266,7 @@ Transform:
   m_GameObject: {fileID: 3869341665367780409}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0, y: 0.00315, z: 0}
+  m_LocalPosition: {x: 0, y: 0.00264, z: -0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -284,7 +284,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 0.075, y: 0.05, z: 0.09}
   m_MoveThreshold: 0.1
-  m_Carve: 0
+  m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
@@ -727,6 +727,9 @@ MonoBehaviour:
   smoothIterations: 2
   maxHeightDifference: 0.1
   rotationSpeed: 90
+  costOfTree: 0
+  costOfRock: 0
+  costOfGold: 0
 --- !u!65 &-3292502988666772052
 BoxCollider:
   m_ObjectHideFlags: 0

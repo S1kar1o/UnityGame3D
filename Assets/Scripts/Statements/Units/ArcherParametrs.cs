@@ -30,7 +30,6 @@ public class ArcherParametrs : WarriorParametrs
             if (!inWater)
             {
                 isAttack = false;
-
                 isDie = true;
                 isRunning = false;
                 isStanding = false;
@@ -40,6 +39,7 @@ public class ArcherParametrs : WarriorParametrs
                 isDrow = true;
             }
             agent.isStopped = true;
+            UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
 
         }
         else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
