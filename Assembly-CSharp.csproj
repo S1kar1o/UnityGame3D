@@ -95,6 +95,7 @@
     <Compile Include="Assets\Scripts\Statements\Units\HpBarFocuse\HpBarRotation.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\CreateBrige.cs" />
     <Compile Include="Assets\Animation\Scripts\VillagerAnimation.cs" />
+    <Compile Include="Assets\Audio\MainAudio.cs" />
     <Compile Include="Assets\Scripts\BildingBrige\BridgePlacer.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
