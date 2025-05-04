@@ -1,11 +1,12 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class ButtonControler : MonoBehaviour
 {
-    public GameObject PanelResearch, PanelEndGame, PanelBuilding,PanelOfFunction;
+    public GameObject PanelResearch, PanelEndGame, PanelBuilding, PanelOfFunction, RecrutePanel;
     public Button ResearchButton, ButtonEndGame, ButtonBuildingMenu;
     public TMP_Text txt;
     public bool researchPanelActive = false, endGamePanelIsActive = false, buildingMenuIsActive=false;
@@ -13,7 +14,9 @@ public class ButtonControler : MonoBehaviour
     private UnityTcpClient utp;
 
 
-
+    public float liftAmount = 20f;
+    private bool isFlipped = false;
+    private Coroutine currentAnim;
     public RectTransform panel;       // Твоя панель
     public float animationTime = 0.5f; // Швидкість анімації
     public Vector2 hiddenPos;         // Куди з'їжджає (зазвичай нижче)
@@ -45,11 +48,12 @@ public class ButtonControler : MonoBehaviour
         PanelBuilding.SetActive(buildingMenuIsActive);
 
     }
-    public float liftAmount = 20f;
+    public void ActivatePanelRecruiting()
+    {
+        RecrutePanel.SetActive(!hirePanel);
+        hirePanel = !hirePanel;
 
-    private bool isFlipped = false;
-    private Coroutine currentAnim;
-
+    }
     public void AnimateButton()
     {
         if (currentAnim != null)
@@ -116,11 +120,8 @@ public class ButtonControler : MonoBehaviour
     public void PanelEndGameButton()
     {
         PanelEndGame.SetActive(endGamePanelIsActive);
-        if (endGamePanelIsActive)
-            utp.SendMessage("WON");
-
     }
-    public void PanelEndGameFromServerButton()
+    public void PanelEndGameLoseFromServerButton()
     {
         txt.text = "You lose -25";
         PanelEndGame.SetActive(endGamePanelIsActive);
@@ -128,8 +129,6 @@ public class ButtonControler : MonoBehaviour
     }
     public void EndGameButton()
     {
-        utp.SendMessage("WON");
-
         utp.enemyReady = false;
         utp.ReloadRscClient();
         SceneManager.LoadScene("SampleScene");

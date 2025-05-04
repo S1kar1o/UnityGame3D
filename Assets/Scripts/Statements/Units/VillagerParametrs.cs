@@ -153,6 +153,7 @@ public class VillagerParametrs : MonoBehaviour
                 {
                     isDrow = true;
                 }
+                UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
                 agent.isStopped = true;
 
             }

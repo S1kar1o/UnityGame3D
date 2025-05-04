@@ -26,9 +26,11 @@ public class MovingObjects : MonoBehaviour
     private ButtonControler buttonControler;
     public GameObject spawnBuilding;
     public List<GameObject> selectedUnits = new List<GameObject>(); // Список вибраних юнітів
-    private float holdTime=0.0f; // Час утримання кнопки
+    private float holdTime = 0.0f; // Час утримання кнопки
     public float holdThreshold = 0.5f; // Час (у секундах), після якого вважаємо, що кнопку утримують
 
+
+    public TextMeshProUGUI costTree, costGold, costRock;
     void Start()
     {
         GameObject obj = GameObject.Find("UnityTcpClient");
@@ -110,7 +112,7 @@ public class MovingObjects : MonoBehaviour
                             {
                                 extractor.IsRunningToResource(true);
                                 extractor.MoveToResource(resource); // Рух до ресурсу
-                                SendExtractMessage(obj,resource);
+                                SendExtractMessage(obj, resource);
                             }
                         }
                     }
@@ -149,7 +151,7 @@ public class MovingObjects : MonoBehaviour
                                 if (warrior != null)
                                 {
                                     warrior.AttackEnemy(enemy);
-                                    SendAttackMessage(obj,enemy, warrior.GetDamage());
+                                    SendAttackMessage(obj, enemy, warrior.GetDamage());
                                 }
                             }
                         }
@@ -268,12 +270,29 @@ public class MovingObjects : MonoBehaviour
             if (hit.collider.CompareTag("Building"))
             {
                 GameObject building = hit.collider.gameObject;
-                spawnBuilding = building;
-                SpawnUnits buildingStatement=building.GetComponent<SpawnUnits>();
-                if (building.GetComponent<Building>() == null)
+                if (building.GetComponent<Building>() == null&& spawnBuilding == building)
                 {
-                    ActivatePanelRecruiting();
+                    Debug.Log(spawnBuilding);
+                    {
+                        spawnBuilding = null;
+                        ActivatePanelRecruiting();
+                    }
                 }
+                else if(building.GetComponent<Building>() == null)
+                {
+                    spawnBuilding = building;
+                    SpawnUnits buildingStatement = building.GetComponent<SpawnUnits>();
+
+                    buildingStatement.textCostOfGold = costGold;
+                    buildingStatement.textCostOfRock = costRock;
+                    buildingStatement.textCostOfTree = costTree;
+                    buildingStatement.startCorutineUpdatePrice();
+                    if (building.GetComponent<Building>() == null)
+                    {
+                        ActivatePanelRecruiting();
+                    }
+                }
+
                 return true;
 
             }

@@ -41,6 +41,7 @@ public class RiderParametrs : WarriorParametrs
                 isDrow = true;
             }
             agent.isStopped = true;
+            UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
 
         }
         else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))

@@ -11,20 +11,22 @@ public class CameraMoving : MonoBehaviour
     private UnityTcpClient utp;
 
     private bool waitingStarted = false; // Флаг, щоб уникнути багаторазового запуску корутини
-
-    //private void Start()
-    //{
-    //    utp = UnityTcpClient.Instance;
-    //    StartCoroutine(WaitingForSpawn()); // Запускаємо затримку лише раз
-    //}
-
-    private void Update()/*if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
-
-        isLocked = false;
-
-        if (!isLocked)*/
+    public bool waiting = false;
+    private void Start()
     {
-        
+        utp = UnityTcpClient.Instance;
+        utp.cameraMoving = this;
+        StartCoroutine(WaitingForSpawn()); // Запускаємо затримку лише раз
+    }
+
+    private void Update()
+    {
+        if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
+        if (!waiting)
+            isLocked = false;
+        else
+            isLocked = true;
+        if (!isLocked)
         {
             float rotate = 0.0f;
 
@@ -57,7 +59,7 @@ public class CameraMoving : MonoBehaviour
         }
     }
 
-   /* private IEnumerator WaitingForSpawn()
+    private IEnumerator WaitingForSpawn()
     {
         yield return new WaitForSeconds(2f);
         waitingStarted = true; // Вмикаємо логіку лише після 2 секунд
@@ -69,7 +71,7 @@ public class CameraMoving : MonoBehaviour
         {
             if (enemys.Count <= 0)
             {
-                Debug.Log(101);
+                utp.SendMessage("WON");
                 utp.buttonControler.endGamePanelIsActive = true;
                 utp.buttonControler.PanelEndGameButton();
                 return true;
@@ -78,6 +80,6 @@ public class CameraMoving : MonoBehaviour
             utp.buttonControler.PanelEndGameButton();
             return false;
         }
-        return true;}*/
-    
+        return true;
+    }
 }

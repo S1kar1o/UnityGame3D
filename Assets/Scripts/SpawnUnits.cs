@@ -1,83 +1,135 @@
-using UnityEngine;
+п»їusing UnityEngine;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System;
+using TMPro;
+using System.Collections;
 
 public class SpawnUnits : MonoBehaviour
 {
     [SerializeField] private GameObject[] prefabUnit;
     [SerializeField] private int indexUnit = 0;
     [SerializeField] private UnityTcpClient tcpClient;
-
+    public int priceOfGold, priceOfWood, priceOfRock;
+    public TextMeshProUGUI textCostOfTree, textCostOfRock, textCostOfGold;
+    private Coroutine resourceCheckCoroutine;
+    private MovingObjects movingObjects;
     void Start()
     {
-
         GameObject ut = GameObject.Find("UnityTcpClient");
         tcpClient = ut.GetComponent<UnityTcpClient>();
-
+        movingObjects = FindObjectOfType<MovingObjects>();
         indexUnit = tcpClient.IDclient;
     }
 
-    public async void SpawnUnit()
+    private void OnDisable()
     {
-        try
+        if (resourceCheckCoroutine != null)
+            StopCoroutine(resourceCheckCoroutine);
+    }
+    public void startCorutineUpdatePrice()
+    {
+        textCostOfGold.text = priceOfGold.ToString();
+        textCostOfTree.text = priceOfWood.ToString();
+        textCostOfRock.text = priceOfRock.ToString();
+        if (resourceCheckCoroutine == null)
+            resourceCheckCoroutine = StartCoroutine(UpdateResourceColorsRoutine());
+    }
+    private IEnumerator UpdateResourceColorsRoutine()
+    {
+        while (true)
         {
-            string name = prefabUnit[indexUnit].name.Replace("(Clone)", "").Trim();
-
-            Vector3 position = new Vector3(
-                transform.GetChild(1).position.x + UnityEngine.Random.Range(1f, 5f),
-                transform.GetChild(1).position.y,
-                transform.GetChild(1).position.z + UnityEngine.Random.Range(3f, 10f)
-            );
-
-            float rotateY = prefabUnit[indexUnit].transform.rotation.y + UnityEngine.Random.Range(0f, 360f);
-            string requestIdMessage = "ID_GENERATED";
-
-            // Відправляємо запит на ID і чекаємо відповіді
-            bool sendRequestResult = await SpawnUnitOnServer(requestIdMessage);
-
-            if (!sendRequestResult)
+            if (gameObject == movingObjects.spawnBuilding && movingObjects.spawnBuilding != null)
             {
-                Debug.LogError("Failed to notify server, Unit will NOT be spawned.");
-                return;
+                UpdateResourceColors();
+                yield return new WaitForSeconds(0.3f);
             }
-
-            // Чекаємо отримання ID від сервера
-            bool idReceived = await WaitForIDAsync();
-
-            if (!idReceived)
+            else
             {
-                Debug.LogError("Failed to receive ID from server.");
-                return;
-            }
-
-            // Відправляємо данні для спавну
-            string spawnMessage = $"SPAWN {tcpClient.idUnitGeneratedAtServer} {name} {position.x} {position.y} {position.z} {0} {rotateY} {0}\n";
-            bool sendResult = await SpawnUnitOnServer(spawnMessage);
-
-            if (sendResult)
-            {
-                // Створюємо юніта
-                GameObject spawnedUnit = Instantiate(
-                    prefabUnit[indexUnit],
-                    position,
-                    Quaternion.Euler(0, rotateY, 0)
-                );
-
-                ServerId sr = spawnedUnit.GetComponent<ServerId>();
-                sr.serverId = tcpClient.idUnitGeneratedAtServer;
-                tcpClient.idUnitGeneratedAtServer = 0;
+                resourceCheckCoroutine = null;
+                yield break; 
             }
         }
-        catch (System.Exception ex)
+    }
+
+    private void UpdateResourceColors()
+    {
+        UpdateTextColor(textCostOfGold, UnityTcpClient.Instance.goldAmount, priceOfGold);
+        UpdateTextColor(textCostOfRock, UnityTcpClient.Instance.rockAmount, priceOfRock);
+        UpdateTextColor(textCostOfTree, UnityTcpClient.Instance.woodAmount, priceOfWood);
+    }
+
+    private void UpdateTextColor(TMP_Text text, int currentAmount, int cost)
+    {
+        text.color = currentAmount >= cost ? Color.green : Color.red;
+    }
+    public async void SpawnUnit()
+    {
+        if (UnityTcpClient.Instance.goldAmount >= priceOfGold && UnityTcpClient.Instance.woodAmount >= priceOfWood && UnityTcpClient.Instance.rockAmount >= priceOfRock)
         {
-            Debug.LogError($"Error in SpawnUnit: {ex.Message}");
+            try
+            {
+                UnityTcpClient.Instance.goldAmount -= priceOfGold;
+                UnityTcpClient.Instance.woodAmount -= priceOfWood;
+                UnityTcpClient.Instance.rockAmount -= priceOfRock;
+
+                string name = prefabUnit[indexUnit].name.Replace("(Clone)", "").Trim();
+
+                Vector3 position = new Vector3(
+                    transform.GetChild(1).position.x + UnityEngine.Random.Range(1f, 5f),
+                    transform.GetChild(1).position.y,
+                    transform.GetChild(1).position.z + UnityEngine.Random.Range(3f, 10f)
+                );
+
+                float rotateY = prefabUnit[indexUnit].transform.rotation.y + UnityEngine.Random.Range(0f, 360f);
+                string requestIdMessage = "ID_GENERATED";
+
+                // Р’С–РґРїСЂР°РІР»СЏС”РјРѕ Р·Р°РїРёС‚ РЅР° ID С– С‡РµРєР°С”РјРѕ РІС–РґРїРѕРІС–РґС–
+                bool sendRequestResult = await SpawnUnitOnServer(requestIdMessage);
+
+                if (!sendRequestResult)
+                {
+                    Debug.LogError("Failed to notify server, Unit will NOT be spawned.");
+                    return;
+                }
+
+                // Р§РµРєР°С”РјРѕ РѕС‚СЂРёРјР°РЅРЅСЏ ID РІС–Рґ СЃРµСЂРІРµСЂР°
+                bool idReceived = await WaitForIDAsync();
+
+                if (!idReceived)
+                {
+                    Debug.LogError("Failed to receive ID from server.");
+                    return;
+                }
+
+                // Р’С–РґРїСЂР°РІР»СЏС”РјРѕ РґР°РЅРЅС– РґР»СЏ СЃРїР°РІРЅСѓ
+                string spawnMessage = $"SPAWN {tcpClient.idUnitGeneratedAtServer} {name} {position.x} {position.y} {position.z} {0} {rotateY} {0}\n";
+                bool sendResult = await SpawnUnitOnServer(spawnMessage);
+
+                if (sendResult)
+                {
+                    // РЎС‚РІРѕСЂСЋС”РјРѕ СЋРЅС–С‚Р°
+                    GameObject spawnedUnit = Instantiate(
+                        prefabUnit[indexUnit],
+                        position,
+                        Quaternion.Euler(0, rotateY, 0)
+                    );
+
+                    ServerId sr = spawnedUnit.GetComponent<ServerId>();
+                    sr.serverId = tcpClient.idUnitGeneratedAtServer;
+                    tcpClient.idUnitGeneratedAtServer = 0;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"Error in SpawnUnit: {ex.Message}");
+            }
         }
     }
 
     private async Task<bool> WaitForIDAsync()
     {
-        float timeout = 5f; // Таймаут 5 секунд
+        float timeout = 5f; // РўР°Р№РјР°СѓС‚ 5 СЃРµРєСѓРЅРґ
         float startTime = Time.time;
 
         while (tcpClient.idUnitGeneratedAtServer == 0)
@@ -88,7 +140,7 @@ public class SpawnUnits : MonoBehaviour
                 return false;
             }
 
-            await Task.Yield(); // Аналог yield return null для async/await
+            await Task.Yield(); // РђРЅР°Р»РѕРі yield return null РґР»СЏ async/await
         }
 
         return true;

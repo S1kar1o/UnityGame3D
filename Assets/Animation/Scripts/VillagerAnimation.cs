@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class VillagerAnimation : MonoBehaviour
@@ -15,7 +16,7 @@ public class VillagerAnimation : MonoBehaviour
 
     [SerializeField] private VillagerParametrs villagerParametrs;
 
-    private bool deathHandled = false;
+    protected bool deathHandled = false;
 
     private void Awake()
     {
@@ -41,48 +42,79 @@ public class VillagerAnimation : MonoBehaviour
 
     private IEnumerator HandleDeath()
     {
-        // Чекаємо завершення анімації
-        AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-        yield return new WaitWhile(() => state.IsName("Die") == false || state.normalizedTime < 1.0f);
+        // Чекаємо завершення анімації "Die"
+        while (true)
+        {
+            AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
+            if (state.IsName("Die") && state.normalizedTime >= 1.0f)
+                break;
 
-        // Чекаємо 5 секунд
+            yield return null;
+        }
+
+        // Затримка після смерті
         yield return new WaitForSeconds(5f);
 
-        // Починаємо зникнення (fade out)
-        float duration = 2f; // тривалість зникнення
-        float elapsed = 0f;
-
+        // Збираємо всі матеріали рендерерів
         Renderer[] renderers = GetComponentsInChildren<Renderer>();
-        Material[] materials = new Material[renderers.Length];
+        List<Material> materials = new List<Material>();
 
-        for (int i = 0; i < renderers.Length; i++)
+        foreach (Renderer r in renderers)
         {
-            materials[i] = renderers[i].material;
-            materials[i].SetFloat("_Mode", 2); // Fade mode
-            materials[i].SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            materials[i].SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            materials[i].SetInt("_ZWrite", 0);
-            materials[i].DisableKeyword("_ALPHATEST_ON");
-            materials[i].EnableKeyword("_ALPHABLEND_ON");
-            materials[i].DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            materials[i].renderQueue = 3000;
+            foreach (Material mat in r.materials)
+            {
+                // Налаштовуємо material для fade
+                mat.SetFloat("_Mode", 2);
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_ZWrite", 0);
+                mat.DisableKeyword("_ALPHATEST_ON");
+                mat.EnableKeyword("_ALPHABLEND_ON");
+                mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                mat.renderQueue = 3000;
+
+                materials.Add(mat);
+            }
         }
+
+        // Плавне зникнення (fade out)
+        float duration = 2f;
+        float elapsed = 0f;
 
         while (elapsed < duration)
         {
             float alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
             foreach (var mat in materials)
             {
-                Color color = mat.color;
-                color.a = alpha;
-                mat.color = color;
+                if (mat.HasProperty("_Color"))
+                {
+                    Color color = mat.color;
+                    color.a = alpha;
+                    mat.color = color;
+                }
             }
+
             elapsed += Time.deltaTime;
             yield return null;
         }
 
+        // Гарантовано встановити повну прозорість
+        foreach (var mat in materials)
+        {
+            if (mat.HasProperty("_Color"))
+            {
+                Color color = mat.color;
+                color.a = 0f;
+                mat.color = color;
+            }
+        }
+
+        // Позначити, що анімація завершена
         villagerParametrs.animationOfDeathEnded = true;
+
+        // Затримка перед знищенням (можна опустити)
         yield return new WaitForSeconds(1f);
+
         Destroy(gameObject); // або gameObject.SetActive(false);
     }
 }

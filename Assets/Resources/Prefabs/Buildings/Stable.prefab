@@ -250,7 +250,7 @@ Transform:
   m_GameObject: {fileID: 6528108446683663715}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.89, y: 0, z: 0}
+  m_LocalPosition: {x: -7.89, y: -0.65, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -268,7 +268,7 @@ NavMeshObstacle:
   m_Shape: 1
   m_Extents: {x: 10, y: 2, z: 9}
   m_MoveThreshold: 0.1
-  m_Carve: 0
+  m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 2, z: 0}
   m_TimeToStationary: 0.5
@@ -552,6 +552,12 @@ MonoBehaviour:
   - {fileID: 524242966294373640, guid: 936ec1d759ff537458c74e93c5468a70, type: 3}
   indexUnit: 0
   tcpClient: {fileID: 0}
+  priceOfGold: 50
+  priceOfWood: 30
+  priceOfRock: 20
+  textCostOfTree: {fileID: 0}
+  textCostOfRock: {fileID: 0}
+  textCostOfGold: {fileID: 0}
 --- !u!114 &6738039855976805045
 MonoBehaviour:
   m_ObjectHideFlags: 0

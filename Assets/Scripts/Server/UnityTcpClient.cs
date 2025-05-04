@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -87,6 +88,7 @@ public class UnityTcpClient : MonoBehaviour
             }
         }
     }
+    public CameraMoving cameraMoving;
 
     void Awake()
     {
@@ -244,8 +246,20 @@ public class UnityTcpClient : MonoBehaviour
                             }
 
                             GameObject unit = FindObjectByServerID(unitId);
-                            StartCoroutine(MoveStepByStep(unit, pathPoints));
-
+                            var extractor = unit.GetComponent<VillagerParametrs>();
+                            if (extractor != null)
+                            {
+                                // Спроба привести до WarriorParametrs, якщо це можливо
+                                if (extractor is WarriorParametrs warrior)
+                                {
+                                    warrior.targetEnemy = null;
+                                }
+                                StartCoroutine(MoveStepByStep(unit, pathPoints));
+                            }
+                            else
+                            {
+                                extractor.StopExtracting(); //  Викликає батьківський метод
+                            }
 
                         }
                         else if (message.StartsWith("ATTACK"))
@@ -299,12 +313,18 @@ public class UnityTcpClient : MonoBehaviour
                         {
                             StartCoroutine(LoadSceneAsync("SampleScene"));
                         }
-                        else if (message.StartsWith("WON") || message.StartsWith("LOSE") || message.StartsWith("Opponent disconnected"))
+                        else if (message.StartsWith("LOSE"))
                         {
                             Debug.Log(102);
 
                             buttonControler.endGamePanelIsActive = true;
-                            buttonControler.PanelEndGameFromServerButton();
+                            buttonControler.PanelEndGameLoseFromServerButton();
+                        }
+                        else if(message.StartsWith("WON")|| message.StartsWith("Opponent disconnected"))
+                        {
+                            cameraMoving.waiting = true;
+                            buttonControler.endGamePanelIsActive = true;
+                            buttonControler.PanelEndGameButton();
                         }
                         else
                         {
@@ -368,31 +388,11 @@ public class UnityTcpClient : MonoBehaviour
             yield break;
         }
 
-        agent.ResetPath();
+        NavMeshPath path = new NavMeshPath();
+        agent.CalculatePath(pathPoints.Last(), path);
+        agent.SetPath(path);
 
-        foreach (var target in pathPoints)
-        {
-            NavMeshHit hit;
-            if (NavMesh.SamplePosition(target, out hit, 1.0f, NavMesh.AllAreas))
-            {
-                agent.SetDestination(hit.position);
-                Debug.Log($"[MOVE] Встановлена ціль: {hit.position}");
-
-                yield return new WaitUntil(() => !agent.pathPending);
-
-                if (agent.pathStatus != NavMeshPathStatus.PathComplete)
-                {
-                    Debug.LogWarning($"[MOVE] Шлях до {hit.position} неможливий: {agent.pathStatus}");
-                    continue;
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"[MOVE] Точка {target} поза NavMesh.");
-                continue;
-            }
-        }
-            Debug.Log("Маршрут завершено.");
+        Debug.Log("Маршрут завершено.");
     }
 
     private void ProcessSpawnMessage(string message)
@@ -474,7 +474,6 @@ public class UnityTcpClient : MonoBehaviour
         GameObject unitPrefab = Resources.Load<GameObject>("Prefabs/Units/" + unitName);
         if (unitPrefab != null)
         {
-            CameraMoving cameraMoving = FindObjectOfType<CameraMoving>();
             GameObject unit = Instantiate(unitPrefab, spawnPosition, spawnRotation);
             ServerId ID = unit.GetComponent<ServerId>();
             ID.serverId = id;
@@ -486,7 +485,7 @@ public class UnityTcpClient : MonoBehaviour
                     Debug.LogWarning($"Юніт {unitName} створений, але не розміщений на NavMesh!");
                 }
             }
-            cameraMoving.enemys.Add(unitPrefab);
+            cameraMoving.enemys.Add(unit);
 
             Debug.Log($"Unit spawned: {unitName} at position {spawnPosition}");
         }
@@ -605,18 +604,6 @@ public class UnityTcpClient : MonoBehaviour
     }
 
     // Допоміжна функція для пошуку об'єкта за ID
-    private GameObject FindObjectByID(int objectID)
-    {
-        GameObject[] allObjects = FindObjectsOfType<GameObject>();
-        foreach (var obj in allObjects)
-        {
-            if (obj.GetInstanceID() == objectID)
-            {
-                return obj;
-            }
-        }
-        return null;
-    }
     private GameObject FindObjectByServerID(int objectID)
     {
         GameObject[] allObjects = FindObjectsOfType<GameObject>();
