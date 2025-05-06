@@ -1,102 +1,103 @@
-using Unity.AI.Navigation; // Використовуємо простори імен для роботи з навігацією
-using UnityEngine; // Основний простір імен Unity
-using UnityEngine.AI; // Простір імен для роботи з AI та навігацією
+п»їusing System.Data.Common;
+using Unity.AI.Navigation; // Г‚ГЁГЄГ®Г°ГЁГ±ГІГ®ГўГіВєГ¬Г® ГЇГ°Г®Г±ГІГ®Г°ГЁ ВіГ¬ГҐГ­ Г¤Г«Гї Г°Г®ГЎГ®ГІГЁ Г§ Г­Г ГўВіГЈГ Г¶ВіВєГѕ
+using UnityEngine; // ГЋГ±Г­Г®ГўГ­ГЁГ© ГЇГ°Г®Г±ГІВіГ° ВіГ¬ГҐГ­ Unity
+using UnityEngine.AI; // ГЏГ°Г®Г±ГІВіГ° ВіГ¬ГҐГ­ Г¤Г«Гї Г°Г®ГЎГ®ГІГЁ Г§ AI ГІГ  Г­Г ГўВіГЈГ Г¶ВіВєГѕ
 
-public class WallGenerator : MonoBehaviour // Клас для генерації стін
+public class WallGenerator : MonoBehaviour // ГЉГ«Г Г± Г¤Г«Гї ГЈГҐГ­ГҐГ°Г Г¶ВіВї Г±ГІВіГ­
 {
-    [Header("Wall Settings")] // Заголовок для налаштувань мосту
-    public GameObject wallPrefab; // Префаб стіни
-    public GameObject wallConectorPrefab; // Префаб стіни
-    public float navMeshLinkWidth = 5f; // Ширина посилання навігаційної сітки
-    public bool navMeshLinkBidirectional = true; // Чи є посилання двонаправленим
-    public float maxSlopeAngle = 15f; // Максимальний кут нахилу
-    public Color validPlacementColor = new Color(0, 1, 0, 0.5f); // Колір для валідного розміщення
-    public Color invalidPlacementColor = new Color(1, 0, 0, 0.5f); // Колір для невалідного розміщення
-    public Color cursorFollowColor = new Color(0, 0.5f, 1f, 0.7f); // Колір для прев'ю під курсором
+    [Header("Wall Settings")] // Г‡Г ГЈГ®Г«Г®ГўГ®ГЄ Г¤Г«Гї Г­Г Г«Г ГёГІГіГўГ Г­Гј Г¬Г®Г±ГІГі
+    public GameObject wallPrefab; // ГЏГ°ГҐГґГ ГЎ Г±ГІВіГ­ГЁ
+    public GameObject wallConectorPrefab; // ГЏГ°ГҐГґГ ГЎ Г±ГІВіГ­ГЁ
 
-    [Header("Terrain Connection")] // Заголовок для налаштувань з'єднання з террейном
-    public float connectionSearchDistance = 20f; // Дистанція пошуку з'єднання
-    public LayerMask groundLayerMask; // Маска шару землі
-    public float waterCheckDistance = 10f; // Дистанція перевірки води
-    public int waterCheckPoints = 1; // Кількість точок для перевірки води
+    public float maxSlopeAngle = 15f; // ГЊГ ГЄГ±ГЁГ¬Г Г«ГјГ­ГЁГ© ГЄГіГІ Г­Г ГµГЁГ«Гі
+    public Color validPlacementColor = new Color(0, 1, 0, 0.5f); // ГЉГ®Г«ВіГ° Г¤Г«Гї ГўГ Г«ВіГ¤Г­Г®ГЈГ® Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+    public Color invalidPlacementColor = new Color(1, 0, 0, 0.5f); // ГЉГ®Г«ВіГ° Г¤Г«Гї Г­ГҐГўГ Г«ВіГ¤Г­Г®ГЈГ® Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+    public Color cursorFollowColor = new Color(0, 0.5f, 1f, 0.7f); // ГЉГ®Г«ВіГ° Г¤Г«Гї ГЇГ°ГҐГў'Гѕ ГЇВіГ¤ ГЄГіГ°Г±Г®Г°Г®Г¬
 
-    private Vector3 firstPoint; // Перша точка розміщення
-    private Vector3 secondPoint; // Друга точка розміщення
-    private bool isFirstPointSelected = false; // Чи обрана перша точка
-    private bool isPlacingWall = false; // Чи йде процес розміщення
-    private bool isValidPlacement = true; // Чи валідне розміщення
+    public float radius = 10f;
+    public LayerMask wallLayer;
+
+
+    [Header("Terrain Connection")] // Г‡Г ГЈГ®Г«Г®ГўГ®ГЄ Г¤Г«Гї Г­Г Г«Г ГёГІГіГўГ Г­Гј Г§'ВєГ¤Г­Г Г­Г­Гї Г§ ГІГҐГ°Г°ГҐГ©Г­Г®Г¬
+    public float connectionSearchDistance = 20f; // Г„ГЁГ±ГІГ Г­Г¶ВіГї ГЇГ®ГёГіГЄГі Г§'ВєГ¤Г­Г Г­Г­Гї
+    public LayerMask groundLayerMask; // ГЊГ Г±ГЄГ  ГёГ Г°Гі Г§ГҐГ¬Г«Ві
+    public float waterCheckDistance = 10f; // Г„ГЁГ±ГІГ Г­Г¶ВіГї ГЇГҐГ°ГҐГўВіГ°ГЄГЁ ГўГ®Г¤ГЁ
+    public int waterCheckPoints = 1; // ГЉВіГ«ГјГЄВіГ±ГІГј ГІГ®Г·Г®ГЄ Г¤Г«Гї ГЇГҐГ°ГҐГўВіГ°ГЄГЁ ГўГ®Г¤ГЁ
+
+    private Vector3 firstPoint; // ГЏГҐГ°ГёГ  ГІГ®Г·ГЄГ  Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+    private Vector3 secondPoint; // Г„Г°ГіГЈГ  ГІГ®Г·ГЄГ  Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+    private bool isFirstPointSelected = false; // Г—ГЁ Г®ГЎГ°Г Г­Г  ГЇГҐГ°ГёГ  ГІГ®Г·ГЄГ 
+    private bool isPlacingWall = false; // Г—ГЁ Г©Г¤ГҐ ГЇГ°Г®Г¶ГҐГ± Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+    private bool isValidPlacement = true; // Г—ГЁ ГўГ Г«ВіГ¤Г­ГҐ Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
     private bool isWall = false;
     private bool isWallSecondPoint = false;
 
-    private GameObject[] WallParts; // Масив частин мосту
-    private GameObject[] previewParts; // Масив частин прев'ю
-    private GameObject cursorFollowPreview; // Прев'ю, що слідує за курсором
+
+    private int wallCount = 0;
+    private bool priceValid = false;
+
+    private GameObject[] WallParts; // ГЊГ Г±ГЁГў Г·Г Г±ГІГЁГ­ Г¬Г®Г±ГІГі
+    private GameObject[] previewParts; // ГЊГ Г±ГЁГў Г·Г Г±ГІГЁГ­ ГЇГ°ГҐГў'Гѕ
+    private GameObject cursorFollowPreview; // ГЏГ°ГҐГў'Гѕ, Г№Г® Г±Г«ВіГ¤ГіВє Г§Г  ГЄГіГ°Г±Г®Г°Г®Г¬
 
     public float maxAllowedSlopeAngle = 45f;
     public float maxHeightDifference = 0.5f;
 
-    void Update() // Оновлення кожного кадру
+    private int costOfTreeWall, costOfRockWall, costOfGoldWall;
+
+    private bool needUpdateFirst = true;
+
+    void Update()
     {
-        if (!isPlacingWall) // Якщо не в режимі розміщення
+        if (!isPlacingWall)
         {
-            ClearPreview(); // Очистити прев'ю
-            return; // Вийти з методу
+            ClearPreview();
+            return;
         }
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition); // Отримати промінь від камери до курсора
-        if (Physics.Raycast(ray, out RaycastHit hit)) // Якщо промінь перетинає об'єкт
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            if (!isFirstPointSelected) // Якщо перша точка не обрана
-            {
-                
-                UpdateCursorFollowPreview(hit.point); // Оновити прев'ю під курсором
+            // Check for wall under cursor (for both preview and placement)
+            bool isOverWall = hit.collider.CompareTag("Wall");
 
+            if (!isFirstPointSelected)
+            {
+                // Set wall flag if starting on a wall
+                isWall = isOverWall;
+                UpdateCursorFollowPreview(hit.point);
             }
-            else // Якщо перша точка обрана
+            else
             {
-                secondPoint = hit.point; // Запам'ятати другу точку
-                isValidPlacement = CheckPlacementValidity(firstPoint, secondPoint); // Перевірити валідність розміщення
-                
-                UpdateWallPreview(); // Оновити прев'ю мосту
+                // Set second wall flag if ending on a wall
+                isWallSecondPoint = isOverWall;
+                secondPoint = hit.point;
+                isValidPlacement = CheckPlacementValidity(firstPoint, secondPoint);
+                UpdateWallPreview();
             }
 
-            if (Input.GetMouseButtonDown(0)) // При натисканні лівої кнопки миші
+            if (Input.GetMouseButtonDown(0))
             {
-                if (hit.collider.CompareTag("Wall"))
+                if (IsValidLocation(hit) || isOverWall)
                 {
-                    isWall = true;
-                    Debug.Log("СтІНА");
-                }
+                    priceValid =
+                        UnityTcpClient.Instance.goldAmount < wallCount * costOfGoldWall ||
+                        UnityTcpClient.Instance.rockAmount < wallCount * costOfRockWall ||
+                        UnityTcpClient.Instance.woodAmount < wallCount * costOfTreeWall;
 
-                if (hit.collider.CompareTag("Wall") && isFirstPointSelected)
-                {
-                    isWallSecondPoint = true;
-                    Debug.Log("СтІН_DWAА");
-                }
-
-
-
-
-
-                if (IsValidLocation(hit) || isWall) // Якщо місце валідне
-                {
-                    Debug.Log("СтІНА_0");
-                    if (!isFirstPointSelected) // Якщо перша точка не обрана
+                    if (!isFirstPointSelected)
                     {
-                        Debug.Log("СтІНА_1");
-                        firstPoint = hit.point; // Запам'ятати першу точку
-                        isFirstPointSelected = true; // Позначити, що перша точка обрана
-                        Destroy(cursorFollowPreview); // Видалити прев'ю під курсором
-                        cursorFollowPreview = null; // Очистити посилання
-
-                        Debug.Log("СтІНА_2");
+                        firstPoint = hit.point;
+                        isFirstPointSelected = true;
+                        isWall = isOverWall; // Confirm wall placement
+                        Destroy(cursorFollowPreview);
+                        cursorFollowPreview = null;
                     }
-                    else if (isValidPlacement || isWallSecondPoint) // Якщо розміщення валідне і є вода
+                    else if ((isValidPlacement || isWallSecondPoint) && !priceValid)
                     {
-                        
-                        ClearPreview(); // Очистити прев'ю
-                        PlaceWall(); // Розмістити міст
-                        isPlacingWall = false; // Вийти з режиму розміщення
+                        ClearPreview();
+                        PlaceWall();
+                        isPlacingWall = false;
                         isWall = false;
                         isWallSecondPoint = false;
                     }
@@ -104,118 +105,155 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             }
         }
 
-        if (Input.GetMouseButtonDown(1)) // При натисканні правої кнопки миші
+        if (Input.GetMouseButtonDown(1))
         {
-            CancelPlacement(); // Скасувати розміщення
+            CancelPlacement();
         }
     }
 
-    
 
-    private void UpdateCursorFollowPreview(Vector3 position) // Оновлення прев'ю під курсором
+    private void UpdateCursorFollowPreview(Vector3 position) // ГЋГ­Г®ГўГ«ГҐГ­Г­Гї ГЇГ°ГҐГў'Гѕ ГЇВіГ¤ ГЄГіГ°Г±Г®Г°Г®Г¬
     {
-        if (cursorFollowPreview == null) // Якщо прев'ю ще не створене
+        if (cursorFollowPreview == null) // ГџГЄГ№Г® ГЇГ°ГҐГў'Гѕ Г№ГҐ Г­ГҐ Г±ГІГўГ®Г°ГҐГ­ГҐ
         {
-            cursorFollowPreview = Instantiate(wallPrefab, position, Quaternion.identity); // Створити прев'ю
-            cursorFollowPreview.tag = "Untagged"; // Встановити тег
+            cursorFollowPreview = Instantiate(wallPrefab, position, Quaternion.identity); // Г‘ГІГўГ®Г°ГЁГІГЁ ГЇГ°ГҐГў'Гѕ
+            cursorFollowPreview.tag = "Untagged"; // Г‚Г±ГІГ Г­Г®ГўГЁГІГЁ ГІГҐГЈ
 
-            foreach (var collider in cursorFollowPreview.GetComponentsInChildren<Collider>()) // Для всіх колайдерів
+            foreach (var collider in cursorFollowPreview.GetComponentsInChildren<Collider>()) // Г„Г«Гї ГўГ±ВіГµ ГЄГ®Г«Г Г©Г¤ГҐГ°ВіГў
             {
-                collider.enabled = false; // Вимкнути колайдери
+                collider.enabled = false; // Г‚ГЁГ¬ГЄГ­ГіГІГЁ ГЄГ®Г«Г Г©Г¤ГҐГ°ГЁ
             }
 
-            foreach (var renderer in cursorFollowPreview.GetComponentsInChildren<Renderer>()) // Для всіх рендерерів
+            foreach (var renderer in cursorFollowPreview.GetComponentsInChildren<Renderer>()) // Г„Г«Гї ГўГ±ВіГµ Г°ГҐГ­Г¤ГҐГ°ГҐГ°ВіГў
             {
-                renderer.material.color = cursorFollowColor; // Встановити колір
+                renderer.material.color = cursorFollowColor; // Г‚Г±ГІГ Г­Г®ГўГЁГІГЁ ГЄГ®Г«ВіГ°
             }
         }
-        else // Якщо прев'ю вже існує
+        else // ГџГЄГ№Г® ГЇГ°ГҐГў'Гѕ ГўГ¦ГҐ ВіГ±Г­ГіВє
         {
-            cursorFollowPreview.transform.position = position; // Оновити позицію
+            cursorFollowPreview.transform.position = position; // ГЋГ­Г®ГўГЁГІГЁ ГЇГ®Г§ГЁГ¶ВіГѕ
         }
     }
 
-    private bool IsValidLocation(RaycastHit hit) // Перевірка валідності місця
+    private bool IsValidLocation(RaycastHit hit) // ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГўГ Г«ВіГ¤Г­Г®Г±ГІВі Г¬ВіГ±Г¶Гї
     {
-        return hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground") && // Чи це земля
-               !hit.collider.CompareTag("Water") && // Чи не вода
-               !hit.collider.CompareTag("Wall"); // Чи не міст
+        return hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground") && // Г—ГЁ Г¶ГҐ Г§ГҐГ¬Г«Гї
+               !hit.collider.CompareTag("Water") && // Г—ГЁ Г­ГҐ ГўГ®Г¤Г 
+               !hit.collider.CompareTag("Wall"); // Г—ГЁ Г­ГҐ Г¬ВіГ±ГІ
     }
 
-    private bool CheckPlacementValidity(Vector3 start, Vector3 end) // Перевірка валідності розміщення
+    private bool CheckPlacementValidity(Vector3 start, Vector3 end) // ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГўГ Г«ВіГ¤Г­Г®Г±ГІВі Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
     {
-        Vector3 direction = end - start; // Напрямок між точками
-        float horizontalDistance = new Vector2(direction.x, direction.z).magnitude; // Горизонтальна дистанція
-        float verticalDistance = Mathf.Abs(direction.y); // Вертикальна дистанція
-        float angle = Mathf.Atan2(verticalDistance, horizontalDistance) * Mathf.Rad2Deg; // Кут нахилу
+        Vector3 direction = end - start; // ГЌГ ГЇГ°ГїГ¬Г®ГЄ Г¬ВіГ¦ ГІГ®Г·ГЄГ Г¬ГЁ
+        float horizontalDistance = new Vector2(direction.x, direction.z).magnitude; // ГѓГ®Г°ГЁГ§Г®Г­ГІГ Г«ГјГ­Г  Г¤ГЁГ±ГІГ Г­Г¶ВіГї
+        float verticalDistance = Mathf.Abs(direction.y); // Г‚ГҐГ°ГІГЁГЄГ Г«ГјГ­Г  Г¤ГЁГ±ГІГ Г­Г¶ВіГї
+        float angle = Mathf.Atan2(verticalDistance, horizontalDistance) * Mathf.Rad2Deg; // ГЉГіГІ Г­Г ГµГЁГ«Гі
 
-        if (angle > maxSlopeAngle) // Якщо кут перевищує максимальний
+        if (angle > maxSlopeAngle) // ГџГЄГ№Г® ГЄГіГІ ГЇГҐГ°ГҐГўГЁГ№ГіВє Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­ГЁГ©
         {
-            Debug.LogWarning($"Wall angle {angle:F1}° exceeds maximum {maxSlopeAngle}°"); // Попередження
-            return false; // Повернути false
+            Debug.LogWarning($"Wall angle {angle:F1}В° exceeds maximum {maxSlopeAngle}В°"); // ГЏГ®ГЇГҐГ°ГҐГ¤Г¦ГҐГ­Г­Гї
+            return false; // ГЏГ®ГўГҐГ°Г­ГіГІГЁ false
         }
-        return true; // Повернути true
+        return true; // ГЏГ®ГўГҐГ°Г­ГіГІГЁ true
     }
 
-    private void UpdateWallPreview() // Оновлення прев'ю стіни з урахуванням рельєфу
+    private void UpdateWallPreview()
     {
-        ClearPreview(); // Очистити попереднє прев'ю
+        ClearPreview();
 
-        Vector3 direction = (secondPoint - firstPoint).normalized; // Напрямок стіни
-        Quaternion rotation = Quaternion.LookRotation(direction); // Поворот стіни
-        float distance = Vector3.Distance(firstPoint, secondPoint); // Дистанція між точками
-        float wallLength = wallPrefab.GetComponentInChildren<Renderer>().bounds.size.z; // Довжина сегменту
+        Vector3 direction = (secondPoint - firstPoint).normalized;
+        Quaternion rotation = Quaternion.LookRotation(direction);
+        float distance = Vector3.Distance(firstPoint, secondPoint);
+        float wallLength = wallPrefab.GetComponentInChildren<Renderer>().bounds.size.z;
 
-        int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1); // Кількість сегментів
-        float offset = (wallCount * wallLength - distance) / 2; // Відступ для центрування
+        int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1);
+        this.wallCount = wallCount;
+        float offset = (wallCount * wallLength - distance) / 2;
 
         Vector3 currentPosition = firstPoint - direction * (offset - 20);
-        Vector3 currentPosition1 = firstPoint - direction * (offset);// Початкова позиція
-        previewParts = new GameObject[wallCount]; // Ініціалізація масиву прев'ю
+        Vector3 firstConnectorPosition = firstPoint - direction * offset;
+        previewParts = new GameObject[wallCount];
 
-        Color previewColor = isValidPlacement ? validPlacementColor : invalidPlacementColor; // Вибір кольору
-        bool allSegmentsValid = true; // Чи всі сегменти мають валідне розміщення
+        // РџРµСЂРµРІС–СЂРєР° С†С–РЅРё
+        bool priceValid =
+            UnityTcpClient.Instance.goldAmount < wallCount * costOfGoldWall ||
+            UnityTcpClient.Instance.rockAmount < wallCount * costOfRockWall ||
+            UnityTcpClient.Instance.woodAmount < wallCount * costOfTreeWall;
 
-
-
-
-
-
-        for (int i = 0; i < wallCount; i++) // Для кожного сегменту
+        // Р’РёР·РЅР°С‡Р°С”РјРѕ, С‡Рё РїРѕРєР°Р·СѓРІР°С‚Рё РґСЂСѓРіРёР№ РєРѕРЅРµРєС‚РѕСЂ Сѓ РїСЂРµРІ'СЋ
+        bool showSecondConnector = false;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
         {
-            if (i == 0 && isWall)
+            showSecondConnector = hit.collider.CompareTag("Wall");
+        }
+
+        Color previewColor = isValidPlacement ? validPlacementColor : invalidPlacementColor;
+        if (priceValid) previewColor = invalidPlacementColor;
+
+        for (int i = 0; i < wallCount; i++)
+        {
+            // РџРµСЂС€РёР№ РєРѕРЅРµРєС‚РѕСЂ
+            if (i == 0 && isWall && !nearConector(firstConnectorPosition))
             {
-                previewParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                previewParts[i] = Instantiate(wallConectorPrefab, firstConnectorPosition, wallConectorPrefab.transform.rotation);
                 previewParts[i].tag = "Untagged";
+
+                foreach (var collider in previewParts[i].GetComponentsInChildren<Collider>())
+                    collider.enabled = false;
+
+                foreach (var renderer in previewParts[i].GetComponentsInChildren<Renderer>())
+                {
+                    var material = renderer.material;
+                    material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.7f);
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.renderQueue = 3000;
+                }
+
+                currentPosition += direction * wallLength;
                 continue;
             }
 
-            // Визначаємо позицію на рельєфі
+            // РћСЃС‚Р°РЅРЅС–Р№ РєРѕРЅРµРєС‚РѕСЂ (РїСЂРµРІ'СЋ)
+            if (i == wallCount - 1 && (isWallSecondPoint || showSecondConnector) && !nearConector(currentPosition))
+            {
+                previewParts[i] = Instantiate(wallConectorPrefab, currentPosition, wallConectorPrefab.transform.rotation);
+                previewParts[i].tag = "Untagged";
+
+                foreach (var collider in previewParts[i].GetComponentsInChildren<Collider>())
+                    collider.enabled = false;
+
+                foreach (var renderer in previewParts[i].GetComponentsInChildren<Renderer>())
+                {
+                    var material = renderer.material;
+                    material.color = new Color(previewColor.r, previewColor.g, previewColor.b, 0.7f);
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.renderQueue = 3000;
+                }
+
+                continue;
+            }
+
+            // Р—РІРёС‡Р°Р№РЅС– СЃРµРіРјРµРЅС‚Рё СЃС‚С–РЅРё
             Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
-
-            
-
-            // Створюємо прев'ю сегмента
             previewParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
             previewParts[i].tag = "Untagged";
 
-            // Перевіряємо валідність позиції для поточного сегмента
             bool segmentValid = CheckSegmentPlacement(groundPosition, rotation);
-            if (!segmentValid) allSegmentsValid = false;
+            if (!segmentValid) isValidPlacement = false;
 
-            // Встановлюємо колір (можна зробити індивідуальний для кожного сегмента)
             Color segmentColor = segmentValid ? validPlacementColor : invalidPlacementColor;
+            if (priceValid) segmentColor = invalidPlacementColor;
 
-            // Налаштування прев'ю
             foreach (var collider in previewParts[i].GetComponentsInChildren<Collider>())
-            {
                 collider.enabled = false;
-            }
 
             foreach (var renderer in previewParts[i].GetComponentsInChildren<Renderer>())
             {
-                renderer.material.color = segmentColor;
-                // Додаємо напівпрозорість для прев'ю
                 var material = renderer.material;
                 material.color = new Color(segmentColor.r, segmentColor.g, segmentColor.b, 0.7f);
                 material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
@@ -226,11 +264,12 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
             currentPosition += direction * wallLength;
         }
-
-        // Оновлюємо загальний статус валідності
-        isValidPlacement = allSegmentsValid;
     }
-
+    public bool nearConector(Vector3 position)
+    {
+        Collider[] hits = Physics.OverlapSphere(position, radius, wallLayer);
+        return hits.Length > 0;
+    }
     private void PlaceWall()
     {
         Vector3 direction = (secondPoint - firstPoint).normalized;
@@ -240,49 +279,166 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
         int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1);
         float offset = (wallCount * wallLength - distance) / 2;
-
+        bool hasStartConn = false;
+        bool hasEndConn = false;
         Vector3 currentPosition = firstPoint - direction * (offset - 20);
-        Vector3 currentPosition1 = firstPoint - direction * (offset);
+        Vector3 currentPosition1 = firstPoint - direction * offset;
+        Vector3 endConnectorPosition = currentPosition + direction * (wallLength * (wallCount - 1)) + direction * 20f;
 
-        
         WallParts = new GameObject[wallCount];
 
         for (int i = 0; i < wallCount; i++)
         {
-
-            if (i == 0 && isWall)
+            // First connector placement
+            if (i == 0 && isWall && !nearConector(currentPosition1))
             {
-                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
-                WallParts[i].tag = "Wall";
-                
-                continue;
+                if (!ConnectorExistsInRadius(currentPosition1))
+                {
+                    WallParts[i] = Instantiate(wallConectorPrefab, currentPosition1, wallConectorPrefab.transform.rotation);
+                    WallParts[i].tag = "Wall";
+                    hasStartConn=true;
+                    currentPosition += direction * wallLength;
+                    continue;
+                }
+                else
+                {
+                    // If connector exists nearby, place normal wall segment instead
+                    Debug.Log("Connector already exists nearby - placing normal wall");
+                }
             }
 
-            
-
-            
-            // Визначаємо висоту для поточного сегмента
+            // Regular wall segment placement
             Vector3 groundPosition = GetPositionOnTerrain(currentPosition);
-
             WallParts[i] = Instantiate(wallPrefab, groundPosition, rotation);
             WallParts[i].tag = "Wall";
+
+            // Last connector placement
             if (i == (wallCount - 1) && isWallSecondPoint)
             {
-                currentPosition = currentPosition + direction * 20f;
-                WallParts[i] = Instantiate(wallConectorPrefab, currentPosition, wallConectorPrefab.transform.rotation);
-                WallParts[i].tag = "Wall";
-
-                continue;
+                if (!ConnectorExistsInRadius(endConnectorPosition))
+                {
+                    WallParts[i] = Instantiate(wallConectorPrefab, endConnectorPosition, wallConectorPrefab.transform.rotation);
+                    WallParts[i].tag = "Wall";
+                    hasEndConn=true;
+                    continue;
+                }
+                else
+                {
+                    // If connector exists nearby, keep the normal wall segment we already placed
+                    Debug.Log("Connector already exists nearby - keeping normal wall");
+                }
             }
 
             currentPosition += direction * wallLength;
-            
+        }
+
+        // Update resources
+        UnityTcpClient.Instance.goldAmount -= costOfGoldWall * wallCount;
+        UnityTcpClient.Instance.woodAmount -= costOfTreeWall * wallCount;
+        UnityTcpClient.Instance.rockAmount -= costOfRockWall * wallCount;
+        UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
+        SendWallConstructionMessage(firstPoint, secondPoint, hasStartConn, hasEndConn);
+
+    }
+    private void SendWallConstructionMessage(Vector3 startPoint, Vector3 endPoint, bool hasStartConn, bool hasEndConn)
+    {
+        // Р¤РѕСЂРјР°С‚: WALL startX startY startZ endX endY endZ hasStartConn hasEndConn\n
+        string message = $"WALL {startPoint.x} {startPoint.y} {startPoint.z} {endPoint.x} {endPoint.y} {endPoint.z} {(hasStartConn ? 1 : 0)} {(hasEndConn ? 1 : 0)}\n";
+        UnityTcpClient.Instance.SendMessage(message);
+    }
+
+    public void HandleWallConstructionMessage(string message)
+    {
+        try
+        {
+            // РџСЂРёР±РёСЂР°С”РјРѕ Р·Р°Р№РІС– РїСЂРѕР±С–Р»Рё С– СЂРѕР·Р±РёРІР°С”РјРѕ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ
+            message = message.Trim();
+            string[] parts = message.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
+
+            if (parts.Length != 9 || !parts[0].Equals("WALL"))
+            {
+                Debug.LogError($"РќРµРІС–СЂРЅРёР№ С„РѕСЂРјР°С‚ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ РїСЂРѕ СЃС‚С–РЅСѓ: {message}");
+                return;
+            }
+
+            // РџР°СЂСЃРёРјРѕ РєРѕРѕСЂРґРёРЅР°С‚Рё
+            Vector3 startPos = new Vector3(
+                float.Parse(parts[1]),
+                float.Parse(parts[2]),
+                float.Parse(parts[3]));
+
+            Vector3 endPos = new Vector3(
+                float.Parse(parts[4]),
+                float.Parse(parts[5]),
+                float.Parse(parts[6]));
+
+            // РџР°СЂСЃРёРјРѕ РїСЂР°РїРѕСЂС†С– РєРѕРЅРµРєС‚РѕСЂС–РІ
+            bool hasStartConn = parts[7] == "1";
+            bool hasEndConn = parts[8] == "1";
+
+            Debug.Log($"РћС‚СЂРёРјР°РЅРѕ СЃС‚С–РЅСѓ: {startPos} -> {endPos}, РєРѕРЅРµРєС‚РѕСЂРё: СЃС‚Р°СЂС‚={hasStartConn}, РєС–РЅРµС†СЊ={hasEndConn}");
+
+            BuildWallFromNetwork(startPos, endPos, hasStartConn, hasEndConn);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"РџРѕРјРёР»РєР° РѕР±СЂРѕР±РєРё РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ '{message}': {e.Message}");
         }
     }
 
+    private void BuildWallFromNetwork(Vector3 startPos, Vector3 endPos, bool hasStartConn, bool hasEndConn)
+    {
+        Vector3 direction = (endPos - startPos).normalized;
+        Quaternion rotation = Quaternion.LookRotation(direction);
+        float wallLength = wallPrefab.GetComponentInChildren<Renderer>().bounds.size.z;
+        float distance = Vector3.Distance(startPos, endPos);
+
+        int wallCount = Mathf.Max(1, Mathf.FloorToInt(distance / wallLength) + 1);
+        float offset = (wallCount * wallLength - distance) / 2;
+
+        Vector3 currentPos = startPos - direction * (offset - 20);
+        Vector3 startConnectorPos = startPos - direction * offset;
+        Vector3 endConnectorPos = currentPos + direction * (wallLength * (wallCount - 1)) + direction * 20f;
+
+        for (int i = 0; i < wallCount; i++)
+        {
+            // РџРѕС‡Р°С‚РєРѕРІРёР№ РєРѕРЅРµРєС‚РѕСЂ
+            if (i == 0 && hasStartConn && !ConnectorExistsInRadius(startConnectorPos))
+            {
+                Instantiate(wallConectorPrefab, startConnectorPos, wallConectorPrefab.transform.rotation).tag = "Wall";
+                currentPos += direction * wallLength;
+                continue;
+            }
+
+            // Р—РІРёС‡Р°Р№РЅРёР№ СЃРµРіРјРµРЅС‚ СЃС‚С–РЅРё
+            Instantiate(wallPrefab, GetPositionOnTerrain(currentPos), rotation).tag = "Wall";
+
+            // РљС–РЅС†РµРІРёР№ РєРѕРЅРµРєС‚РѕСЂ
+            if (i == wallCount - 1 && hasEndConn && !ConnectorExistsInRadius(endConnectorPos))
+            {
+                Instantiate(wallConectorPrefab, endConnectorPos, wallConectorPrefab.transform.rotation).tag = "Wall";
+                continue;
+            }
+
+            currentPos += direction * wallLength;
+        }
+    }
+
+    private bool ConnectorExistsInRadius(Vector3 position)
+    {
+        Collider[] hits = Physics.OverlapSphere(position, radius, wallLayer);
+        foreach (var hit in hits)
+        {
+            if (hit.CompareTag("Wall") && hit.gameObject.name.Contains(wallConectorPrefab.name))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     private Vector3 GetPositionOnTerrain(Vector3 position)
     {
-        Ray ray = new Ray(position + Vector3.up * 100f, Vector3.down); // Пускаємо промінь зверху
+        Ray ray = new Ray(position + Vector3.up * 100f, Vector3.down); // ГЏГіГ±ГЄГ ВєГ¬Г® ГЇГ°Г®Г¬ВіГ­Гј Г§ГўГҐГ°ГµГі
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask.GetMask("Ground")))
@@ -290,28 +446,28 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             return hit.point;
         }
 
-        // Якщо промінь не влучив (на всякий випадок)
+        // ГџГЄГ№Г® ГЇГ°Г®Г¬ВіГ­Гј Г­ГҐ ГўГ«ГіГ·ГЁГў (Г­Г  ГўГ±ГїГЄГЁГ© ГўГЁГЇГ Г¤Г®ГЄ)
         return position;
     }
     private bool CheckSegmentPlacement(Vector3 position, Quaternion rotation)
     {
-        // 1. Перевірка наявності опори під сегментом (чи не "висить" у повітрі)
+        // 1. ГЏГҐГ°ГҐГўВіГ°ГЄГ  Г­Г ГїГўГ­Г®Г±ГІВі Г®ГЇГ®Г°ГЁ ГЇВіГ¤ Г±ГҐГЈГ¬ГҐГ­ГІГ®Г¬ (Г·ГЁ Г­ГҐ "ГўГЁГ±ГЁГІГј" Гі ГЇГ®ГўВіГІГ°Ві)
         Ray groundCheckRay = new Ray(position + Vector3.up * 0.5f, Vector3.down);
         if (!Physics.Raycast(groundCheckRay, 1f, LayerMask.GetMask("Ground")))
         {
             return false;
         }
 
-        // 2. Перевірка на перетин з іншими об'єктами
+        // 2. ГЏГҐГ°ГҐГўВіГ°ГЄГ  Г­Г  ГЇГҐГ°ГҐГІГЁГ­ Г§ ВіГ­ГёГЁГ¬ГЁ Г®ГЎ'ВєГЄГІГ Г¬ГЁ
         Collider[] wallColliders = wallPrefab.GetComponentsInChildren<Collider>();
         foreach (var collider in wallColliders)
         {
-            // Створюємо фізичну копію колайдера для перевірки
+            // Г‘ГІГўГ®Г°ГѕВєГ¬Г® ГґВіГ§ГЁГ·Г­Гі ГЄГ®ГЇВіГѕ ГЄГ®Г«Г Г©Г¤ГҐГ°Г  Г¤Г«Гї ГЇГҐГ°ГҐГўВіГ°ГЄГЁ
             Vector3 colliderCenter = position + rotation * collider.bounds.center;
             if (Physics.CheckBox(colliderCenter,
                                collider.bounds.extents,
                                rotation,
-                               LayerMask.GetMask("Default"))) // Шар з перешкодами
+                               LayerMask.GetMask("Default"))) // ГГ Г° Г§ ГЇГҐГ°ГҐГёГЄГ®Г¤Г Г¬ГЁ
             {
                 return false;
             }
@@ -319,20 +475,20 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
 
 
 
-        // 3. Перевірка кута нахилу поверхні (чи не надто крутий схил)
+        // 3. ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГЄГіГІГ  Г­Г ГµГЁГ«Гі ГЇГ®ГўГҐГ°ГµГ­Ві (Г·ГЁ Г­ГҐ Г­Г Г¤ГІГ® ГЄГ°ГіГІГЁГ© Г±ГµГЁГ«)
         Ray slopeCheckRay = new Ray(position + Vector3.up * 0.5f, Vector3.down);
         RaycastHit slopeHit;
         if (Physics.Raycast(slopeCheckRay, out slopeHit, 1f, LayerMask.GetMask("Ground")))
         {
             float slopeAngle = Vector3.Angle(slopeHit.normal, Vector3.up);
-            if (slopeAngle > maxAllowedSlopeAngle) // maxAllowedSlopeAngle - заданий ліміт кута
+            if (slopeAngle > maxAllowedSlopeAngle) // maxAllowedSlopeAngle - Г§Г Г¤Г Г­ГЁГ© Г«ВіГ¬ВіГІ ГЄГіГІГ 
             {
                 return false;
             }
         }
 
-        // 4. Перевірка достатнього простору для сегмента
-        float requiredSpace = 0.2f; // Додатковий простір навколо
+        // 4. ГЏГҐГ°ГҐГўВіГ°ГЄГ  Г¤Г®Г±ГІГ ГІГ­ГјГ®ГЈГ® ГЇГ°Г®Г±ГІГ®Г°Гі Г¤Г«Гї Г±ГҐГЈГ¬ГҐГ­ГІГ 
+        float requiredSpace = 0.2f; // Г„Г®Г¤Г ГІГЄГ®ГўГЁГ© ГЇГ°Г®Г±ГІВіГ° Г­Г ГўГЄГ®Г«Г®
         Bounds wallBounds = wallPrefab.GetComponentInChildren<Renderer>().bounds;
         Vector3 halfExtents = wallBounds.extents + Vector3.one * requiredSpace;
         if (Physics.CheckBox(position, halfExtents, rotation, LayerMask.GetMask("Obstacles")))
@@ -340,61 +496,65 @@ public class WallGenerator : MonoBehaviour // Клас для генерації стін
             return false;
         }
 
-        // 5. Перевірка висоти (чи не занадто високо/низько)
+        // 5. ГЏГҐГ°ГҐГўВіГ°ГЄГ  ГўГЁГ±Г®ГІГЁ (Г·ГЁ Г­ГҐ Г§Г Г­Г Г¤ГІГ® ГўГЁГ±Г®ГЄГ®/Г­ГЁГ§ГјГЄГ®)
         float terrainHeight = Terrain.activeTerrain.SampleHeight(position);
-        if (Mathf.Abs(position.y - terrainHeight) > maxHeightDifference) // maxHeightDifference - допустима різниця
+        if (Mathf.Abs(position.y - terrainHeight) > maxHeightDifference) // maxHeightDifference - Г¤Г®ГЇГіГ±ГІГЁГ¬Г  Г°ВіГ§Г­ГЁГ¶Гї
         {
             return false;
         }
 
-        // 6. Додаткова перевірка на наявність води (якщо потрібно)
+        // 6. Г„Г®Г¤Г ГІГЄГ®ГўГ  ГЇГҐГ°ГҐГўВіГ°ГЄГ  Г­Г  Г­Г ГїГўГ­ВіГ±ГІГј ГўГ®Г¤ГЁ (ГїГЄГ№Г® ГЇГ®ГІГ°ВіГЎГ­Г®)
         if (CheckWaterPresence(position))
         {
             return false;
         }
 
-        // Всі перевірки пройдено - позиція валідна
+        // Г‚Г±Ві ГЇГҐГ°ГҐГўВіГ°ГЄГЁ ГЇГ°Г®Г©Г¤ГҐГ­Г® - ГЇГ®Г§ГЁГ¶ВіГї ГўГ Г«ВіГ¤Г­Г 
         return true;
     }
 
-    // Допоміжний метод для перевірки води
+    // Г„Г®ГЇГ®Г¬ВіГ¦Г­ГЁГ© Г¬ГҐГІГ®Г¤ Г¤Г«Гї ГЇГҐГ°ГҐГўВіГ°ГЄГЁ ГўГ®Г¤ГЁ
     private bool CheckWaterPresence(Vector3 position)
     {
-        // Реалізація залежить від того, як у вашому проекті реалізована вода
-        // Наприклад, перевірка по шарах або по висоті
+        // ГђГҐГ Г«ВіГ§Г Г¶ВіГї Г§Г Г«ГҐГ¦ГЁГІГј ГўВіГ¤ ГІГ®ГЈГ®, ГїГЄ Гі ГўГ ГёГ®Г¬Гі ГЇГ°Г®ГҐГЄГІВі Г°ГҐГ Г«ВіГ§Г®ГўГ Г­Г  ГўГ®Г¤Г 
+        // ГЌГ ГЇГ°ГЁГЄГ«Г Г¤, ГЇГҐГ°ГҐГўВіГ°ГЄГ  ГЇГ® ГёГ Г°Г Гµ Г ГЎГ® ГЇГ® ГўГЁГ±Г®ГІВі
         return false;
     }
-    private void ClearPreview() // Очищення прев'ю
+    private void ClearPreview() // ГЋГ·ГЁГ№ГҐГ­Г­Гї ГЇГ°ГҐГў'Гѕ
     {
-        if (previewParts != null) // Якщо є частини прев'ю
+        if (previewParts != null) // ГџГЄГ№Г® Вє Г·Г Г±ГІГЁГ­ГЁ ГЇГ°ГҐГў'Гѕ
         {
-            foreach (GameObject part in previewParts) // Для кожної частини
+            foreach (GameObject part in previewParts) // Г„Г«Гї ГЄГ®Г¦Г­Г®Вї Г·Г Г±ГІГЁГ­ГЁ
             {
-                if (part != null) Destroy(part); // Знищити об'єкт
+                if (part != null) Destroy(part); // Г‡Г­ГЁГ№ГЁГІГЁ Г®ГЎ'ВєГЄГІ
             }
-            previewParts = null; // Очистити масив
+            previewParts = null; // ГЋГ·ГЁГ±ГІГЁГІГЁ Г¬Г Г±ГЁГў
         }
 
-        if (cursorFollowPreview != null) // Якщо є прев'ю під курсором
+        if (cursorFollowPreview != null) // ГџГЄГ№Г® Вє ГЇГ°ГҐГў'Гѕ ГЇВіГ¤ ГЄГіГ°Г±Г®Г°Г®Г¬
         {
-            Destroy(cursorFollowPreview); // Знищити об'єкт
-            cursorFollowPreview = null; // Очистити посилання
+            Destroy(cursorFollowPreview); // Г‡Г­ГЁГ№ГЁГІГЁ Г®ГЎ'ВєГЄГІ
+            cursorFollowPreview = null; // ГЋГ·ГЁГ±ГІГЁГІГЁ ГЇГ®Г±ГЁГ«Г Г­Г­Гї
         }
     }
 
-    private void CancelPlacement() // Скасування розміщення
+    private void CancelPlacement() // Г‘ГЄГ Г±ГіГўГ Г­Г­Гї Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
     {
-        isPlacingWall = false; // Вийти з режиму розміщення
-        isFirstPointSelected = false; // Скинути вибір точки
-        ClearPreview(); // Очистити прев'ю
-        Debug.Log("Wall placement canceled"); // Логування
+        isPlacingWall = false; // Г‚ГЁГ©ГІГЁ Г§ Г°ГҐГ¦ГЁГ¬Гі Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+        isFirstPointSelected = false; // Г‘ГЄГЁГ­ГіГІГЁ ГўГЁГЎВіГ° ГІГ®Г·ГЄГЁ
+        ClearPreview(); // ГЋГ·ГЁГ±ГІГЁГІГЁ ГЇГ°ГҐГў'Гѕ
+        Debug.Log("Wall placement canceled"); // Г‹Г®ГЈГіГўГ Г­Г­Гї
     }
 
-    public void StartPlacingWall() // Початок розміщення мосту
+    public void StartPlacingWall(int costOfTreeWall, int costOfRockWall, int costOfGoldWall) // ГЏГ®Г·Г ГІГ®ГЄ Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї Г¬Г®Г±ГІГі
+
     {
-        isPlacingWall = !isPlacingWall; // Перемкнути режим розміщення
-        isFirstPointSelected = false; // Скинути вибір точки
-        ClearPreview(); // Очистити прев'ю
-        Debug.Log("Wall placement mode: " + (isPlacingWall ? "ON" : "OFF")); // Логування
+        this.costOfTreeWall = costOfTreeWall;
+        this.costOfRockWall = costOfRockWall;
+        this.costOfGoldWall = costOfGoldWall;
+        isPlacingWall = !isPlacingWall; // ГЏГҐГ°ГҐГ¬ГЄГ­ГіГІГЁ Г°ГҐГ¦ГЁГ¬ Г°Г®Г§Г¬ВіГ№ГҐГ­Г­Гї
+        isFirstPointSelected = false; // Г‘ГЄГЁГ­ГіГІГЁ ГўГЁГЎВіГ° ГІГ®Г·ГЄГЁ
+        ClearPreview(); // ГЋГ·ГЁГ±ГІГЁГІГЁ ГЇГ°ГҐГў'Гѕ
+        Debug.Log("Wall placement mode: " + (isPlacingWall ? "ON" : "OFF")); // Г‹Г®ГЈГіГўГ Г­Г­Гї
     }
 }

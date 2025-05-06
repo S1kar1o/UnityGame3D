@@ -34,8 +34,11 @@ public class BridgePlacer : MonoBehaviour
     private GameObject[] previewParts;
     private GameObject cursorFollowPreview;
 
+    private int costOfTreeBrige, costOfRockBrige, costOfGoldBrige;
+    private int brigeCount = 0;
+    private bool priceValid = false;
 
-    public bool messageFromServer=false;
+    public bool messageFromServer = false;
     void Update()
     {
         if (!isPlacingBridge)
@@ -47,6 +50,7 @@ public class BridgePlacer : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
+
             if (!isFirstPointSelected)
             {
                 UpdateCursorFollowPreview(hit.point);
@@ -63,6 +67,12 @@ public class BridgePlacer : MonoBehaviour
             {
                 if (IsValidLocation(hit))
                 {
+                    priceValid =
+           (UnityTcpClient.Instance.goldAmount < brigeCount * costOfGoldBrige) ||
+           (UnityTcpClient.Instance.rockAmount < brigeCount * costOfRockBrige) ||
+           (UnityTcpClient.Instance.woodAmount < brigeCount * costOfTreeBrige);
+
+
                     if (!isFirstPointSelected)
                     {
                         firstPoint = hit.point;
@@ -70,7 +80,7 @@ public class BridgePlacer : MonoBehaviour
                         Destroy(cursorFollowPreview);
                         cursorFollowPreview = null;
                     }
-                    else if (isValidPlacement && hasWaterUnderBridge)
+                    else if (isValidPlacement && hasWaterUnderBridge && !priceValid)
                     {
                         ClearPreview();
                         PlaceBridge();
@@ -167,12 +177,19 @@ public class BridgePlacer : MonoBehaviour
         float bridgeLength = bridgePrefab.GetComponentInChildren<Renderer>().bounds.size.z;
 
         int bridgeCount = Mathf.Max(1, Mathf.FloorToInt(distance / bridgeLength) + 1);
+        this.brigeCount = bridgeCount;
         float offset = (bridgeCount * bridgeLength - distance) / 2;
 
         Vector3 position = firstPoint - direction * offset;
         previewParts = new GameObject[bridgeCount];
 
         Color previewColor = (isValidPlacement && hasWaterUnderBridge) ? validPlacementColor : invalidPlacementColor;
+        bool priceValid =
+           (UnityTcpClient.Instance.goldAmount < brigeCount * costOfGoldBrige) ||
+           (UnityTcpClient.Instance.rockAmount < brigeCount * costOfRockBrige) ||
+           (UnityTcpClient.Instance.woodAmount < brigeCount * costOfTreeBrige);
+
+        if (priceValid) previewColor = invalidPlacementColor;
 
         for (int i = 0; i < bridgeCount; i++)
         {
@@ -240,10 +257,14 @@ public class BridgePlacer : MonoBehaviour
         }
 
         CreateNavMeshLinks();
+        UnityTcpClient.Instance.goldAmount = UnityTcpClient.Instance.goldAmount - costOfGoldBrige * brigeCount;
+        UnityTcpClient.Instance.woodAmount = UnityTcpClient.Instance.woodAmount - costOfTreeBrige * brigeCount;
+        UnityTcpClient.Instance.rockAmount = UnityTcpClient.Instance.rockAmount - costOfRockBrige * brigeCount;
+        UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
     }
     private void CreateNavMeshLinks()
     {
-       
+
         for (int i = 0; i < bridgeParts.Length; i++)
         {
             Debug.Log(120);
@@ -342,8 +363,12 @@ public class BridgePlacer : MonoBehaviour
         Debug.Log("Bridge placement canceled");
     }
 
-    public void StartPlacingBridge()
+    public void StartPlacingBridge(int costOfTreeBrige, int costOfRockBrige, int costOfGoldBrige)
     {
+        this.costOfTreeBrige = costOfTreeBrige;
+        this.costOfRockBrige = costOfRockBrige;
+        this.costOfGoldBrige = costOfGoldBrige;
+
         isPlacingBridge = !isPlacingBridge;
         isFirstPointSelected = false;
         ClearPreview();

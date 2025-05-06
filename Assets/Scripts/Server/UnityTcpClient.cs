@@ -13,6 +13,7 @@ using UnityEngine.SceneManagement;
 
 public class UnityTcpClient : MonoBehaviour
 {
+    public LoginingToDB loginController;
     private TcpClient client;
     private NetworkStream stream;
     private bool isReconnecting = false;
@@ -104,8 +105,9 @@ public class UnityTcpClient : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             Application.runInBackground = true;
 
-            Initialize();
         }
+        Initialize();
+
     }
 
     private void Initialize()
@@ -171,6 +173,10 @@ public class UnityTcpClient : MonoBehaviour
             }
         }
     }
+    void OnDestroy()
+    {
+        Debug.Log("UnityTcpClient is being destroyed!");
+    }
     IEnumerator LoadSceneAsync(string nameScene)
     {
         AsyncOperation operation = SceneManager.LoadSceneAsync(nameScene);
@@ -226,6 +232,17 @@ public class UnityTcpClient : MonoBehaviour
                         else if (message.StartsWith("SPAWN"))
                         {
                             ProcessSpawnMessage(message);
+                        }else if (message.StartsWith("WALL"))
+                        {
+                            Debug.Log(121);
+                            WallGenerator wallGenerator = FindAnyObjectByType<WallGenerator>();
+                            if (wallGenerator != null)
+                            {
+                                wallGenerator.HandleWallConstructionMessage(message);
+
+                            }
+                            else
+                                Debug.Log("eeeerrrroor494");
                         }
                         else if (message.StartsWith("BUILT"))
                         {
@@ -290,7 +307,6 @@ public class UnityTcpClient : MonoBehaviour
                         }
                         else if (message.StartsWith("LOGIN_SUCCESS_WITHOUT_TOKEN"))
                         {
-                            Debug.Log(120);
                             // Розбиваємо повідомлення на частини
                             string[] parts = message.Split(' ');
 
@@ -309,6 +325,18 @@ public class UnityTcpClient : MonoBehaviour
                             }
                             StartCoroutine(LoadSceneAsync("SampleScene"));
                         }
+                        else if (message.StartsWith("REGISTRATION_SUCCESS"))
+                        {
+                            loginController.toApplyMenu();
+                        }
+                        else if (message.StartsWith("REGISTRATION_FAILED"))
+                        {
+                            string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
+                            HandleRegistrationError(errorMessage);
+                        }else if (message.StartsWith("NEED_APPLY"))
+                        {
+                            loginController.ProblemAcceptGmail();
+                        }
                         else if (message.StartsWith("LOGIN_SUCCESS"))
                         {
                             StartCoroutine(LoadSceneAsync("SampleScene"));
@@ -320,7 +348,7 @@ public class UnityTcpClient : MonoBehaviour
                             buttonControler.endGamePanelIsActive = true;
                             buttonControler.PanelEndGameLoseFromServerButton();
                         }
-                        else if(message.StartsWith("WON")|| message.StartsWith("Opponent disconnected"))
+                        else if (message.StartsWith("WON") || message.StartsWith("Opponent disconnected"))
                         {
                             cameraMoving.waiting = true;
                             buttonControler.endGamePanelIsActive = true;
@@ -351,7 +379,32 @@ public class UnityTcpClient : MonoBehaviour
         enemyReady = true;
 
     }
+    private void HandleRegistrationError(string errorMessage)
+    {
+        // Розділяємо повідомлення про помилку на код та опис (якщо є)
+        string errorCode = "";
+        string description = errorMessage;
 
+        if (errorMessage.Contains(":"))
+        {
+            var parts = errorMessage.Split(new[] { ':' }, 2);
+            errorCode = parts[0].Trim();
+            description = parts.Length > 1 ? parts[1].Trim() : "Unknown error";
+        }
+
+        // Відображення помилки користувачеві
+        if (loginController != null)
+        {
+            loginController.ShowRegistrationError(description);
+        }
+        else
+        {
+            Debug.LogError($"Registration error (no controller): {description}");
+        }
+
+        // Додаткове логування для розробників
+        Debug.Log($"Registration failed: Code={errorCode}, Message={description}");
+    }
     private void ProcessLoadedIDfromServer(string message)
     {
         string[] parts = message.Split(' ');
@@ -725,12 +778,12 @@ public class UnityTcpClient : MonoBehaviour
                 Vector3 buildPosition = new Vector3(buildX, buildY, buildZ);
                 Quaternion buildRotation = Quaternion.Euler(rotX, rotY, rotZ);
                 GameObject newBuilding = Instantiate(buildingPrefab, buildPosition, buildRotation);
-                newBuilding.tag = UnityTcpClient.Instance.tagOwner[1-UnityTcpClient.Instance.IDclient];
+                newBuilding.tag = UnityTcpClient.Instance.tagOwner[1 - UnityTcpClient.Instance.IDclient];
                 ServerId serverId = newBuilding.GetComponent<ServerId>();
                 serverId.serverId = id;
                 TowerAttack ta = newBuilding.GetComponent<TowerAttack>();
-                if( ta != null )
-                     ta.enabled = true;
+                if (ta != null)
+                    ta.enabled = true;
                 GameObject obstracle = newBuilding.transform.GetChild(0).gameObject;
                 obstracle.SetActive(true);
                 Debug.Log($"Building constructed: {prefabName} at position {buildPosition} with rotation {buildRotation.eulerAngles}");

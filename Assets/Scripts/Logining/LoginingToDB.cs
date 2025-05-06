@@ -1,15 +1,18 @@
-﻿using TMPro;
+﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 public class LoginingToDB : MonoBehaviour
 {
     [SerializeField] private TMP_InputField emailField, passwordField, nickNameField;
-    [SerializeField] private UnityTcpClient tcpClient;
-    [SerializeField] private Button finishInputButton,loginingButton,registrationButton,returnButton;
+    [SerializeField] private TMP_Text errorText, errorDuringApplyMessage;
+    [SerializeField] private Button finishInputButton, loginingButton, registrationButton, returnButton, applyButton, closeGame;
     private bool logOrCreate = false;
+    [SerializeField] private float errorDisplayTime = 5f;
 
     private void Start()
     {
+        UnityTcpClient.Instance.loginController = this;
         SetFieldsVisibility(false, false);
     }
 
@@ -24,7 +27,18 @@ public class LoginingToDB : MonoBehaviour
         returnButton.gameObject.SetActive(showFields);
         loginingButton.gameObject.SetActive(!showFields);
         registrationButton.gameObject.SetActive(!showFields);
+        closeGame.gameObject.SetActive(!showFields);
+    }
 
+    public void CloseGame()
+    {
+        Debug.Log("Game is exiting...");
+        Application.Quit();
+
+#if UNITY_EDITOR
+        // Якщо ви запускаєте гру в редакторі Unity, закриття гри не працюватиме, тому ми зупинимо редактор.
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
     public void registrationMethod()
@@ -42,14 +56,16 @@ public class LoginingToDB : MonoBehaviour
     }
     public void configuationComplete()
     {
-        Debug.Log(logOrCreate);
         if (logOrCreate)
             buttonRegistrationPressed();
         else
-        buttonEnterToAccountPressed();
+            buttonEnterToAccountPressed();
 
     }
-
+    public void ProblemAcceptGmail()
+    {
+        errorDuringApplyMessage.color = Color.red;
+    }
     private bool AreFieldsValid(bool checkNick)
     {
         if (string.IsNullOrEmpty(emailField.text) || string.IsNullOrEmpty(passwordField.text))
@@ -61,21 +77,71 @@ public class LoginingToDB : MonoBehaviour
         return true;
     }
 
-    private async void buttonEnterToAccountPressed()
+    public async void buttonEnterToAccountPressed()
     {
         if (AreFieldsValid(false))
         {
-            await tcpClient.SendMessage($"LOGINBYEMAIL {emailField.text} {passwordField.text}");
+            await UnityTcpClient.Instance.SendMessage($"LOGINBYEMAIL {emailField.text} {passwordField.text}");
         }
     }
 
+    public void toApplyMenu()
+    {
+        emailField.gameObject.SetActive(false);
+        passwordField.gameObject.SetActive(false);
+        nickNameField.gameObject.SetActive(false);
+        finishInputButton.gameObject.SetActive(false);
+        returnButton.gameObject.SetActive(false);
+        loginingButton.gameObject.SetActive(false);
+        registrationButton.gameObject.SetActive(false);
 
 
+        applyButton.gameObject.SetActive(true);
+    }
+    public void problemDuringLogin(string exeptionDiscription)
+    {
+        errorText.gameObject.SetActive(true);
+        errorText.text = exeptionDiscription;
+    }
+
+    private readonly Dictionary<string, string> errorMessages = new Dictionary<string, string>
+    {
+        {"Invalid format", "Невірний формат запиту"},
+        {"Email exists", "Користувач з таким email вже існує"},
+        {"Weak password", "Пароль занадто простий"},
+        {"Invalid email", "Невірний формат email"},
+        {"Database error", "Помилка бази даних, спробуйте пізніше"}
+    };
+
+    public void ShowRegistrationError(string errorMessage)
+    {
+        // Отримуємо локалізоване повідомлення або використовуємо оригінал
+        string displayMessage = errorMessages.TryGetValue(errorMessage, out string localized) ?
+            localized : errorMessage;
+
+        errorText.text = displayMessage;
+        errorText.gameObject.SetActive(true);
+
+        // Автоматичне приховування помилки через вказаний час
+        CancelInvoke(nameof(HideError));
+        Invoke(nameof(HideError), errorDisplayTime);
+    }
+    private void HideError()
+    {
+        errorText.gameObject.SetActive(false);
+    }
+
+    public void ClearErrors()
+    {
+        errorText.text = "";
+        errorText.gameObject.SetActive(false);
+        CancelInvoke(nameof(HideError));
+    }
     private async void buttonRegistrationPressed()
     {
         if (AreFieldsValid(true))
         {
-            await tcpClient.SendMessage($"REGISTRATE {nickNameField.text} {emailField.text} {passwordField.text}");
+            await UnityTcpClient.Instance.SendMessage($"REGISTRATE {nickNameField.text} {emailField.text} {passwordField.text}");
         }
     }
 }
