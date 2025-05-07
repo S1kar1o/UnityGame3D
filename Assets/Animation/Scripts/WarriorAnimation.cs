@@ -1,17 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+пїњusing UnityEngine;
 
 public class WarriorAnimation : VillagerAnimation
 {
     protected const string IS_ATTACK = "IsAttack";
+
     protected float nextActionTime = 0f;
-    protected float interval = 1.5f; // ≤нтервал у секундах
+    protected float interval = 1.5f;
+    private bool IsDie = false;
+    private bool hasPlayedDrownSound = false;
+
+    private AudioSource audioSource;
+
     [SerializeField] protected WarriorParametrs warriorParametrs;
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
     }
+
     private void Update()
     {
         animator.SetBool(IS_DIE, warriorParametrs.IsDie());
@@ -20,8 +28,19 @@ public class WarriorAnimation : VillagerAnimation
         animator.SetBool(IS_STANDING_IN_WATER, warriorParametrs.IsStandingInWater());
         animator.SetBool(IS_DROW, warriorParametrs.IsDrow());
         animator.SetBool(IS_SWIMMING, warriorParametrs.IsSwimming());
+
+        UnitSoundPlayer.Instance.HandleRunningSound(audioSource, warriorParametrs.IsRunning());
+        UnitSoundPlayer.Instance.HandleDeathSound(audioSource, warriorParametrs.IsDie(), ref IsDie);
+        UnitSoundPlayer.Instance.HandleSwimmingSound(audioSource, warriorParametrs.IsSwimming());
+        UnitSoundPlayer.Instance.HandleStandingInWaterSound(audioSource, warriorParametrs.IsStandingInWater());
+        UnitSoundPlayer.Instance.HandleDrownSound(audioSource, warriorParametrs.IsDrow(), ref IsDie);
+
         AttackAnimationLogic();
     }
+
+
+    
+
 
     public void AttackAnimationLogic()
     {
@@ -31,36 +50,34 @@ public class WarriorAnimation : VillagerAnimation
         {
             AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-            // ѕереконуЇмось, що ан≥мац≥€ атаки IsAttack уже запущена
-            if (stateInfo.IsName("Base Layer.IsAttack"))
+            if (stateInfo.IsName("Base Layer.IsAttack") &&
+                stateInfo.normalizedTime >= 0.5f &&
+                Time.time >= nextActionTime)
             {
-                // якщо ан≥мац≥€ атаки на 50% або б≥льше
-                if (stateInfo.normalizedTime >= 0.5f && Time.time >= nextActionTime)
-                {
-                    nextActionTime = Time.time + interval;
+                nextActionTime = Time.time + interval;
 
-                    if (warriorParametrs.targetEnemy != null)
+                UnitSoundPlayer.Instance.Play(UnitSoundPlayer.Instance.attackSound, audioSource); 
+
+                if (warriorParametrs.targetEnemy != null)
+                {
+                    VillagerParametrs target = warriorParametrs.targetEnemy.GetComponent<VillagerParametrs>();
+                    if (target != null)
                     {
-                        VillagerParametrs target = warriorParametrs.targetEnemy.GetComponent<VillagerParametrs>();
-                        if (target != null)
+                        target.getDamage(50);
+                        if (target.GetHp() <= 0)
                         {
-                            BuildingStats bd= warriorParametrs.targetEnemy.GetComponent<BuildingStats>();
-                            target.getDamage(50);
-                            if (target.GetHp() <= 0)
-                            {
-                                warriorParametrs.targetEnemy = null;
-                                warriorParametrs.SetAttack(false);
-                            }
+                            warriorParametrs.targetEnemy = null;
+                            warriorParametrs.SetAttack(false);
                         }
-                        else
+                    }
+                    else
+                    {
+                        BuildingStats bd = warriorParametrs.targetEnemy.GetComponent<BuildingStats>();
+                        bd.getDamage(50);
+                        if (bd.GetHp() <= 0)
                         {
-                            BuildingStats bd = warriorParametrs.targetEnemy.GetComponent<BuildingStats>();
-                            bd.getDamage(50);
-                            if (bd.GetHp() <= 0)
-                            {
-                                warriorParametrs.targetEnemy = null;
-                                warriorParametrs.SetAttack(false);
-                            }
+                            warriorParametrs.targetEnemy = null;
+                            warriorParametrs.SetAttack(false);
                         }
                     }
                 }

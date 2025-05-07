@@ -72,13 +72,13 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark04.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
     <Compile Include="Assets\Animation\Scripts\RiderAnimation.cs" />
-    <Compile Include="Assets\Animation\Scripts\BaseAnimation.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_FrameRateCounter.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
     <Compile Include="Assets\Scripts\Building.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark01.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshSpawner.cs" />
+    <Compile Include="Assets\Audio\AudioManager.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\Benchmark02.cs" />
     <Compile Include="Assets\Scripts\SpawnUnits.cs" />
     <Compile Include="Assets\Animation\Scripts\ArcherAnimation.cs" />
@@ -139,6 +139,7 @@
     <Compile Include="Assets\IroNice19\IroNiceScripts\RiverMeshCreate.cs" />
     <Compile Include="Assets\Scripts\ButtonControler.cs" />
     <Compile Include="Assets\Forst\CTI Runtime Components\CTI Runtime Components URP 14plus\Scripts\CTI_URP_CustomWind.cs" />
+    <Compile Include="Assets\Audio\UnitSoundPlayer.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ShaderPropAnimator.cs" />
     <Compile Include="Assets\Scripts\TimeLighting.cs" />
     <Compile Include="Assets\Scripts\RandomGeneratorPlayerInStart.cs" />
