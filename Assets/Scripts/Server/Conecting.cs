@@ -19,7 +19,7 @@ public class Conecting : MonoBehaviour
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
     }
-    void Start()
+    void Awake()
     {
         tcpClient = UnityTcpClient.Instance;
         Send();

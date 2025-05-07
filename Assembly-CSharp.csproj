@@ -1278,6 +1278,10 @@
       <Project>{428D518F-A187-4878-3A94-269C62422FB0}</Project>
       <Name>Freeloader</Name>
     </ProjectReference>
+    <ProjectReference Include="endel.nativewebsocket.csproj">
+      <Project>{18E28B4E-8C04-32C7-8D98-E094FFD34C70}</Project>
+      <Name>endel.nativewebsocket</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

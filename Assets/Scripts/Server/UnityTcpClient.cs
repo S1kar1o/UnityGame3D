@@ -3,35 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
+using NativeWebSocket;
 
 public class UnityTcpClient : MonoBehaviour
 {
     public LoginingToDB loginController;
-    private TcpClient client;
-    private NetworkStream stream;
+    public ButtonControler buttonControler;
+    public TokenManager tokenManager;
+    public UIresourceControll uIresource;
+    public CameraMoving cameraMoving;
+    private WebSocket ws;
     private bool isReconnecting = false;
     private bool isFirstConnectionLog = true;
-    private readonly byte[] buffer = new byte[1024];
+    private StringBuilder messageBuffer = new StringBuilder();
     private static UnityTcpClient _instance;
     private static readonly object _lock = new object();
-    public ButtonControler buttonControler;
     private bool isConnected = false;
-    // Stores movement information for objects in 3D space
     public int IDclient;
     public int goldAmount = 500, woodAmount = 500, rockAmount = 500;
-
     public bool enemyReady = false;
-    public event Action<string> OnSceneChangeRequested;  // Подія для зміни сцени
+    public event Action<string> OnSceneChangeRequested;
     private string _sceneToMove;
-    public TokenManager tokenManager;
     public int idUnitGeneratedAtServer = 0;
+    [SerializeField] private string serverIp = "c-server-d27j.onrender.com";
+    public string[] tagOwner = new string[] { "Unit", "Enemy" };
+    private static int loginTokenAttempts = 0;
+    private const int MAX_LOGIN_TOKEN_ATTEMPTS = 3;
+
     public string SceneToMove
     {
         get => _sceneToMove;
@@ -40,32 +43,11 @@ public class UnityTcpClient : MonoBehaviour
             if (_sceneToMove != value)
             {
                 _sceneToMove = value;
-                OnSceneChangeRequested?.Invoke(_sceneToMove);  // Сповіщаємо про зміну
+                OnSceneChangeRequested?.Invoke(_sceneToMove);
             }
         }
-    }
-    public void OnConnectedToServer()
-    {
-        isConnected = true;
-        TryLoginWithToken(); // Після підключення намагаємося здійснити вхід за токеном
     }
 
-    public string[] tagOwner = new string[] { "Unit", "Enemy" };
-    public UIresourceControll uIresource;
-    // Метод для спроби авторизації через токен
-    private async void TryLoginWithToken()
-    {
-        if (isConnected)
-        {
-            string key = tokenManager.GetTokenFromFile(); // Отримуємо токен
-            if (key != null)
-            {
-                Debug.Log(101);
-                await SendMessage("LOGINBYTOKEN " + key); // Відправляємо повідомлення з токеном
-            }
-        }
-    }
-    // Публічний доступ до екземпляра
     public static UnityTcpClient Instance
     {
         get
@@ -74,12 +56,9 @@ public class UnityTcpClient : MonoBehaviour
             {
                 if (_instance == null)
                 {
-                    // Пошук існуючого екземпляра на сцені
                     _instance = FindObjectOfType<UnityTcpClient>();
-
                     if (_instance == null)
                     {
-                        // Створення нового об'єкта, якщо не знайдено
                         GameObject singletonObject = new GameObject(typeof(UnityTcpClient).Name);
                         _instance = singletonObject.AddComponent<UnityTcpClient>();
                         DontDestroyOnLoad(singletonObject);
@@ -89,7 +68,6 @@ public class UnityTcpClient : MonoBehaviour
             }
         }
     }
-    public CameraMoving cameraMoving;
 
     void Awake()
     {
@@ -100,67 +78,106 @@ public class UnityTcpClient : MonoBehaviour
                 Destroy(gameObject);
                 return;
             }
-
             _instance = this;
             DontDestroyOnLoad(gameObject);
             Application.runInBackground = true;
-
         }
         Initialize();
-
     }
 
     private void Initialize()
     {
-        // Тут ініціалізація підключення
         ConnectToServer();
     }
 
-    public async Task ConnectToServer(string ipAddress = "127.0.0.1", int port = 8080)
+    public async void ConnectToServer()
     {
         try
         {
             if (isFirstConnectionLog)
             {
-                Debug.Log($"Attempting to connect to server at {ipAddress}:{port}\n");
+                Debug.Log($"Attempting to connect to WebSocket server at wss://{serverIp}/ws");
                 isFirstConnectionLog = false;
             }
 
-            client = new TcpClient();
-            await client.ConnectAsync(ipAddress, port);
-            stream = client.GetStream();
-            isConnected = true;
-            Debug.Log("Connected to server.");
-            /*            await SendMessage("Hello from Unity client!\n");
-            */
-            OnConnectedToServer();
+            ws = new WebSocket($"wss://{serverIp}/ws");
+            ws.OnOpen += () =>
+            {
+                isConnected = true;
+                Debug.Log("Connected to server.");
+                OnConnectedToServer();
+            };
+            ws.OnMessage += (bytes) =>
+            {
+                string receivedMessage = Encoding.UTF8.GetString(bytes).Trim();
+                messageBuffer.Append(receivedMessage + "\n");
+                ProcessReceivedMessages();
+            };
+            ws.OnError += (e) =>
+            {
+                Debug.LogError($"WebSocket error: {e}");
+                isConnected = false;
+                if (!isReconnecting) StartCoroutine(Reconnect());
+            };
+            ws.OnClose += (e) =>
+            {
+                Debug.Log($"WebSocket closed: {e}");
+                isConnected = false;
+                if (!isReconnecting) StartCoroutine(Reconnect());
+            };
 
-            ReceiveMessages();
+            await ws.Connect();
         }
         catch (Exception ex)
         {
             Debug.LogError($"Error connecting to server: {ex.Message}");
             if (!isReconnecting)
             {
-                isReconnecting = true;
-                await Reconnect(ipAddress, port);
+                StartCoroutine(Reconnect());
             }
         }
     }
 
-    public async new Task SendMessage(string message)
+    public void OnConnectedToServer()
     {
-        if (isConnected && client.Connected && stream != null)
+        TryLoginWithToken();
+    }
+
+    private async void TryLoginWithToken()
+    {
+        if (!isConnected) return;
+
+        string key = tokenManager.GetTokenFromFile();
+        if (!string.IsNullOrEmpty(key) && loginTokenAttempts < MAX_LOGIN_TOKEN_ATTEMPTS)
+        {
+            Debug.Log($"Attempting login with token (attempt {loginTokenAttempts + 1}/{MAX_LOGIN_TOKEN_ATTEMPTS}).");
+            loginTokenAttempts++;
+            await SendMessage($"LOGINBYTOKEN {key}");
+        }
+        else
+        {
+            Debug.Log("No token found or max token attempts reached, attempting login with email.");
+            loginTokenAttempts = 0;
+        }
+    }
+
+    public async Task SendMessage(string message)
+    {
+        if (isConnected && ws != null && ws.State == WebSocketState.Open)
         {
             try
             {
-                byte[] data = Encoding.UTF8.GetBytes(message + "\n");
-                await stream.WriteAsync(data, 0, data.Length);
-                Debug.Log("Message sent to server: " + message);
+                Debug.Log($"Sending to server: {message.Trim()}");
+                await ws.SendText(message + "\n");
             }
             catch (Exception ex)
             {
                 Debug.LogError($"Error sending message: {ex.Message}");
+                isConnected = false;
+                if (!isReconnecting)
+                {
+                    StartCoroutine(Reconnect());
+                }
             }
         }
         else
@@ -168,235 +185,231 @@ public class UnityTcpClient : MonoBehaviour
             Debug.LogError("Cannot send message, no active connection.");
             if (!isReconnecting)
             {
-                isReconnecting = true;
-                await Reconnect("127.0.0.1", 8080);
+                StartCoroutine(Reconnect());
             }
         }
     }
-    void OnDestroy()
-    {
-        Debug.Log("UnityTcpClient is being destroyed!");
-    }
-    IEnumerator LoadSceneAsync(string nameScene)
-    {
-        AsyncOperation operation = SceneManager.LoadSceneAsync(nameScene);
 
-        // Уникаємо автоматичного переходу на нову сцену, чекаючи завершення завантаження
-        operation.allowSceneActivation = false;
-
-        while (!operation.isDone)
+    private void ProcessReceivedMessages()
+    {
+        string currentBuffer = messageBuffer.ToString();
+        int newlineIndex;
+        while ((newlineIndex = currentBuffer.IndexOf('\n')) >= 0)
         {
-            // Прогрес завантаження
-            float progress = Mathf.Clamp01(operation.progress / 0.9f); // Progress max is 0.9
-                                                                       // Відображення прогресу завантаження (наприклад, через slider)
-            Debug.Log("Завантаження: " + progress * 100 + "%");
+            string message = currentBuffer.Substring(0, newlineIndex).Trim();
+            currentBuffer = currentBuffer.Substring(newlineIndex + 1);
+            messageBuffer.Clear();
+            messageBuffer.Append(currentBuffer);
 
-            // Якщо завантажено 90%, переходимо до сцени
-            if (operation.progress >= 0.9f)
+            if (string.IsNullOrEmpty(message)) continue;
+
+            Debug.Log($"Received from server: {message}");
+
+            if (message.Contains("YourID:"))
             {
-                operation.allowSceneActivation = true;  // Активуємо сцену
-
+                InitializeID(message);
             }
-
-            yield return null; // дає можливість оновлювати UI, виконувати інші завдання
-
-        }
-    }
-    public async void ReceiveMessages()
-    {
-        while (isConnected)
-        {
-            try
+            else if (message.Contains("Другий гравець підключився"))
             {
-                int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-                if (bytesRead > 0)
+                Debug.Log("Гра починається...");
+                StartCoroutine(LoadSceneAsync("LoadingScene"));
+            }
+            else if (message.StartsWith("SPAWN"))
+            {
+                ProcessSpawnMessage(message);
+            }
+            else if (message.StartsWith("RAITING_SUCCESS"))
+            {
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
                 {
-                    string receivedMessage = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                    Debug.Log("Received from server: " + receivedMessage);
-
-                    // Розділяємо отриманий рядок на окремі повідомлення
-                    string[] messages = receivedMessage.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    foreach (string message in messages)
-                    {
-                        // Оброюляємо кожне окреме повідомлення
-                        if (message.Contains("YourID:"))
-                        {
-                            InitializeID(message);
-                        }
-                        else if (message.Contains("Другий гравець підключився"))
-                        {
-                            Debug.Log("Гра починається...");
-                            StartCoroutine(LoadSceneAsync("LoadingScene"));
-                        }
-                        else if (message.StartsWith("SPAWN"))
-                        {
-                            ProcessSpawnMessage(message);
-                        }
-                        else if (message.StartsWith("RAITING_SUCCESS"))
-                        {
-                            Conecting conecting = FindAnyObjectByType<Conecting>();
-                            if (conecting != null)
-                            {
-                                conecting.UpdateRainting(message);
-
-                            }
-
-                        }
-                        else if (message.StartsWith("WALL"))
-                        {
-                            Debug.Log(121);
-                            WallGenerator wallGenerator = FindAnyObjectByType<WallGenerator>();
-                            if (wallGenerator != null)
-                            {
-                                wallGenerator.HandleWallConstructionMessage(message);
-
-                            }
-                            else
-                                Debug.Log("eeeerrrroor494");
-                        }
-                        else if (message.StartsWith("BUILT"))
-                        {
-                            ProcessBuiltMessage(message);
-                        }
-                        else if (message.StartsWith("MOVE"))
-                        {
-                            string message2 = message.Replace(',', '.');
-                            string[] parts = message2.Split(' ');
-                            int unitId = int.Parse(parts[1]);
-                            List<Vector3> pathPoints = new List<Vector3>();
-                            for (int i = 2; i < parts.Length; i += 3)
-                            {
-                                float x = float.Parse(parts[i], CultureInfo.InvariantCulture);
-                                float y = float.Parse(parts[i + 1], CultureInfo.InvariantCulture);
-                                float z = float.Parse(parts[i + 2], CultureInfo.InvariantCulture);
-                                pathPoints.Add(new Vector3(x, y, z));
-                            }
-
-                            GameObject unit = FindObjectByServerID(unitId);
-                            var extractor = unit.GetComponent<VillagerParametrs>();
-                            if (extractor != null)
-                            {
-                                // Спроба привести до WarriorParametrs, якщо це можливо
-                                if (extractor is WarriorParametrs warrior)
-                                {
-                                    warrior.targetEnemy = null;
-                                }
-                                StartCoroutine(MoveStepByStep(unit, pathPoints));
-                            }
-                            else
-                            {
-                                extractor.StopExtracting(); //  Викликає батьківський метод
-                            }
-
-                        }
-                        else if (message.StartsWith("ATTACK"))
-                        {
-                            ProcessAttackMessage(message);
-                        }
-                        else if (message.StartsWith("EXTRACT"))
-                        {
-                            ProcessExtractMessage(message);
-                        }
-                        else if (message.StartsWith("LOADED"))
-                        {
-                            ProcessLoadedMessage(message);
-                        }
-                        else if (message.StartsWith("ID_GENERATED"))
-                        {
-                            ProcessLoadedIDfromServer(message);
-                        }
-                        else if (message.StartsWith("DIE"))
-                        {
-                            ProcessDieMessage(message);
-                        }
-                        else if (message.StartsWith("GOEXTRACT"))
-                        {
-                            Debug.Log(1);
-                            ProcessExtractByUnitMessage(message);
-
-                        }
-                        else if (message.StartsWith("LOGIN_SUCCESS_WITHOUT_TOKEN"))
-                        {
-                            // Розбиваємо повідомлення на частини
-                            string[] parts = message.Split(' ');
-
-                            if (parts.Length == 3) // Перевіряємо, чи є токен і userId
-                            {
-                                string token = parts[1];
-                                string userId = parts[2];
-                                Debug.Log(120);
-
-                                // Зберігаємо токен і userId в файл
-                                tokenManager.SaveTokenToFile(token, userId);
-                            }
-                            else
-                            {
-                                Debug.LogError("Невірний формат повідомлення LOGIN_SUCCESS");
-                            }
-                            StartCoroutine(LoadSceneAsync("SampleScene"));
-                        }
-                        else if (message.StartsWith("REGISTRATION_SUCCESS"))
-                        {
-                            loginController.toApplyMenu();
-                        }
-                        else if (message.StartsWith("REGISTRATION_FAILED"))
-                        {
-                            string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
-                            HandleRegistrationError(errorMessage);
-                        }
-                        else if (message.StartsWith("NEED_APPLY"))
-                        {
-                            loginController.ProblemAcceptGmail();
-                        }
-                        else if (message.StartsWith("LOGIN_SUCCESS"))
-                        {
-                            StartCoroutine(LoadSceneAsync("SampleScene"));
-                        }
-                        else if (message.StartsWith("LOSE"))
-                        {
-                            Debug.Log(102);
-
-                            buttonControler.endGamePanelIsActive = true;
-                            buttonControler.PanelEndGameLoseFromServerButton();
-                        }
-                        else if (message.StartsWith("WON") || message.StartsWith("Opponent disconnected"))
-                        {
-                            cameraMoving.waiting = true;
-                            buttonControler.endGamePanelIsActive = true;
-                            buttonControler.PanelEndGameButton();
-                        }
-                        else
-                        {
-                            Debug.LogWarning($"Unknown message type: {message}");
-                        }
-                    }
+                    conecting.UpdateRainting(message);
                 }
             }
-            catch (Exception ex)
+            else if (message.StartsWith("WALL"))
             {
-                Debug.LogError($"Error receiving message: {ex.Message}");
-                break;
+                WallGenerator wallGenerator = FindAnyObjectByType<WallGenerator>();
+                if (wallGenerator != null)
+                {
+                    wallGenerator.HandleWallConstructionMessage(message);
+                }
+                else
+                {
+                    Debug.LogError("WallGenerator not found.");
+                }
+            }
+            else if (message.StartsWith("BUILT"))
+            {
+                ProcessBuiltMessage(message);
+            }
+            else if (message.StartsWith("MOVE"))
+            {
+                string message2 = message.Replace(',', '.');
+                string[] parts = message2.Split(' ');
+                int unitId = int.Parse(parts[1]);
+                List<Vector3> pathPoints = new List<Vector3>();
+                for (int i = 2; i < parts.Length; i += 3)
+                {
+                    float x = float.Parse(parts[i], CultureInfo.InvariantCulture);
+                    float y = float.Parse(parts[i + 1], CultureInfo.InvariantCulture);
+                    float z = float.Parse(parts[i + 2], CultureInfo.InvariantCulture);
+                    pathPoints.Add(new Vector3(x, y, z));
+                }
+
+                GameObject unit = FindObjectByServerID(unitId);
+                var extractor = unit?.GetComponent<VillagerParametrs>();
+                if (extractor != null)
+                {
+                    if (extractor is WarriorParametrs warrior)
+                    {
+                        warrior.targetEnemy = null;
+                    }
+                    StartCoroutine(MoveStepByStep(unit, pathPoints));
+                }
+                else
+                {
+                    extractor?.StopExtracting();
+                }
+            }
+            else if (message.StartsWith("ATTACK"))
+            {
+                ProcessAttackMessage(message);
+            }
+            else if (message.StartsWith("EXTRACT"))
+            {
+                ProcessExtractMessage(message);
+            }
+            else if (message.StartsWith("LOADED"))
+            {
+                ProcessLoadedMessage(message);
+            }
+            else if (message.StartsWith("ID_GENERATED"))
+            {
+                ProcessLoadedIDfromServer(message);
+            }
+            else if (message.StartsWith("DIE"))
+            {
+                ProcessDieMessage(message);
+            }
+            else if (message.StartsWith("GOEXTRACT"))
+            {
+                ProcessExtractByUnitMessage(message);
+            }
+            else if (message.StartsWith("LOGIN_SUCCESS_WITHOUT_TOKEN"))
+            {
+                string[] parts = message.Split(' ');
+                if (parts.Length == 3)
+                {
+                    string token = parts[1];
+                    string userId = parts[2];
+                    tokenManager.SaveTokenToFile(token, userId);
+                    Debug.Log($"Login successful! Token: {token}, UserId: {userId}");
+                    loginTokenAttempts = 0;
+                }
+                StartCoroutine(LoadSceneAsync("SampleScene"));
+            }
+            else if (message.StartsWith("REGISTRATION_SUCCESS"))
+            {
+                loginController.toApplyMenu();
+            }
+            else if (message.StartsWith("REGISTRATION_FAILED"))
+            {
+                string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
+                HandleRegistrationError(errorMessage);
+            }
+            else if (message.StartsWith("NEED_APPLY"))
+            {
+                loginController.ProblemAcceptGmail();
+            }
+            else if (message.StartsWith("LOGIN_SUCCESS"))
+            {
+                StartCoroutine(LoadSceneAsync("SampleScene"));
+            }
+            else if (message.StartsWith("LOSE"))
+            {
+                buttonControler.endGamePanelIsActive = true;
+                buttonControler.PanelEndGameLoseFromServerButton();
+            }
+            else if (message.StartsWith("WON") || message.StartsWith("Opponent disconnected"))
+            {
+                cameraMoving.waiting = true;
+                buttonControler.endGamePanelIsActive = true;
+                buttonControler.PanelEndGameButton();
+            }
+            else
+            {
+                Debug.LogWarning($"Unknown message type: {message}");
             }
         }
     }
+
+    private IEnumerator Reconnect()
+    {
+        isReconnecting = true;
+        Debug.Log("Reconnecting...");
+        yield return new WaitForSeconds(10f);
+        Close();
+        ConnectToServer();
+        isReconnecting = false;
+    }
+
+    void OnDestroy()
+    {
+        Close();
+        Debug.Log("UnityWebSocketClient is being destroyed!");
+    }
+
+    public bool IsConnected()
+    {
+        return ws != null && ws.State == WebSocketState.Open && isConnected;
+    }
+
+    public async void Close()
+    {
+        try
+        {
+            isConnected = false;
+            if (ws != null && ws.State == WebSocketState.Open)
+            {
+                await ws.Close();
+            }
+            Debug.Log("Connection closed.");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error closing connection: {ex.Message}");
+        }
+    }
+
+    public void ReloadRscClient()
+    {
+        goldAmount = 500;
+        woodAmount = 500;
+        rockAmount = 500;
+    }
+
+    private void InitializeID(string message)
+    {
+        char id = message[7];
+        IDclient = id - '0';
+        Debug.Log($"Client ID set to: {IDclient}");
+    }
+
     private void ProcessLoadedMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 1)
         {
-            Debug.LogWarning($"Неправильний формат Load: {message}");
+            Debug.LogWarning($"Invalid LOADED message format: {message}");
             return;
         }
         enemyReady = true;
-
     }
+
     private void HandleRegistrationError(string errorMessage)
     {
-        // Розділяємо повідомлення про помилку на код та опис (якщо є)
         string errorCode = "";
         string description = errorMessage;
-
         if (errorMessage.Contains(":"))
         {
             var parts = errorMessage.Split(new[] { ':' }, 2);
@@ -404,7 +417,6 @@ public class UnityTcpClient : MonoBehaviour
             description = parts.Length > 1 ? parts[1].Trim() : "Unknown error";
         }
 
-        // Відображення помилки користувачеві
         if (loginController != null)
         {
             loginController.ShowRegistrationError(description);
@@ -413,57 +425,61 @@ public class UnityTcpClient : MonoBehaviour
         {
             Debug.LogError($"Registration error (no controller): {description}");
         }
-
-        // Додаткове логування для розробників
         Debug.Log($"Registration failed: Code={errorCode}, Message={description}");
     }
+
     private void ProcessLoadedIDfromServer(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 2)
         {
-            Debug.LogWarning($"Неправильний формат Load: {message}");
+            Debug.LogWarning($"Invalid ID_GENERATED message format: {message}");
             return;
         }
-        int objectID = int.Parse(parts[1]); // ID об'єкта
-
-        idUnitGeneratedAtServer = objectID;
+        idUnitGeneratedAtServer = int.Parse(parts[1]);
     }
-    private void InitializeID(string message)
+
+    private IEnumerator LoadSceneAsync(string nameScene)
     {
-        Debug.Log(message);
-        char id = message[7];
-        Debug.Log(id);
+        AsyncOperation operation = SceneManager.LoadSceneAsync(nameScene);
+        operation.allowSceneActivation = false;
 
-        IDclient = id - '0';
-        Debug.Log(id + ":::::::");
+        while (!operation.isDone)
+        {
+            float progress = Mathf.Clamp01(operation.progress / 0.9f);
+            Debug.Log($"Loading: {progress * 100}%");
+            if (operation.progress >= 0.9f)
+            {
+                operation.allowSceneActivation = true;
+            }
+            yield return null;
+        }
     }
-    IEnumerator MoveStepByStep(GameObject unit, List<Vector3> pathPoints, float threshold = 0.5f)
+
+    private IEnumerator MoveStepByStep(GameObject unit, List<Vector3> pathPoints, float threshold = 0.5f)
     {
         if (unit == null || !unit.activeInHierarchy)
         {
-            Debug.LogWarning("Об'єкт не активний або не існує.");
+            Debug.LogWarning("Object is not active or does not exist.");
             yield break;
         }
 
         NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
         if (agent == null || !agent.enabled || !agent.isOnNavMesh)
         {
-            Debug.LogWarning("NavMeshAgent не готовий або не на NavMesh.");
+            Debug.LogWarning("NavMeshAgent is not ready or not on NavMesh.");
             yield break;
         }
 
         NavMeshPath path = new NavMeshPath();
         agent.CalculatePath(pathPoints.Last(), path);
         agent.SetPath(path);
-
-        Debug.Log("Маршрут завершено.");
+        Debug.Log("Path completed.");
     }
 
     private void ProcessSpawnMessage(string message)
     {
         string[] parts = message.Split(' ');
-
         if (parts.Length == 9 && parts[0] == "SPAWN")
         {
             int id = int.Parse(parts[1]);
@@ -475,8 +491,6 @@ public class UnityTcpClient : MonoBehaviour
             string rotY = parts[7].Replace(',', '.');
             string rotZ = parts[8];
 
-            Debug.Log(id + " " + unitName + " " + objX + " " + objY + " " + objZ + " " + rotX + " " + rotY + " " + rotZ);
-
             if (float.TryParse(objX, NumberStyles.Float, CultureInfo.InvariantCulture, out float BuildX) &&
                 float.TryParse(objY, NumberStyles.Float, CultureInfo.InvariantCulture, out float BuildY) &&
                 float.TryParse(objZ, NumberStyles.Float, CultureInfo.InvariantCulture, out float BuildZ) &&
@@ -487,10 +501,9 @@ public class UnityTcpClient : MonoBehaviour
                 Vector3 spawnPosition = new Vector3(BuildX, BuildY, BuildZ);
                 Quaternion spawnRotation = Quaternion.Euler(0, RotY, 0);
 
-                // Перевіряємо, чи NavMesh готовий
                 if (!IsNavMeshReady(spawnPosition))
                 {
-                    Debug.LogWarning($"NavMesh не готовий для позиції {spawnPosition}. Відкладений спавн...");
+                    Debug.LogWarning($"NavMesh not ready at position {spawnPosition}. Delaying spawn...");
                     StartCoroutine(SpawnWhenNavMeshReady(id, unitName, spawnPosition, spawnRotation));
                     return;
                 }
@@ -504,8 +517,7 @@ public class UnityTcpClient : MonoBehaviour
         }
         else
         {
-            Debug.Log(message);
-            Debug.LogError("Invalid spawn message format. Expected format: SPAWN <unitName> <x> <y> <z>");
+            Debug.LogError($"Invalid spawn message format: {message}");
         }
     }
 
@@ -516,7 +528,7 @@ public class UnityTcpClient : MonoBehaviour
 
     private IEnumerator SpawnWhenNavMeshReady(int id, string unitName, Vector3 spawnPosition, Quaternion spawnRotation)
     {
-        int maxAttempts = 50; // Максимальна кількість спроб (5 секунд при 10 спробах/сек)
+        int maxAttempts = 50;
         float delayBetweenAttempts = 0.1f;
 
         for (int i = 0; i < maxAttempts; i++)
@@ -529,8 +541,7 @@ public class UnityTcpClient : MonoBehaviour
             yield return new WaitForSeconds(delayBetweenAttempts);
         }
 
-        Debug.LogError($"Не вдалося знайти NavMesh для {unitName} на позиції {spawnPosition} після {maxAttempts} спроб!");
-        // Спавнимо без NavMesh як резервний варіант
+        Debug.LogError($"Failed to find NavMesh for {unitName} at {spawnPosition} after {maxAttempts} attempts!");
         SpawnUnit(id, unitName, spawnPosition, spawnRotation, forceSpawn: true);
     }
 
@@ -547,11 +558,10 @@ public class UnityTcpClient : MonoBehaviour
                 NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
                 if (agent != null && !agent.isOnNavMesh)
                 {
-                    Debug.LogWarning($"Юніт {unitName} створений, але не розміщений на NavMesh!");
+                    Debug.LogWarning($"Unit {unitName} spawned but not placed on NavMesh!");
                 }
             }
             cameraMoving.enemys.Add(unit);
-
             Debug.Log($"Unit spawned: {unitName} at position {spawnPosition}");
         }
         else
@@ -559,120 +569,110 @@ public class UnityTcpClient : MonoBehaviour
             Debug.LogError($"Unit prefab {unitName} not found.");
         }
     }
+
     private void ProcessExtractByUnitMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 3)
         {
-            Debug.LogWarning($"Неправильний формат GOEXTRACT: {message}");
+            Debug.LogWarning($"Invalid GOEXTRACT message format: {message}");
             return;
         }
 
         if (!int.TryParse(parts[1], out int unitId) || !int.TryParse(parts[2], out int targetId))
         {
-            Debug.LogError($"Помилка парсингу ID у GOEXTRACT: {message}");
+            Debug.LogError($"Error parsing IDs in GOEXTRACT: {message}");
             return;
         }
-        Debug.Log(2);
 
         GameObject unit = FindObjectByServerID(unitId);
         GameObject resource = FindObjectByServerID(targetId);
-        Debug.Log(4);
-
         if (unit == null)
         {
-            Debug.LogError($"Юніт з ID {unitId} не знайдено!");
+            Debug.LogError($"Unit with ID {unitId} not found!");
             return;
         }
         if (resource == null)
         {
-            Debug.LogError($"Ресурс з ID {targetId} не знайдено!");
+            Debug.LogError($"Resource with ID {targetId} not found!");
             return;
         }
-        Debug.Log(5);
 
         VillagerParametrs unitObj = unit.GetComponent<VillagerParametrs>();
         if (unitObj == null)
         {
-            Debug.LogError($"Компонент VillagerParametrs не знайдено на юніті з ID {unitId}!");
+            Debug.LogError($"VillagerParametrs component not found on unit with ID {unitId}!");
             return;
         }
-        Debug.Log(3);
 
         unitObj.IsRunningToResource(true);
-        unitObj.MoveToResource(resource); // Рух до ресурсу
-        Debug.Log($"Юніт {unitId} почав видобуток ресурсу {targetId}");
+        unitObj.MoveToResource(resource);
+        Debug.Log($"Unit {unitId} started extracting resource {targetId}");
     }
+
     private void ProcessExtractMessage(string message)
     {
         try
         {
-            // Розбиваємо повідомлення на частини
             string[] parts = message.Split(' ');
             if (parts.Length < 3)
             {
-                Debug.LogError("Невірний формат повідомлення EXTRACT: " + message);
+                Debug.LogError($"Invalid EXTRACT message format: {message}");
                 return;
             }
 
-            int resourceID = int.Parse(parts[1]); // ID ресурсу
-            int amount = int.Parse(parts[2]);    // Кількість ресурсу
-
-            // Знаходимо об'єкт ресурсу за ID (припустимо, що ID зберігається в компоненті AmountResource)
+            int resourceID = int.Parse(parts[1]);
+            int amount = int.Parse(parts[2]);
             GameObject resource = FindObjectByServerID(resourceID);
-            AmountResource amountResource = resource.GetComponent<AmountResource>();
-            if (resource != null)
+            AmountResource amountResource = resource?.GetComponent<AmountResource>();
+            if (amountResource != null)
             {
                 amountResource.Extraction(amount);
-                Debug.Log($"Видобуто {amount} одиниць ресурсу з об'єкта ID {resourceID}.");
+                Debug.Log($"Extracted {amount} units from resource ID {resourceID}.");
             }
             else
             {
-                Debug.LogError($"Ресурс з ID {resourceID} не знайдено.");
+                Debug.LogError($"Resource with ID {resourceID} not found.");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Помилка при обробці повідомлення EXTRACT: {ex.Message}");
+            Debug.LogError($"Error processing EXTRACT message: {ex.Message}");
         }
     }
+
     private void ProcessDieMessage(string message)
     {
         try
         {
-            // Розбиваємо повідомлення на частини
             string[] parts = message.Split(' ');
             if (parts.Length < 2)
             {
-                Debug.LogError("Невірний формат повідомлення DIE: " + message);
+                Debug.LogError($"Invalid DIE message format: {message}");
                 return;
             }
 
-            int objectID = int.Parse(parts[1]); // ID об'єкта
-
-            // Знаходимо об'єкт за ID
+            int objectID = int.Parse(parts[1]);
             GameObject obj = FindObjectByServerID(objectID);
             if (obj != null)
             {
                 Destroy(obj);
-                Debug.Log($"Об'єкт з ID {objectID} був знищений.");
+                Debug.Log($"Object with ID {objectID} was destroyed.");
             }
             else
             {
-                Debug.LogError($"Об'єкт з ID {objectID} не знайдено.");
+                Debug.LogError($"Object with ID {objectID} not found.");
             }
         }
         catch (Exception ex)
         {
-            Debug.LogError($"Помилка при обробці повідомлення DIE: {ex.Message}");
+            Debug.LogError($"Error processing DIE message: {ex.Message}");
         }
     }
 
-    // Допоміжна функція для пошуку об'єкта за ID
     private GameObject FindObjectByServerID(int objectID)
     {
-        GameObject[] allObjects = FindObjectsOfType<GameObject>();
-        foreach (var obj in allObjects)
+        foreach (var obj in FindObjectsOfType<GameObject>())
         {
             ServerId sr = obj.GetComponent<ServerId>();
             if (sr != null && sr.serverId == objectID)
@@ -682,12 +682,13 @@ public class UnityTcpClient : MonoBehaviour
         }
         return null;
     }
+
     private void ProcessAttackMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 4)
         {
-            Debug.LogWarning($"Неправильний формат ATTACK_RESULT: {message}");
+            Debug.LogWarning($"Invalid ATTACK message format: {message}");
             return;
         }
         int attackerId = int.Parse(parts[1]);
@@ -695,87 +696,61 @@ public class UnityTcpClient : MonoBehaviour
         int damage = int.Parse(parts[3]);
 
         GameObject attacker = FindObjectByServerID(attackerId);
-        WarriorParametrs attackerObj = attacker.GetComponent<WarriorParametrs>();
+        WarriorParametrs attackerObj = attacker?.GetComponent<WarriorParametrs>();
         GameObject target = FindObjectByServerID(targetId);
-        attackerObj.AttackEnemy(target);
+        if (attackerObj != null && target != null)
+        {
+            attackerObj.AttackEnemy(target);
+        }
     }
-    // Допоміжна функція для пошуку ресурсу за ID
+
     private void ProcessBuiltMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length == 8 && parts[0] == "BUILT" && parts[1] == "Bridge3")
         {
             GameObject bridgePlacer = GameObject.Find("BridgePlacer");
-            BridgePlacer bp = bridgePlacer.GetComponent<BridgePlacer>();
+            BridgePlacer bp = bridgePlacer?.GetComponent<BridgePlacer>();
             string prefabName = parts[1];
-            string buildXStr = parts[2];
-            string buildYStr = parts[3];
-            string buildZStr = parts[4];
-            string buildXEnd = parts[5];
-            string buildYEnd = parts[6];
-            string buildZEnd = parts[7];
-            Debug.Log(buildXStr + " " + buildYStr + " " + buildZStr + " " + buildXEnd + " " + buildYEnd + " " + buildZEnd);
-            buildXStr = buildXStr.Replace(',', '.');
-            buildYStr = buildYStr.Replace(',', '.');
-            buildZStr = buildZStr.Replace(',', '.');
-            buildXEnd = buildXEnd.Replace(',', '.');
-            buildYEnd = buildYEnd.Replace(',', '.');
-            buildZEnd = buildZEnd.Replace(',', '.');
-            Debug.Log(buildXStr + " " + buildYStr + " " + buildZStr + " " + buildXEnd + " " + buildYEnd + " " + buildZEnd);
+            string buildXStr = parts[2].Replace(',', '.');
+            string buildYStr = parts[3].Replace(',', '.');
+            string buildZStr = parts[4].Replace(',', '.');
+            string buildXEnd = parts[5].Replace(',', '.');
+            string buildYEnd = parts[6].Replace(',', '.');
+            string buildZEnd = parts[7].Replace(',', '.');
 
-            bp.messageFromServer = true;
-            bp.firstPoint = new Vector3(float.Parse(buildXStr, CultureInfo.InvariantCulture), float.Parse(buildYStr, CultureInfo.InvariantCulture), float.Parse(buildZStr, CultureInfo.InvariantCulture));
-            bp.secondPoint = new Vector3(float.Parse(buildXEnd, CultureInfo.InvariantCulture), float.Parse(buildYEnd, CultureInfo.InvariantCulture), float.Parse(buildZEnd, CultureInfo.InvariantCulture));
-            bp.PlaceBridge();
-            bp.messageFromServer = false;
-            bp.firstPoint = Vector3.zero;
-            bp.secondPoint = Vector3.zero;
-
+            if (bp != null)
+            {
+                bp.messageFromServer = true;
+                bp.firstPoint = new Vector3(float.Parse(buildXStr, CultureInfo.InvariantCulture), float.Parse(buildYStr, CultureInfo.InvariantCulture), float.Parse(buildZStr, CultureInfo.InvariantCulture));
+                bp.secondPoint = new Vector3(float.Parse(buildXEnd, CultureInfo.InvariantCulture), float.Parse(buildYEnd, CultureInfo.InvariantCulture), float.Parse(buildZEnd, CultureInfo.InvariantCulture));
+                bp.PlaceBridge();
+                bp.messageFromServer = false;
+                bp.firstPoint = Vector3.zero;
+                bp.secondPoint = Vector3.zero;
+            }
         }
         else if (parts.Length == 9 && parts[0] == "BUILT")
         {
             string prefabName = parts[1];
             string prefabId = parts[2];
+            string buildXStr = parts[3].Replace(',', '.');
+            string buildYStr = parts[4].Replace(',', '.');
+            string buildZStr = parts[5].Replace(',', '.');
+            string rotXStr = parts[6].Replace(',', '.');
+            string rotYStr = parts[7].Replace(',', '.');
+            string rotZStr = parts[8].Replace(',', '.');
 
-            string buildXStr = parts[3];
-            string buildYStr = parts[4];
-            string buildZStr = parts[5];
-            string rotXStr = parts[6];
-            string rotYStr = parts[7];
-            string rotZStr = parts[8];
-
-            // Заміна коми на крапку
-            buildXStr = buildXStr.Replace(',', '.');
-            buildYStr = buildYStr.Replace(',', '.');
-            buildZStr = buildZStr.Replace(',', '.');
-            rotXStr = rotXStr.Replace(',', '.');
-            rotYStr = rotYStr.Replace(',', '.');
-            rotZStr = rotZStr.Replace(',', '.');
-
-            // Парсинг рядків у числа
-            if (float.TryParse(buildXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildX) &&
-                float.TryParse(buildYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildY) &&
-                float.TryParse(buildZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildZ) &&
-                float.TryParse(rotXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotX) &&
-                float.TryParse(rotYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotY) &&
-                float.TryParse(rotZStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float rotZ))
-            {
-                LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr);
-            }
-            else
-            {
-                Debug.LogError("Invalid build message format. Coordinates and rotation must be numbers.");
-            }
+            LoadAndInstantiateBuilding(prefabName, prefabId, buildXStr, buildYStr, buildZStr, rotXStr, rotYStr, rotZStr);
         }
         else
         {
-            Debug.LogError("Invalid build message format.");
+            Debug.LogError($"Invalid BUILT message format: {message}");
         }
     }
 
     private void LoadAndInstantiateBuilding(string prefabName, string idStr, string buildXStr, string buildYStr, string buildZStr, string rotXStr, string rotYStr, string rotZStr)
     {
-        // Парсинг рядків у числа
         if (float.TryParse(buildXStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildX) &&
             int.TryParse(idStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out int id) &&
             float.TryParse(buildYStr, NumberStyles.Float, CultureInfo.InvariantCulture, out float buildY) &&
@@ -790,7 +765,7 @@ public class UnityTcpClient : MonoBehaviour
                 Vector3 buildPosition = new Vector3(buildX, buildY, buildZ);
                 Quaternion buildRotation = Quaternion.Euler(rotX, rotY, rotZ);
                 GameObject newBuilding = Instantiate(buildingPrefab, buildPosition, buildRotation);
-                newBuilding.tag = UnityTcpClient.Instance.tagOwner[1 - UnityTcpClient.Instance.IDclient];
+                newBuilding.tag = tagOwner[1 - IDclient];
                 ServerId serverId = newBuilding.GetComponent<ServerId>();
                 serverId.serverId = id;
                 TowerAttack ta = newBuilding.GetComponent<TowerAttack>();
@@ -810,38 +785,11 @@ public class UnityTcpClient : MonoBehaviour
             Debug.LogError("Invalid number format received from server.");
         }
     }
-    private async Task Reconnect(string ipAddress, int port)
-    {
-        Debug.Log("Reconnecting...");
-        await Task.Delay(5000);
-        await ConnectToServer(ipAddress, port);
-        isReconnecting = false;
-    }
 
-    public bool IsConnected()
+    void Update()
     {
-        return client != null && client.Connected && isConnected;
-    }
-
-    public void Close()
-    {
-        try
-        {
-            stream?.Close();
-            client?.Close();
-            isConnected = false;
-            Debug.Log("Connection closed.");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Error closing connection: {ex.Message}");
-        }
-    }
-
-    public void ReloadRscClient()
-    {
-        goldAmount = 500;
-        woodAmount = 500;
-        rockAmount = 500;
+#if !UNITY_WEBGL || UNITY_EDITOR
+        ws?.DispatchMessageQueue();
+#endif
     }
 }
