@@ -301,7 +301,7 @@ Transform:
   m_GameObject: {fileID: 5178084011995603291}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.093, z: 0}
+  m_LocalPosition: {x: 0, y: 1.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -671,17 +671,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 269.0784
+      value: 1246.1296
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 212.1
+      value: 102.10138
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 148.14069
+      value: -525.36304
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f8a97bd330387e841aab2d6424999fc0,
         type: 3}
@@ -878,6 +878,8 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   hpBarBackground: {fileID: 453200594249305173}
   hpBarForeground: {fileID: 6477984146621369575}
+  rb: {fileID: 6371812310440264262}
+  agent: {fileID: 8467033966034923416}
   boxCollider: {fileID: 5391608888426749419}
   colliderForActionsWithWater: {fileID: 7655824579007566369}
   displaycmentAmount: 2
@@ -939,7 +941,7 @@ Rigidbody:
   m_GameObject: {fileID: 7484640550819272255}
   serializedVersion: 4
   m_Mass: 100
-  m_Drag: 0.89
+  m_Drag: 3
   m_AngularDrag: 0.83
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
