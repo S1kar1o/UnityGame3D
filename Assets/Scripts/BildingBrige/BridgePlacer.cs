@@ -38,7 +38,7 @@ public class BridgePlacer : MonoBehaviour
     private int brigeCount = 0;
     private bool priceValid = false;
 
-    public bool messageFromServer=false;
+    public bool messageFromServer = false;
     void Update()
     {
         if (!isPlacingBridge)
@@ -264,7 +264,7 @@ public class BridgePlacer : MonoBehaviour
     }
     private void CreateNavMeshLinks()
     {
-       
+
         for (int i = 0; i < bridgeParts.Length; i++)
         {
             Debug.Log(120);

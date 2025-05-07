@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,9 +7,9 @@ using UnityEngine;
 public class BildingButtonManager : MonoBehaviour
 {
 
-    
 
-   
+
+
     public int costOfTreeBrige, costOfRockBrige, costOfGoldBrige, costOfTreeWall, costOfRockWall, costOfGoldWall;
     public TextMeshProUGUI textCostOfTreeBrige, textCostOfRockBrige, textCostOfGoldBrige, textCostOfTreeWall, textCostOfRockWall, textCostOfGoldWall;
     private Coroutine resourceCheckCoroutine;

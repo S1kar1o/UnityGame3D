@@ -67,37 +67,5 @@ PrefabInstance:
     - {fileID: 3594683914899948403, guid: b08bbd344ee3d2f4cb4d47622adedaa0, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 568194071020843000, guid: b08bbd344ee3d2f4cb4d47622adedaa0,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5624773716640035925}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b08bbd344ee3d2f4cb4d47622adedaa0, type: 3}
---- !u!1 &7497803632238973541 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 568194071020843000, guid: b08bbd344ee3d2f4cb4d47622adedaa0,
-    type: 3}
-  m_PrefabInstance: {fileID: 8065715841528954269}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5624773716640035925
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7497803632238973541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0077ad086c202e34f8270d69569f7cc1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  layer:
-    serializedVersion: 2
-    m_Bits: 128
-  maxSlopeAngle: 50
-  terrain: {fileID: 0}
-  flattenScale: 0.9
-  rotationSpeed: 90
-  snapDistance: 25
-  wallsPrefab: {fileID: 568194071020843000, guid: b08bbd344ee3d2f4cb4d47622adedaa0,
-    type: 3}

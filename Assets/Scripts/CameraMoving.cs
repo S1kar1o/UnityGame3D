@@ -21,12 +21,12 @@ public class CameraMoving : MonoBehaviour
 
     private void Update()
     {
-        if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
+       /* if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
         if (!waiting)
-            isLocked = false;
+            isLocked = checkEnemy();
         else
             isLocked = true;
-        if (!isLocked)
+        if (!isLocked)*/
         {
             float rotate = 0.0f;
 
