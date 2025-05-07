@@ -8,14 +8,14 @@ public class TowerAttack : MonoBehaviour
     public GameObject target; // Поточна ціль
     public float attackRange = 200f; // Дальність атаки вежі
     public float attackCooldown = 1f; // Затримка між пострілами
-    private bool isSearching;
+    public bool isSearching;
     private bool enemy;
     private float lastAttackTime; // Час останнього пострілу
 
     void Start()
     {
         lastAttackTime = -attackCooldown; // Щоб можна було стріляти одразу
-        if (gameObject.CompareTag("Enemy"))
+        if (gameObject.tag == UnityTcpClient.Instance.tagOwner[1-UnityTcpClient.Instance.IDclient])
         {
             enemy = true;
         }
@@ -23,20 +23,36 @@ public class TowerAttack : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(1120);
         if (target == null && !isSearching)
         {
             StartCoroutine(FindTargetCoroutine());
         }
         else if (target != null)
         {
+            VillagerParametrs villager = target.GetComponent<VillagerParametrs>();
+            BuildingStats building = target.GetComponent<BuildingStats>();
+            RiderParametrs rider = target.GetComponent<RiderParametrs>();
             // Якщо ціль вийшла за діапазон
             if (Vector3.Distance(transform.position, target.transform.position) > attackRange)
             {
                 target = null;
             }
+            else if (villager != null || building != null || rider != null)
+            {
+                bool isVillagerDead = villager != null && villager.GetHp() <= 0;
+                bool isBuildingDead = building != null && building.GetHp() <= 0;
+                bool isRiderDead = rider != null && rider.GetHp() <= 0;
+
+                if (isVillagerDead || isBuildingDead || isRiderDead)
+                {
+                    target = null;
+                    StartCoroutine(FindTargetCoroutine()); // Запускаємо пошук нової цілі
+                    isSearching = false;
+                }
+            }
+
             // Атака, якщо готові
-            else if (Time.time >= lastAttackTime + attackCooldown)
+            if (Time.time >= lastAttackTime + attackCooldown)
             {
                 Shoot();
                 lastAttackTime = Time.time;

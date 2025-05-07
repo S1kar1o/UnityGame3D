@@ -243,6 +243,7 @@ public class VillagerParametrs : MonoBehaviour
 
     public void getDamage(float damage)
     {
+        Debug.Log(122);
         float newHP = Mathf.Clamp(hp - damage, 0, maxHP);
         StartCoroutine(UpdateHPBar(newHP));
         if(newHP<=0)

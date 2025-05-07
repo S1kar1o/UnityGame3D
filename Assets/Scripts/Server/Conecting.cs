@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Conecting : MonoBehaviour
 {
+    public TMP_Text points;
     private UnityTcpClient tcpClient;
     public void CloseGame()
     {
@@ -20,9 +22,18 @@ public class Conecting : MonoBehaviour
     void Start()
     {
         tcpClient = UnityTcpClient.Instance;
+        Send();
     }
+    private void Send()
+    {
+        UnityTcpClient.Instance.SendMessage("RAITING");
+    }
+    public void UpdateRainting(string message)
+    {
+        string[] parts = message.Split(' ');
 
-
+        points.text= parts[1];
+    }
     public async void SendMessageToServer()
     {
         await tcpClient.SendMessage("READYTOPLAY");

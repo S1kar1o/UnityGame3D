@@ -232,7 +232,18 @@ public class UnityTcpClient : MonoBehaviour
                         else if (message.StartsWith("SPAWN"))
                         {
                             ProcessSpawnMessage(message);
-                        }else if (message.StartsWith("WALL"))
+                        }
+                        else if (message.StartsWith("RAITING_SUCCESS"))
+                        {
+                            Conecting conecting = FindAnyObjectByType<Conecting>();
+                            if (conecting != null)
+                            {
+                                conecting.UpdateRainting(message);
+
+                            }
+
+                        }
+                        else if (message.StartsWith("WALL"))
                         {
                             Debug.Log(121);
                             WallGenerator wallGenerator = FindAnyObjectByType<WallGenerator>();
@@ -333,7 +344,8 @@ public class UnityTcpClient : MonoBehaviour
                         {
                             string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
                             HandleRegistrationError(errorMessage);
-                        }else if (message.StartsWith("NEED_APPLY"))
+                        }
+                        else if (message.StartsWith("NEED_APPLY"))
                         {
                             loginController.ProblemAcceptGmail();
                         }
