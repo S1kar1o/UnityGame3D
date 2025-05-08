@@ -83,6 +83,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3665595576191747759
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2730673252140933338}
+  m_Layer: 0
+  m_Name: objforwater
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2730673252140933338
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3665595576191747759}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6420590011626786886}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4264618922038206546
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,7 +290,7 @@ Transform:
   m_GameObject: {fileID: 6311689631490852730}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.06800001, y: 0.3010004, z: 0}
+  m_LocalPosition: {x: -0.06800001, y: 1.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -284,8 +315,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.5080898, y: 0.8589668, z: 0.45208624}
-  m_Center: {x: 0.003036239, y: 1.4373778, z: 0.056071304}
+  m_Size: {x: 0.5080898, y: 1.0484023, z: 0.45208624}
+  m_Center: {x: 0.003036239, y: 0.015687423, z: 0.056071304}
 --- !u!1 &6967476814237104083
 GameObject:
   m_ObjectHideFlags: 0
@@ -524,17 +555,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 201.78244
+      value: 1314.0457
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 166.58
+      value: 95.31102
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 333.9
+      value: -524.10394
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
@@ -637,6 +668,10 @@ PrefabInstance:
         type: 3}
       insertIndex: 2
       addedObject: {fileID: 2830148174088286806}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2730673252140933338}
     - targetCorrespondingSourceObject: {fileID: -1070350730909333850, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       insertIndex: -1
@@ -749,10 +784,12 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   hpBarBackground: {fileID: 8580459822577650596}
   hpBarForeground: {fileID: 9082383616071436606}
+  rb: {fileID: 863740946307552724}
+  agent: {fileID: 5099674749474279398}
   boxCollider: {fileID: 5650575472459051738}
   colliderForActionsWithWater: {fileID: 7511933541874698539}
-  displaycmentAmount: 6
-  buoyancyPoint: {fileID: 0}
+  displaycmentAmount: 2
+  buoyancyPoint: {fileID: 2830148174088286806}
   Axe: {fileID: 0}
   Pickaxe: {fileID: 0}
   animationOfDeathEnded: 0

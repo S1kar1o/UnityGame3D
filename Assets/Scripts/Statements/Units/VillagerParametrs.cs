@@ -12,8 +12,8 @@ public class VillagerParametrs : MonoBehaviour
     protected float smoothSpeed = 0.5f; // Швидкість анімації втрати HP
 
 
-    protected Rigidbody rb;
-    protected NavMeshAgent agent;
+    public Rigidbody rb;
+    public NavMeshAgent agent;
     public BoxCollider boxCollider;
     private GameObject targetResource;
     private bool isExtracting = false; // Якщо агент видобуває ресурс
@@ -41,17 +41,11 @@ public class VillagerParametrs : MonoBehaviour
     public void Start()
     {
 
-        rb = GetComponent<Rigidbody>();
-        agent = GetComponent<NavMeshAgent>();
-        Transform child = transform.Find("ColliderForWater");
         hpBarForeground.color = hpBarCollor.Evaluate(hp / 100);
 
         agent.autoTraverseOffMeshLink = false; // Вимикаємо автоматичну телепортацію
         StartCoroutine(CheckForNavMeshLink());
-        if (child != null)
-            colliderForActionsWithWater = child.GetComponent<BoxCollider>();
-        else
-            Debug.Log("Дочірній об'єкт не знайдено!");
+       
         try
         {
             utp = UnityTcpClient.Instance;
@@ -243,6 +237,7 @@ public class VillagerParametrs : MonoBehaviour
 
     public void getDamage(float damage)
     {
+        Debug.Log(122);
         float newHP = Mathf.Clamp(hp - damage, 0, maxHP);
         StartCoroutine(UpdateHPBar(newHP));
         if(newHP<=0)

@@ -78,7 +78,7 @@ Transform:
   m_GameObject: {fileID: 2311778230650893564}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 4.23, z: 0}
+  m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -461,17 +461,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 215.46227
+      value: 1300.8727
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 169.94847
+      value: 91.48448
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 319.14508
+      value: -543.93805
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 23e364d7dc70b674985f12f753f9af1c,
         type: 3}
@@ -528,6 +528,11 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: c2813d52ae46bd6449dd452b2837b76d, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 23e364d7dc70b674985f12f753f9af1c,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -608,8 +613,8 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6018281669264991452}
   serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
+  m_Mass: 100
+  m_Drag: 3
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -706,9 +711,11 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   hpBarBackground: {fileID: 4020486991528336072}
   hpBarForeground: {fileID: 3168079338871608080}
+  rb: {fileID: 7448116406231008787}
+  agent: {fileID: 685973670289044936}
   boxCollider: {fileID: 5998978778922972813}
   colliderForActionsWithWater: {fileID: 2917093866254791721}
-  displaycmentAmount: 6
+  displaycmentAmount: 2
   buoyancyPoint: {fileID: 3049666915187367062}
   Axe: {fileID: 0}
   Pickaxe: {fileID: 0}

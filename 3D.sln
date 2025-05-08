@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{8BD133AA-96FC-03E1-C1AC-FD63C8D749AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "endel.nativewebsocket", "endel.nativewebsocket.csproj", "{18E28B4E-8C04-32C7-8D98-E094FFD34C70}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sc.vegetationspawner.runtime", "sc.vegetationspawner.runtime.csproj", "{0F8DE984-3F69-3121-C9C2-5C7DA3B72390}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{C7A19D5E-08D2-4336-A706-1725D855D9B5}"
@@ -21,6 +23,10 @@ Global
 		{8BD133AA-96FC-03E1-C1AC-FD63C8D749AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8BD133AA-96FC-03E1-C1AC-FD63C8D749AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8BD133AA-96FC-03E1-C1AC-FD63C8D749AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18E28B4E-8C04-32C7-8D98-E094FFD34C70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18E28B4E-8C04-32C7-8D98-E094FFD34C70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18E28B4E-8C04-32C7-8D98-E094FFD34C70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18E28B4E-8C04-32C7-8D98-E094FFD34C70}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0F8DE984-3F69-3121-C9C2-5C7DA3B72390}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0F8DE984-3F69-3121-C9C2-5C7DA3B72390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F8DE984-3F69-3121-C9C2-5C7DA3B72390}.Release|Any CPU.ActiveCfg = Release|Any CPU

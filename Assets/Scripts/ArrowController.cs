@@ -8,7 +8,7 @@ public class ArrowController : MonoBehaviour
     public float rotationSpeed = 720f;
     public float zRotationSpeed = 20f;
     public Collider boxCollider;
-
+    public float damage = 30;
     private Vector3 direction;
     private bool hasHit = false, isEnterEndPoint = false;
     private Vector3 targetPoint;
@@ -18,6 +18,7 @@ public class ArrowController : MonoBehaviour
 
     void Start()
     {
+
         if (target != null)
         {
             rb = GetComponent<Rigidbody>() ?? gameObject.AddComponent<Rigidbody>();
@@ -58,6 +59,8 @@ public class ArrowController : MonoBehaviour
                 {
                     Debug.Log("Arrow hit: " + hit.collider.gameObject.name);
                     StickToTarget(hit.point, hit.transform);
+                    giveDamage(target);
+
                     return;
                 }
             }
@@ -69,16 +72,76 @@ public class ArrowController : MonoBehaviour
             if (Vector3.Distance(transform.position, targetPoint) < 0.5f)
             {
                 StickToTarget(targetPoint, target);
+                giveDamage(target);
             }
         }
     }
+    private void giveDamage(Transform obj)
+    {
+        GameObject rootObject = obj.root.gameObject;
 
+        VillagerParametrs target = rootObject.GetComponent<VillagerParametrs>();
+        BuildingStats building = rootObject.GetComponent<BuildingStats>();
+        RiderParametrs rider = rootObject.GetComponent<RiderParametrs>();
+
+        if (target != null)
+        {
+            Debug.Log("Hit villager");
+            target.getDamage(damage);
+        }
+        else if (building != null)
+        {
+            Debug.Log("Hit building");
+            building.getDamage(damage);
+        }
+        else if (rider != null)
+        {
+            Debug.Log("Hit rider");
+            rider.getDamage(damage);
+        }
+        else
+        {
+            Debug.Log("No valid damage target on: " + rootObject.name);
+        }
+    }
     private void OnCollisionEnter(Collision collision)
     {
+        Debug.Log(120);
+
         if (hasHit || traveledDistance <= ignoreDistance) return;
+
         hasHit = true;
+        // Отримуємо головний об’єкт, якщо компонент на дочірньому
+        GameObject rootObject = collision.collider.attachedRigidbody != null
+            ? collision.collider.attachedRigidbody.gameObject
+            : collision.collider.transform.root.gameObject;
+
+        // Перевірка на параметри об'єктів
+        VillagerParametrs target = rootObject.GetComponent<VillagerParametrs>();
+        BuildingStats building = rootObject.GetComponent<BuildingStats>();
+        RiderParametrs rider = rootObject.GetComponent<RiderParametrs>();
+
+        if (target != null)
+        {
+            Debug.Log(120);
+            target.getDamage(damage);
+        }
+        else if (building != null)
+        {
+            building.getDamage(damage);
+        }
+        else if (rider != null)
+        {
+            rider.getDamage(damage);
+        }
+        Debug.Log(120);
+
+        // "Прилипання" до місця зіткнення
         StickToTarget(collision.contacts[0].point, collision.transform);
+
+      
     }
+
 
     private void StickToTarget(Vector3 hitPoint, Transform hitObject)
     {
@@ -96,7 +159,7 @@ public class ArrowController : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
 
-        Destroy(gameObject, 3f);
+        Destroy(gameObject, 2f);
         Destroy(this);
     }
 
