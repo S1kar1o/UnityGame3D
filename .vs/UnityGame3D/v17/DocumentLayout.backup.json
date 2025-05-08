@@ -3,20 +3,16 @@
   "WorkspaceRootPath": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\animation\\scripts\\warrioranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\warrioranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\warrioranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\audio\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\audio\\audiomanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\audio\\unitsoundplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\audio\\unitsoundplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\villageranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\villageranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\archeranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\archeranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,14 +27,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "AudioManager.cs",
-              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\AudioManager.cs",
-              "RelativeDocumentMoniker": "Assets\\Audio\\AudioManager.cs",
-              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\AudioManager.cs",
-              "RelativeToolTip": "Assets\\Audio\\AudioManager.cs",
-              "ViewState": "AgIAACwAAAAAAAAAAAAgwAMAAAANAAAAAAAAAA==",
+              "Title": "UnitSoundPlayer.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\UnitSoundPlayer.cs",
+              "RelativeDocumentMoniker": "Assets\\Audio\\UnitSoundPlayer.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\UnitSoundPlayer.cs",
+              "RelativeToolTip": "Assets\\Audio\\UnitSoundPlayer.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAQwCMAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-06T20:26:00.355Z",
+              "WhenOpened": "2025-05-06T21:47:49.816Z",
+              "IsPinned": true,
               "EditorCaption": ""
             },
             {
@@ -49,7 +46,7 @@
               "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\WarriorAnimation.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\WarriorAnimation.cs",
               "RelativeToolTip": "Assets\\Animation\\Scripts\\WarriorAnimation.cs",
-              "ViewState": "AgIAACYAAAAAAAAAAAAqwDYAAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAABAAAAAAAAAAAAAQwCUAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-06T20:03:54.849Z",
               "EditorCaption": ""
@@ -62,21 +59,9 @@
               "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\VillagerAnimation.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\VillagerAnimation.cs",
               "RelativeToolTip": "Assets\\Animation\\Scripts\\VillagerAnimation.cs",
-              "ViewState": "AgIAAFgAAAAAAAAAAAAqwHgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-05T07:38:45.728Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ArcherAnimation.cs",
-              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\ArcherAnimation.cs",
-              "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\ArcherAnimation.cs",
-              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\ArcherAnimation.cs",
-              "RelativeToolTip": "Assets\\Animation\\Scripts\\ArcherAnimation.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAvAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-01T17:27:09.911Z"
             }
           ]
         }
