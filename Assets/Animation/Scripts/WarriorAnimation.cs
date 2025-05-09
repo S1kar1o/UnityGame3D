@@ -6,17 +6,16 @@ public class WarriorAnimation : VillagerAnimation
 
     protected float nextActionTime = 0f;
     protected float interval = 1.5f;
-    private bool IsDie = false;
-    private bool hasPlayedDrownSound = false;
+    protected bool IsDie = false;
+    protected bool hasPlayedDrownSound = false;
 
-    private AudioSource audioSource;
+    public AudioSource audioSource;
 
     [SerializeField] protected WarriorParametrs warriorParametrs;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
     }
 

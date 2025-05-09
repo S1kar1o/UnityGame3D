@@ -18,14 +18,14 @@ public class WarriorParametrs : VillagerParametrs
     void Awake()
     {
         maxHP = 200;
-        hp = 200; 
+        hp = 200;
     }
-    private void Update()
+    protected void Update()
     {
-        if (agent.nextPosition.y > 59.4)
+        // Умова переміщення (логіка або анімації)
+        if (agent.nextPosition.y > 59.4f)
         {
             agent.updatePosition = true;
-
         }
         else
         {
@@ -35,12 +35,12 @@ public class WarriorParametrs : VillagerParametrs
             rb.MovePosition(nextPos);
         }
 
+        // Смерть
         if (hp <= 0)
         {
             if (!inWater)
             {
                 isAttack = false;
-
                 isDie = true;
                 isRunning = false;
                 isStanding = false;
@@ -49,13 +49,17 @@ public class WarriorParametrs : VillagerParametrs
             {
                 isDrow = true;
             }
+
             agent.isStopped = true;
             UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
-
+            return;
         }
-        else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
+
+        // Коли агент дійшов до цілі
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
         {
             isRunning = false;
+
             if (targetEnemy)
             {
                 if (!inWater)
@@ -66,13 +70,12 @@ public class WarriorParametrs : VillagerParametrs
                 else
                 {
                     isAttack = false;
-
                     ArchimedPower();
                     isStandingInWater = true;
                 }
+
                 isStanding = false;
                 isSwimming = false;
-                isRunning = false;
                 agent.isStopped = true;
             }
             else
@@ -81,19 +84,18 @@ public class WarriorParametrs : VillagerParametrs
                 {
                     isStanding = true;
                     isAttack = false;
-
                 }
                 else
                 {
                     isStandingInWater = true;
                     isSwimming = false;
                     ArchimedPower();
-
                 }
             }
+
             agent.isStopped = true;
         }
-        else
+        else // агент ще рухається
         {
             if (!inWater)
             {
@@ -105,11 +107,22 @@ public class WarriorParametrs : VillagerParametrs
                 ArchimedPower();
                 isSwimming = true;
             }
-            isAttack = false;
 
+            isAttack = false;
             isStanding = false;
             isStandingInWater = false;
             agent.isStopped = false;
+        }
+    }
+
+    // Перенеси переміщення фізичного тіла сюди
+    protected void FixedUpdate()
+    {
+        if (!agent.updatePosition)
+        {
+            Vector3 nextPos = agent.nextPosition;
+            nextPos.y = rb.position.y;
+            rb.MovePosition(nextPos); // фізика — лише тут!
         }
     }
     protected void updateTargetPosition()

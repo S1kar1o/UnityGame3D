@@ -117,23 +117,29 @@ public class VillagerParametrs : MonoBehaviour
             isStandingInWater = false;
         }
     }
-  
-    private void Update(){
+
+    private Vector3? targetPhysicsPosition = null; // Цільова позиція для rb.MovePosition()
+
+    private void Update()
+    {
         if (agent.isOnNavMesh && agent.isActiveAndEnabled)
         {
-            if (agent.nextPosition.y > 59.4 && hp >= 0)
+            if (agent.nextPosition.y > 59.4f && hp >= 0)
             {
                 agent.updatePosition = true;
-
+                targetPhysicsPosition = null;
             }
             else
             {
-                agent.updatePosition = false; // Не оновлювати позицію агента
+                agent.updatePosition = false;
+
+                // Зберігаємо наступну позицію для FixedUpdate
                 Vector3 nextPos = agent.nextPosition;
                 nextPos.y = rb.position.y;
-                rb.MovePosition(nextPos);
+                targetPhysicsPosition = nextPos;
             }
 
+            // Обробка смерті
             if (hp <= 0)
             {
                 if (!inWater)
@@ -147,27 +153,26 @@ public class VillagerParametrs : MonoBehaviour
                 {
                     isDrow = true;
                 }
+
                 UnityTcpClient.Instance.cameraMoving.enemys.Remove(gameObject);
                 agent.isStopped = true;
-
+                return; // виходимо з Update, не виконуємо решту
             }
-            else if (!agent.pathPending && (agent.remainingDistance <= agent.stoppingDistance))
+
+            // Агент дійшов до точки
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
                 isRunning = false;
                 isSwimming = false;
+
                 if (isRunningToResource)
                 {
                     isGathering = true;
+
                     if (targetResource.GetComponent<AmountResource>().typeResource == "Wood")
-                    {
                         Axe.SetActive(true);
-
-                    }
                     else
-                    {
                         Pickaxe.SetActive(true);
-
-                    }
                 }
                 else
                 {
@@ -179,12 +184,12 @@ public class VillagerParametrs : MonoBehaviour
                     {
                         isStandingInWater = true;
                         ArchimedPower();
-
                     }
                 }
+
                 agent.isStopped = true;
             }
-            else
+            else // Агент ще рухається
             {
                 if (!inWater)
                 {
@@ -195,11 +200,20 @@ public class VillagerParametrs : MonoBehaviour
                     ArchimedPower();
                     isSwimming = true;
                 }
+
                 isStanding = false;
                 isStandingInWater = false;
                 isGathering = false;
                 agent.isStopped = false;
             }
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if (targetPhysicsPosition.HasValue)
+        {
+            rb.MovePosition(targetPhysicsPosition.Value);
         }
     }
     protected IEnumerator UpdateHPBar(float newHP)

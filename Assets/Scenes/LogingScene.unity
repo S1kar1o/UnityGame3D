@@ -3039,7 +3039,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -49.18225, y: 2.6671448}
+  m_AnchoredPosition: {x: -49.18225, y: 137}
   m_SizeDelta: {x: 471.9161, y: 244.0323}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1485323934
@@ -3168,18 +3168,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loginController: {fileID: 2133152407}
   buttonControler: {fileID: 0}
+  tokenManager: {fileID: 1576720665}
+  uIresource: {fileID: 0}
+  cameraMoving: {fileID: 0}
   IDclient: 0
   goldAmount: 500
   woodAmount: 500
   rockAmount: 500
   enemyReady: 0
-  tokenManager: {fileID: 1576720665}
   idUnitGeneratedAtServer: 0
+  serverIp: c-server-d27j.onrender.com
   tagOwner:
   - Unit
   - Enemy
-  uIresource: {fileID: 0}
-  cameraMoving: {fileID: 0}
 --- !u!4 &1576720664
 Transform:
   m_ObjectHideFlags: 0

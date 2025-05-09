@@ -1,4 +1,4 @@
-﻿/*using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.IO;
 
@@ -6,7 +6,7 @@ using System.IO;
 public class GenerateIDforServer : MonoBehaviour
 {
     private string savePath;
-    private int lastId = 0;
+    public int lastId = 0;
 
     private void Awake()
     {
@@ -68,4 +68,3 @@ public class GenerateIDforServer : MonoBehaviour
         File.WriteAllText(savePath, lastId.ToString());
     }
 }
-*/

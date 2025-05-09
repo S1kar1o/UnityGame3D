@@ -555,17 +555,17 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1314.0457
+      value: 76.698715
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 95.31102
+      value: 196.04816
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -524.10394
+      value: 327.05835
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6729557fa505c1c449c9d9836f5b7e3a,
         type: 3}
@@ -831,6 +831,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   villagerParametrs: {fileID: 0}
+  audioSource: {fileID: 1494128092359270763}
   warriorParametrs: {fileID: 1880589632949315872}
 --- !u!54 &863740946307552724
 Rigidbody:
@@ -841,7 +842,7 @@ Rigidbody:
   m_GameObject: {fileID: 5931614773281016572}
   serializedVersion: 4
   m_Mass: 100
-  m_Drag: 0.89
+  m_Drag: 3
   m_AngularDrag: 0.83
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
 
 public class ArcherAnimation : WarriorAnimation
@@ -13,6 +14,13 @@ public class ArcherAnimation : WarriorAnimation
         animator.SetBool(IS_STANDING_IN_WATER, archerParametrs.IsStandingInWater());
         animator.SetBool(IS_DROW, archerParametrs.IsDrow());
         animator.SetBool(IS_SWIMMING, archerParametrs.IsSwimming());
+
+        UnitSoundPlayer.Instance.HandleRunningSound(audioSource, archerParametrs.IsRunning());
+        UnitSoundPlayer.Instance.HandleDeathSound(audioSource, archerParametrs.IsDie(), ref IsDie);
+        UnitSoundPlayer.Instance.HandleSwimmingSound(audioSource, archerParametrs.IsSwimming());
+        UnitSoundPlayer.Instance.HandleStandingInWaterSound(audioSource, archerParametrs.IsStandingInWater());
+        UnitSoundPlayer.Instance.HandleDrownSound(audioSource, archerParametrs.IsDrow(), ref IsDie);
+
         AttackAnimationLogic();
         if (archerParametrs.IsDie() && !deathHandled)
         {
