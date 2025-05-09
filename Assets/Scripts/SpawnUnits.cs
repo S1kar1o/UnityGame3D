@@ -72,7 +72,7 @@ public class SpawnUnits : MonoBehaviour
                 UnityTcpClient.Instance.goldAmount -= priceOfGold;
                 UnityTcpClient.Instance.woodAmount -= priceOfWood;
                 UnityTcpClient.Instance.rockAmount -= priceOfRock;
-
+                UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
                 string name = prefabUnit[indexUnit].name.Replace("(Clone)", "").Trim();
 
                 Vector3 position = new Vector3(

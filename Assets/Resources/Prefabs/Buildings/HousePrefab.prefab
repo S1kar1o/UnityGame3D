@@ -48,6 +48,37 @@ NavMeshObstacle:
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
   m_TimeToStationary: 0.5
+--- !u!1 &3658888904613858804
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7913599252470661699}
+  m_Layer: 0
+  m_Name: SpawnPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7913599252470661699
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3658888904613858804}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -17.48, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5905508417728288209}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4526946788169624529
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,6 +425,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: HousePrefab
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 33dfec4fde3ae7741abafc57d420b33f,
+        type: 3}
+      propertyPath: m_TagString
+      value: Building
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -401,6 +437,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 423805818950842747}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 33dfec4fde3ae7741abafc57d420b33f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7913599252470661699}
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 33dfec4fde3ae7741abafc57d420b33f,
         type: 3}
       insertIndex: -1
@@ -422,6 +462,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 666923821209185782}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 33dfec4fde3ae7741abafc57d420b33f,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2000400277417057049}
   m_SourcePrefab: {fileID: 100100000, guid: 33dfec4fde3ae7741abafc57d420b33f, type: 3}
 --- !u!4 &5905508417728288209 stripped
 Transform:
@@ -442,7 +486,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6539020168095747947}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99f881641e12c8949b0e04bb5818536c, type: 3}
   m_Name: 
@@ -539,3 +583,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverId: 0
+--- !u!114 &2000400277417057049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6539020168095747947}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89971cd553633e24eaf9bbfe863ac162, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prefabUnit:
+  - {fileID: 7484640550819272255, guid: 16a3b09fc84f14d428ef2b5619ead64c, type: 3}
+  - {fileID: 5337644537852469130, guid: da785106a7b27174fbbd55d5b2eeb5f3, type: 3}
+  indexUnit: 0
+  tcpClient: {fileID: 0}
+  priceOfGold: 20
+  priceOfWood: 10
+  priceOfRock: 10
+  textCostOfTree: {fileID: 0}
+  textCostOfRock: {fileID: 0}
+  textCostOfGold: {fileID: 0}

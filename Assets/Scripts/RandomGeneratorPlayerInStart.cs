@@ -50,7 +50,7 @@ public class RandomGeneratorPlayerInStart : MonoBehaviour
     private async void GenerateMessageToServer(Vector3 position)
     {
         string name = objectToSpawn[indexUnit].name.Replace("(Clone)", "").Trim();
-        int id = 993+tcpClient.IDclient;
+        int id = 1676+tcpClient.IDclient;
 
         string spawnMessage = $"SPAWN {id} {name} {position.x:F2} {position.y:F2} {position.z:F2} {0} {0} {0}\n";
 

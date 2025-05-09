@@ -21,7 +21,7 @@ public class CameraMoving : MonoBehaviour
 
     private void Update()
     {
-       /* if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
+        /*if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
         if (!waiting)
             isLocked = checkEnemy();
         else

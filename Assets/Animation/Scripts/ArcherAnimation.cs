@@ -15,11 +15,11 @@ public class ArcherAnimation : WarriorAnimation
         animator.SetBool(IS_DROW, archerParametrs.IsDrow());
         animator.SetBool(IS_SWIMMING, archerParametrs.IsSwimming());
 
-        UnitSoundPlayer.Instance.HandleRunningSound(audioSource, warriorParametrs.IsRunning());
-        UnitSoundPlayer.Instance.HandleDeathSound(audioSource, warriorParametrs.IsDie(), ref IsDie);
-        UnitSoundPlayer.Instance.HandleSwimmingSound(audioSource, warriorParametrs.IsSwimming());
-        UnitSoundPlayer.Instance.HandleStandingInWaterSound(audioSource, warriorParametrs.IsStandingInWater());
-        UnitSoundPlayer.Instance.HandleDrownSound(audioSource, warriorParametrs.IsDrow(), ref IsDie);
+        UnitSoundPlayer.Instance.HandleRunningSound(audioSource, archerParametrs.IsRunning());
+        UnitSoundPlayer.Instance.HandleDeathSound(audioSource, archerParametrs.IsDie(), ref IsDie);
+        UnitSoundPlayer.Instance.HandleSwimmingSound(audioSource, archerParametrs.IsSwimming());
+        UnitSoundPlayer.Instance.HandleStandingInWaterSound(audioSource, archerParametrs.IsStandingInWater());
+        UnitSoundPlayer.Instance.HandleDrownSound(audioSource, archerParametrs.IsDrow(), ref IsDie);
 
         AttackAnimationLogic();
         if (archerParametrs.IsDie() && !deathHandled)

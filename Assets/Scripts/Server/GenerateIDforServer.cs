@@ -6,7 +6,7 @@ using System.IO;
 public class GenerateIDforServer : MonoBehaviour
 {
     private string savePath;
-    private int lastId = 0;
+    public int lastId = 0;
 
     private void Awake()
     {

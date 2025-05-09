@@ -64,6 +64,7 @@ public class LoginingToDB : MonoBehaviour
     }
     public void ProblemAcceptGmail()
     {
+        errorDuringApplyMessage.gameObject.SetActive(true);
         errorDuringApplyMessage.color = Color.red;
     }
     private bool AreFieldsValid(bool checkNick)
@@ -95,12 +96,12 @@ public class LoginingToDB : MonoBehaviour
         loginingButton.gameObject.SetActive(false);
         registrationButton.gameObject.SetActive(false);
 
+        errorDuringApplyMessage.gameObject.SetActive(true);
 
         applyButton.gameObject.SetActive(true);
     }
     public void problemDuringLogin(string exeptionDiscription)
     {
-        errorText.gameObject.SetActive(true);
         errorText.text = exeptionDiscription;
     }
 
@@ -142,6 +143,7 @@ public class LoginingToDB : MonoBehaviour
         if (AreFieldsValid(true))
         {
             await UnityTcpClient.Instance.SendMessage($"REGISTRATE {nickNameField.text} {emailField.text} {passwordField.text}");
+            errorText.gameObject.SetActive(true);
         }
     }
 }
