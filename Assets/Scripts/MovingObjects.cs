@@ -132,11 +132,25 @@ public class MovingObjects : MonoBehaviour
                                 {
                                     extractor.StopExtracting(); //  ¬икликаЇ батьк≥вський метод
                                 }
+                                if (hit.collider.CompareTag("Water"))
+                                {
+                                    if (!(extractor is RiderParametrs))
+                                    {
+                                        extractor.targetPosition = hit.point; // якщо targetPosition Ї в батьк≥вському клас≥
+                                        obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
+                                        SendMoveMessage(obj, hit.point);
 
-                                extractor.targetPosition = hit.point; // якщо targetPosition Ї в батьк≥вському клас≥
+                                    }
+                                }
+                                else
+                                {
+                                    extractor.targetPosition = hit.point; // якщо targetPosition Ї в батьк≥вському клас≥
+                                    obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
+                                    SendMoveMessage(obj, hit.point);
+
+                                }
+
                             }
-                            obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
-                            SendMoveMessage(obj, hit.point);
 
                         }
                     }
@@ -270,7 +284,7 @@ public class MovingObjects : MonoBehaviour
             if (hit.collider.CompareTag("Building"))
             {
                 GameObject building = hit.collider.gameObject;
-                if (building.GetComponent<Building>() == null&& spawnBuilding == building)
+                if (building.GetComponent<Building>() == null && spawnBuilding == building)
                 {
                     Debug.Log(spawnBuilding);
                     {
@@ -278,7 +292,7 @@ public class MovingObjects : MonoBehaviour
                         ActivatePanelRecruiting();
                     }
                 }
-                else if(building.GetComponent<Building>() == null)
+                else if (building.GetComponent<Building>() == null)
                 {
                     spawnBuilding = building;
                     SpawnUnits buildingStatement = building.GetComponent<SpawnUnits>();

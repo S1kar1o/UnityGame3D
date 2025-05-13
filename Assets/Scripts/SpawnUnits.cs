@@ -69,9 +69,6 @@ public class SpawnUnits : MonoBehaviour
         {
             try
             {
-                UnityTcpClient.Instance.goldAmount -= priceOfGold;
-                UnityTcpClient.Instance.woodAmount -= priceOfWood;
-                UnityTcpClient.Instance.rockAmount -= priceOfRock;
                 UnityTcpClient.Instance.uIresource.UpdateAmoundOfResource();
                 string name = prefabUnit[indexUnit].name.Replace("(Clone)", "").Trim();
 
@@ -118,6 +115,10 @@ public class SpawnUnits : MonoBehaviour
                     ServerId sr = spawnedUnit.GetComponent<ServerId>();
                     sr.serverId = tcpClient.idUnitGeneratedAtServer;
                     tcpClient.idUnitGeneratedAtServer = 0;
+
+                    UnityTcpClient.Instance.goldAmount -= priceOfGold;
+                    UnityTcpClient.Instance.woodAmount -= priceOfWood;
+                    UnityTcpClient.Instance.rockAmount -= priceOfRock;
                 }
             }
             catch (System.Exception ex)

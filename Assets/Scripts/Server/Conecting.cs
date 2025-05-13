@@ -9,6 +9,9 @@ public class Conecting : MonoBehaviour
 {
     public TMP_Text points;
     private UnityTcpClient tcpClient;
+    public GameObject panelWithInformation;
+    public string telegramURL = "https://t.me/+WVqCryqlsII5ZmM6";
+
     public void CloseGame()
     {
         Debug.Log("Game is exiting...");
@@ -55,6 +58,18 @@ public class Conecting : MonoBehaviour
         UnityTcpClient.Instance.SendMessage("EXIT");
         StartCoroutine(LoadSceneAsync("LogingScene"));
 
+    }
+    public void OpenTelegramGroup()
+    {
+        Application.OpenURL(telegramURL);
+    }
+    public void additionalInformation()
+    {
+        panelWithInformation.SetActive(true);
+    }
+    public void closeAdditionalInformation()
+    {
+        panelWithInformation.SetActive(false);
     }
     IEnumerator LoadSceneAsync(string nameScene)
     {

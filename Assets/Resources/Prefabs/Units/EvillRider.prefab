@@ -657,6 +657,8 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   hpBarBackground: {fileID: 5761281994598372618}
   hpBarForeground: {fileID: 4838091912697235968}
+  rb: {fileID: 3294791955875817355}
+  agent: {fileID: 6689273470074701178}
   boxCollider: {fileID: 8989866806198796559}
   colliderForActionsWithWater: {fileID: 0}
   displaycmentAmount: 6

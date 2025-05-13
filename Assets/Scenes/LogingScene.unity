@@ -3222,15 +3222,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa8f013113e26724db8e02bf1716f43b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackSound: {fileID: 0}
-  runSound: {fileID: 0}
-  deathSound: {fileID: 0}
-  swimSound: {fileID: 0}
-  standingInWaterSound: {fileID: 0}
-  drownSound: {fileID: 0}
-  LogingAudio: {fileID: 8300000, guid: 4a4780e143b88e34294770dfc5414a8b, type: 3}
+  attackSound: {fileID: 8300000, guid: 8f93198f0d0f5414d8505b29fbe9b7b8, type: 3}
+  runSound: {fileID: 8300000, guid: 6362103e09545284aa92913996cf15ac, type: 3}
+  deathSound: {fileID: 8300000, guid: 5f8848f2b3bad52469affea95673a8d2, type: 3}
+  swimSound: {fileID: 8300000, guid: bdcc925cb58ac8f46bb131169456ff98, type: 3}
+  standingInWaterSound: {fileID: 8300000, guid: bdcc925cb58ac8f46bb131169456ff98,
+    type: 3}
+  drownSound: {fileID: 8300000, guid: eb3562dd53dd76247a9f4c6c09eed669, type: 3}
+  LogingAudio: {fileID: 8300000, guid: 8050e4d6980c3de45b5475e513a4eb9b, type: 3}
   LoadingAudio: {fileID: 8300000, guid: 966ddf502a8dc18448def804f5ecdcc5, type: 3}
-  SampleAudio: {fileID: 8300000, guid: e29a12f3c3ba61e44b0810b80faed2cf, type: 3}
+  SampleAudio: {fileID: 8300000, guid: 3af30228bce94054289b44d74c233cdf, type: 3}
   PlaybleAudio: {fileID: 8300000, guid: 292e17e887c48b6429b98d9297b22db1, type: 3}
 --- !u!82 &1576720667
 AudioSource:

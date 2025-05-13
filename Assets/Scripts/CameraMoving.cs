@@ -21,12 +21,12 @@ public class CameraMoving : MonoBehaviour
 
     private void Update()
     {
-        if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
+       /* if (!waitingStarted) return; // Чекаємо, поки не завершиться затримка
         if (!waiting)
             isLocked = checkEnemy();
         else
             isLocked = true;
-        if (!isLocked)
+        if (!isLocked)*/
         {
             float rotate = 0.0f;
 
@@ -61,7 +61,7 @@ public class CameraMoving : MonoBehaviour
 
     private IEnumerator WaitingForSpawn()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(10f);
         waitingStarted = true; // Вмикаємо логіку лише після 2 секунд
     }
 
