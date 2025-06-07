@@ -35,6 +35,10 @@ public class UnityTcpClient : MonoBehaviour
     private static int loginTokenAttempts = 0;
     private const int MAX_LOGIN_TOKEN_ATTEMPTS = 3;
 
+    public bool statusOponent = false;
+    public string UserRaiting = "100";
+
+    public string UserNickName="David";
     public string SceneToMove
     {
         get => _sceneToMove;
@@ -145,6 +149,7 @@ public class UnityTcpClient : MonoBehaviour
 
     private async void TryLoginWithToken()
     {
+
         if (!isConnected) return;
 
         string key = tokenManager.GetTokenFromFile();
@@ -153,6 +158,7 @@ public class UnityTcpClient : MonoBehaviour
             Debug.Log($"Attempting login with token (attempt {loginTokenAttempts + 1}/{MAX_LOGIN_TOKEN_ATTEMPTS}).");
             loginTokenAttempts++;
             await SendMessage($"LOGINBYTOKEN {key}");
+            loginController.currentAnimationCoroutine=StartCoroutine(loginController.waitingAnimation());
         }
         else
         {
@@ -218,12 +224,12 @@ public class UnityTcpClient : MonoBehaviour
             {
                 ProcessSpawnMessage(message);
             }
-            else if (message.StartsWith("RAITING_SUCCESS"))
+            else if (message.StartsWith("USER_INFORMATION"))
             {
                 Conecting conecting = FindAnyObjectByType<Conecting>();
                 if (conecting != null)
                 {
-                    conecting.UpdateRainting(message);
+                    conecting.UpdateInformation(message);
                 }
             }
             else if (message.StartsWith("WALL"))
@@ -241,6 +247,10 @@ public class UnityTcpClient : MonoBehaviour
             else if (message.StartsWith("BUILT"))
             {
                 ProcessBuiltMessage(message);
+            }
+            else if (message.StartsWith("Oponent_Loaded"))
+            {
+                statusOponent = true;
             }
             else if (message.StartsWith("MOVE"))
             {
@@ -311,15 +321,35 @@ public class UnityTcpClient : MonoBehaviour
             else if (message.StartsWith("REGISTRATION_SUCCESS"))
             {
                 loginController.toApplyMenu();
+                loginController.stopWaitingAnimation();
             }
             else if (message.StartsWith("REGISTRATION_FAILED"))
             {
                 string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
                 HandleRegistrationError(errorMessage);
+                loginController.stopWaitingAnimation();
+            }else if (message.StartsWith("LOGIN_FAILED"))
+            {
+                string errorMessage = message.Substring("LOGIN_FAILED".Length).Trim();
+                HandleRegistrationError(errorMessage);
+                loginController.stopWaitingAnimation();
             }
             else if (message.StartsWith("NEED_APPLY"))
             {
                 loginController.ProblemAcceptGmail();
+                loginController.stopWaitingAnimation();
+
+            }else if (message.StartsWith("LEADER_BOARD"))
+            {
+                string json = message.Substring("LEADER_BOARD_JSON ".Length); // â³äð³çàºìî ïðåô³êñ
+
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
+                {
+                    conecting.LoadUsersFromJson(json);
+                }
+/*                loginController.stopWaitingAnimation();
+*/
             }
             else if (message.StartsWith("LOGIN_SUCCESS"))
             {
@@ -342,7 +372,6 @@ public class UnityTcpClient : MonoBehaviour
             }
         }
     }
-
     private IEnumerator Reconnect()
     {
         isReconnecting = true;
@@ -386,6 +415,7 @@ public class UnityTcpClient : MonoBehaviour
         goldAmount = 500;
         woodAmount = 500;
         rockAmount = 500;
+        statusOponent = false;
     }
 
     private void InitializeID(string message)
@@ -536,6 +566,7 @@ public class UnityTcpClient : MonoBehaviour
             if (IsNavMeshReady(spawnPosition))
             {
                 SpawnUnit(id, unitName, spawnPosition, spawnRotation);
+                statusOponent = true;
                 yield break;
             }
             yield return new WaitForSeconds(delayBetweenAttempts);
@@ -543,6 +574,8 @@ public class UnityTcpClient : MonoBehaviour
 
         Debug.LogError($"Failed to find NavMesh for {unitName} at {spawnPosition} after {maxAttempts} attempts!");
         SpawnUnit(id, unitName, spawnPosition, spawnRotation, forceSpawn: true);
+        statusOponent = true;
+
     }
 
     private void SpawnUnit(int id, string unitName, Vector3 spawnPosition, Quaternion spawnRotation, bool forceSpawn = false)
@@ -562,6 +595,8 @@ public class UnityTcpClient : MonoBehaviour
                 }
             }
             cameraMoving.enemys.Add(unit);
+            statusOponent = true;
+
             Debug.Log($"Unit spawned: {unitName} at position {spawnPosition}");
         }
         else

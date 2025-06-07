@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +11,12 @@ public class LoginingToDB : MonoBehaviour
     [SerializeField] private Button finishInputButton, loginingButton, registrationButton, returnButton, applyButton, closeGame;
     private bool logOrCreate = false;
     [SerializeField] private float errorDisplayTime = 5f;
+    public Coroutine currentAnimationCoroutine;
 
+
+    [SerializeField] private RectTransform rectComponent;
+    private float rotateSpeed = 400f;
+    public Image bacgroundDurringLoading;
     private void Start()
     {
         UnityTcpClient.Instance.loginController = this;
@@ -82,10 +89,34 @@ public class LoginingToDB : MonoBehaviour
     {
         if (AreFieldsValid(false))
         {
+
             await UnityTcpClient.Instance.SendMessage($"LOGINBYEMAIL {emailField.text} {passwordField.text}");
+            currentAnimationCoroutine = StartCoroutine(waitingAnimation());
         }
     }
 
+    public IEnumerator waitingAnimation()
+    {
+        bacgroundDurringLoading.gameObject.SetActive(true);
+        rectComponent.gameObject.SetActive(true);
+        while (true)
+        {
+            if (rectComponent != null)
+                rectComponent.Rotate(0f, 0f, -rotateSpeed * Time.deltaTime);
+            else
+                yield break; // закінчити корутину, якщо компонент видалено
+
+            yield return null;
+        }
+    }
+
+    public void stopWaitingAnimation()
+    {
+        bacgroundDurringLoading.gameObject.SetActive(false);
+        rectComponent.gameObject.SetActive(false);
+        if (currentAnimationCoroutine != null)
+            StopCoroutine(currentAnimationCoroutine);
+    }
     public void toApplyMenu()
     {
         emailField.gameObject.SetActive(false);
@@ -143,6 +174,7 @@ public class LoginingToDB : MonoBehaviour
         if (AreFieldsValid(true))
         {
             await UnityTcpClient.Instance.SendMessage($"REGISTRATE {nickNameField.text} {emailField.text} {passwordField.text}");
+            currentAnimationCoroutine= StartCoroutine(waitingAnimation());
             errorText.gameObject.SetActive(true);
         }
     }
