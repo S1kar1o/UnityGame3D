@@ -123,7 +123,7 @@ public class ButtonControler : MonoBehaviour
     }
     public void PanelEndGameLoseFromServerButton()
     {
-        txt.text = "You lose -25";
+        txt.text = "You lose -5";
         PanelEndGame.SetActive(endGamePanelIsActive);
 
     }

@@ -15,16 +15,16 @@ public class VillagerParametrs : MonoBehaviour
     public Rigidbody rb;
     public NavMeshAgent agent;
     public BoxCollider boxCollider;
-    private GameObject targetResource;
+    private GameObject targetResource, targetBuilding;
     private bool isExtracting = false; // якщо агент видобуваЇ ресурс
     private float extractionInterval = 2.0f; // „ас м≥ж циклами видобуванн€
     private int resourceAmountPerCycle = 5; // —к≥льки ресурсу видобуваЇтьс€ за один цикл
 
     protected float maxHP = 100f;
     protected float hp = 100;
-    private Coroutine extractionCoroutine; // «м≥нна дл€ збереженн€ корутини
-    protected bool isUpped=false,wasStandingInWater=false,isStandingInWater=false,inWater = false, isStanding = true,isDrow=false,isSwimming = false,
-        isRunning = false, isRunningToResource = false, isDie = false;
+    private Coroutine extractionCoroutine, buildingCoroutine; // «м≥нна дл€ збереженн€ корутини
+    protected bool isUpped = false, wasStandingInWater = false, isStandingInWater = false, inWater = false, isStanding = true, isDrow = false, isSwimming = false,
+        isRunning = false, isRunningToResource = false, isDie = false, isRunningToBuild = false, isBuilding = false;
     public BoxCollider colliderForActionsWithWater;
     private bool isGathering = false;
     protected float fallMultiplier = 2.5f;
@@ -45,7 +45,7 @@ public class VillagerParametrs : MonoBehaviour
 
         agent.autoTraverseOffMeshLink = false; // ¬имикаЇмо автоматичну телепортац≥ю
         StartCoroutine(CheckForNavMeshLink());
-       
+
         try
         {
             utp = UnityTcpClient.Instance;
@@ -106,6 +106,92 @@ public class VillagerParametrs : MonoBehaviour
             isRunning = false;
         }
     }
+    public void moveToBuild(GameObject building)
+    {
+        isRunningToBuild = true;
+        targetBuilding = building;
+        BoxCollider resourceCollider = building.GetComponent<BoxCollider>();
+        BoxCollider agentCollider = GetComponentInChildren<BoxCollider>();
+
+        if (resourceCollider != null && agentCollider != null)
+        {
+            Vector3 targetPosition = GetClosestPointOnResource(building, resourceCollider, agentCollider);
+            Debug.Log("Adjusted target position near resource: " + targetPosition);
+
+            agent.SetDestination(targetPosition);
+            StartCoroutine(CheckArrivalBuilding());
+        }
+        else
+        {
+            if (resourceCollider == null)
+            {
+                Debug.LogWarning("Resource does not have a BoxCollider component!");
+            }
+            if (agentCollider == null)
+            {
+                Debug.LogWarning("Agent does not have a BoxCollider component!");
+            }
+        }
+    }
+    private IEnumerator CheckArrivalBuilding()
+    {
+        while (agent.pathPending || agent.remainingDistance > agent.stoppingDistance || !agent.hasPath)
+        {
+            yield return null;
+        }
+        if (!isBuilding && targetBuilding != null)
+        {
+            buildingCoroutine = StartCoroutine(BuildingProcessCoroutine());
+        }
+    }
+    private IEnumerator BuildingProcessCoroutine()
+    {
+        if (targetBuilding == null)
+        {
+            yield break;
+        }
+
+        isBuilding = true;
+        agent.ResetPath();
+        agent.isStopped = true;
+
+        while (targetBuilding != null)
+        {
+            BuildingProgres amrsc = targetBuilding.GetComponent<BuildingProgres>();
+            if (amrsc == null)
+            {
+                Debug.LogWarning("Resource does not contain AmountResource component or has been destroyed!");
+                StopBuilding();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(extractionInterval);
+
+            amrsc.UpdateProgresBuilding(10);
+
+            if (amrsc.curentBuildingProgresProcents >= 100)
+            {
+                targetBuilding = null;
+                StopBuilding();
+            }
+        }
+    }
+    public void StopBuilding()
+    {
+        Axe.SetActive(false);
+        Pickaxe.SetActive(false);
+        isBuilding = false;
+        isRunningToBuild = false;
+        agent.isStopped = false;
+        agent.ResetPath();
+        Pickaxe.SetActive(true);
+
+        if (buildingCoroutine != null)
+        {
+            StopCoroutine(buildingCoroutine);
+            buildingCoroutine = null;
+        }
+    }
 
     protected void OnTriggerExit(Collider other)
     {
@@ -148,6 +234,7 @@ public class VillagerParametrs : MonoBehaviour
                     isRunning = false;
                     isStanding = false;
                     isGathering = false;
+                    isBuilding = false;
                 }
                 else
                 {
@@ -173,6 +260,11 @@ public class VillagerParametrs : MonoBehaviour
                         Axe.SetActive(true);
                     else
                         Pickaxe.SetActive(true);
+                }
+                else if (isRunningToBuild)
+                {
+                    Pickaxe.SetActive(true);
+
                 }
                 else
                 {
@@ -254,13 +346,13 @@ public class VillagerParametrs : MonoBehaviour
         Debug.Log(122);
         float newHP = Mathf.Clamp(hp - damage, 0, maxHP);
         StartCoroutine(UpdateHPBar(newHP));
-        if(newHP<=0)
+        if (newHP <= 0)
         {
             agent.updatePosition = false;
         }
     }
-   
-    
+
+
     public void MoveToResource(GameObject resource)
     {
         if (isExtracting)
@@ -393,21 +485,25 @@ public class VillagerParametrs : MonoBehaviour
             extractionCoroutine = null;
         }
     }
-   
+
     public bool IsDie()
     { return isDie; }
     public bool IsStanding()
     { return isStanding; }
     public bool IsGathering()
-    { return isGathering;    }
-   public void IsRunningToResource(bool action)
+    { return isGathering; }
+    public void IsRunningToBuild(bool action)
+    {
+        isRunningToBuild = action;
+    }
+    public void IsRunningToResource(bool action)
     { isRunningToResource = action; }
     public bool IsRunning()
-    { return isRunning;  }
+    { return isRunning; }
     public bool IsStandingInWater()
-    { return isStandingInWater;    }
+    { return isStandingInWater; }
     public bool IsDrow()
-    { return isDrow;  }
+    { return isDrow; }
     public bool IsSwimming() { return isSwimming; }
     public float GetHp()
     {

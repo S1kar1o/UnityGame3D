@@ -8,6 +8,7 @@ using static System.Net.WebRequestMethods;
 using System;
 using System.Threading.Tasks;
 using System.Text;
+using Unity.VisualScripting;
 
 public class MovingObjects : MonoBehaviour
 {
@@ -110,9 +111,25 @@ public class MovingObjects : MonoBehaviour
                             var extractor = obj.GetComponent<VillagerParametrs>();
                             if (extractor != null)
                             {
+                                extractor.StopBuilding();
                                 extractor.IsRunningToResource(true);
                                 extractor.MoveToResource(resource); // Рух до ресурсу
                                 SendExtractMessage(obj, resource);
+                            }
+                        }
+                    }
+                    else if (hit.collider.CompareTag("Building") && hit.collider.gameObject.GetComponent<BuildingProgres>())
+                    {
+                        foreach (var obj in selectedUnits)
+                        {
+                            var extractor = obj.GetComponent<VillagerParametrs>();
+                            if (extractor != null)
+                            {
+                                extractor.StopBuilding();
+                                extractor.StopExtracting();
+                                extractor.moveToBuild(hit.collider.gameObject);
+                                SendBuildingMessage(obj, hit.collider.gameObject);
+
                             }
                         }
                     }
@@ -130,12 +147,18 @@ public class MovingObjects : MonoBehaviour
                                 }
                                 else
                                 {
+                                    extractor.StopBuilding();
                                     extractor.StopExtracting(); //  Викликає батьківський метод
                                 }
                                 if (hit.collider.CompareTag("Water"))
                                 {
                                     if (!(extractor is RiderParametrs))
                                     {
+                                        if (extractor is VillagerParametrs villager)
+                                        {
+                                            villager.StopBuilding();
+                                            villager.StopExtracting();
+                                        }
                                         extractor.targetPosition = hit.point; // Якщо targetPosition є в батьківському класі
                                         obj.GetComponent<NavMeshAgent>().SetDestination(hit.point);
                                         SendMoveMessage(obj, hit.point);
@@ -214,7 +237,42 @@ public class MovingObjects : MonoBehaviour
         int targetId = si.serverId;
 
 
-        string message = $"GOEXTRACT {unitId} {targetId}";
+        string message = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+             "GOEXTRACT {0} {1} {2} {3} {4} {5} {6} {7}",
+              unitId, targetId,
+              unit.transform.position.x, unit.transform.position.y, unit.transform.position.z,
+              unit.transform.rotation.x, unit.transform.rotation.y, unit.transform.rotation.z);
+        Debug.Log($"Надсилаю повідомлення про видобування: {message}");
+
+        try
+        {
+            await utp.SendMessage(message);
+            Debug.Log($"Повідомлення про видобування для юніта {unitId} успішно відправлено.");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Помилка при відправці повідомлення про видобування: {e.Message}");
+        }
+    }
+    public async Task SendBuildingMessage(GameObject unit, GameObject target)
+    {
+        if (utp == null)
+        {
+            Debug.LogError("UnityTcpClient не ініціалізований!");
+            return;
+        }
+
+        ServerId sr = unit.GetComponent<ServerId>();
+        int unitId = sr.serverId;
+        ServerId si = target.GetComponent<ServerId>();
+        int targetId = si.serverId;
+
+        string message = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+         "START_BUILDING {0} {1} {2} {3} {4} {5} {6} {7}",
+         unitId, targetId,
+         unit.transform.position.x, unit.transform.position.y, unit.transform.position.z,
+         unit.transform.rotation.x, unit.transform.rotation.y, unit.transform.rotation.z);
+
         Debug.Log($"Надсилаю повідомлення про видобування: {message}");
 
         try
@@ -240,7 +298,11 @@ public class MovingObjects : MonoBehaviour
 
         ServerId sr2 = target.GetComponent<ServerId>();
         int targetId = sr2.serverId;
-        string message = $"ATTACK {unitId} {targetId} {damage}";
+        string message = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+           "ATTACK {0} {1} {2} {3} {4} {5} {6} {7} {8}",
+           unitId, targetId, damage,
+           unit.transform.position.x, unit.transform.position.y, unit.transform.position.z,
+           unit.transform.rotation.x, unit.transform.rotation.y, unit.transform.rotation.z);
         Debug.Log($"Надсилаю повідомлення про атаку: {message}");
 
         try
@@ -258,23 +320,24 @@ public class MovingObjects : MonoBehaviour
         NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
         agent.SetDestination(destination);
 
-        // Почекай трохи, щоб шлях розрахувався (або використовуй колбек NavMesh)
-        await Task.Delay(50);
-
-        Vector3[] corners = agent.path.corners;
         ServerId si = unit.GetComponent<ServerId>();
         int unitId = si.serverId;
 
-        StringBuilder sb = new StringBuilder();
-        sb.Append($"MOVE {unitId}");
-        foreach (var point in corners)
-        {
-            sb.AppendFormat(" {0:0.00} {1:0.00} {2:0.00}", point.x, point.y, point.z);
-        }
+        Vector3 pos = unit.transform.position;
+        Quaternion rot = unit.transform.rotation;
+        Vector3 dest = destination;
 
-        string message = sb.ToString();
+        string message = string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            "MOVE {0} {1} {2} {3} {4} {5} {6} {7} {8} {9}",
+            unitId,
+            pos.x, pos.y, pos.z,
+            rot.x, rot.y, rot.z,
+            dest.x, dest.y, dest.z
+        );
+
         await utp.SendMessage(message);
     }
+
     bool ColisionBuildings()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);

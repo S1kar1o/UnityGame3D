@@ -37,8 +37,8 @@ public class UnityTcpClient : MonoBehaviour
 
     public bool statusOponent = false;
     public string UserRaiting = "100";
-
-    public string UserNickName="David";
+    public string UserId;
+    public string UserNickName = "David";
     public string SceneToMove
     {
         get => _sceneToMove;
@@ -158,7 +158,7 @@ public class UnityTcpClient : MonoBehaviour
             Debug.Log($"Attempting login with token (attempt {loginTokenAttempts + 1}/{MAX_LOGIN_TOKEN_ATTEMPTS}).");
             loginTokenAttempts++;
             await SendMessage($"LOGINBYTOKEN {key}");
-            loginController.currentAnimationCoroutine=StartCoroutine(loginController.waitingAnimation());
+            loginController.currentAnimationCoroutine = StartCoroutine(loginController.waitingAnimation());
         }
         else
         {
@@ -230,6 +230,8 @@ public class UnityTcpClient : MonoBehaviour
                 if (conecting != null)
                 {
                     conecting.UpdateInformation(message);
+                    conecting.stopWaitingAnimation();
+
                 }
             }
             else if (message.StartsWith("WALL"))
@@ -257,15 +259,22 @@ public class UnityTcpClient : MonoBehaviour
                 string message2 = message.Replace(',', '.');
                 string[] parts = message2.Split(' ');
                 int unitId = int.Parse(parts[1]);
-                List<Vector3> pathPoints = new List<Vector3>();
-                for (int i = 2; i < parts.Length; i += 3)
-                {
-                    float x = float.Parse(parts[i], CultureInfo.InvariantCulture);
-                    float y = float.Parse(parts[i + 1], CultureInfo.InvariantCulture);
-                    float z = float.Parse(parts[i + 2], CultureInfo.InvariantCulture);
-                    pathPoints.Add(new Vector3(x, y, z));
-                }
-
+                Vector3 postionObject = new Vector3(
+                    float.Parse(parts[2], CultureInfo.InvariantCulture),
+                    float.Parse(parts[3], CultureInfo.InvariantCulture),
+                    float.Parse(parts[4], CultureInfo.InvariantCulture)
+                );
+                Vector3 rotateObject = new Vector3(
+                    float.Parse(parts[5], CultureInfo.InvariantCulture),
+                    float.Parse(parts[6], CultureInfo.InvariantCulture),
+                    float.Parse(parts[7], CultureInfo.InvariantCulture)
+                );
+                Vector3 destinationFromServer = new Vector3(
+                    float.Parse(parts[8], CultureInfo.InvariantCulture),
+                    float.Parse(parts[9], CultureInfo.InvariantCulture),
+                    float.Parse(parts[10], CultureInfo.InvariantCulture)
+                );
+               
                 GameObject unit = FindObjectByServerID(unitId);
                 var extractor = unit?.GetComponent<VillagerParametrs>();
                 if (extractor != null)
@@ -274,7 +283,12 @@ public class UnityTcpClient : MonoBehaviour
                     {
                         warrior.targetEnemy = null;
                     }
-                    StartCoroutine(MoveStepByStep(unit, pathPoints));
+                    else if (extractor is VillagerParametrs villager)
+                    {
+                        villager.StopExtracting();
+                        villager.StopBuilding();
+                    }
+                    MoveObject(unit, postionObject, rotateObject, destinationFromServer);
                 }
                 else
                 {
@@ -288,6 +302,10 @@ public class UnityTcpClient : MonoBehaviour
             else if (message.StartsWith("EXTRACT"))
             {
                 ProcessExtractMessage(message);
+            }
+            else if (message.StartsWith("START_BUILDING"))
+            {
+                ProcessStartBuildingMessage(message);
             }
             else if (message.StartsWith("LOADED"))
             {
@@ -328,7 +346,8 @@ public class UnityTcpClient : MonoBehaviour
                 string errorMessage = message.Substring("REGISTRATION_FAILED".Length).Trim();
                 HandleRegistrationError(errorMessage);
                 loginController.stopWaitingAnimation();
-            }else if (message.StartsWith("LOGIN_FAILED"))
+            }
+            else if (message.StartsWith("LOGIN_FAILED"))
             {
                 string errorMessage = message.Substring("LOGIN_FAILED".Length).Trim();
                 HandleRegistrationError(errorMessage);
@@ -339,7 +358,8 @@ public class UnityTcpClient : MonoBehaviour
                 loginController.ProblemAcceptGmail();
                 loginController.stopWaitingAnimation();
 
-            }else if (message.StartsWith("LEADER_BOARD"))
+            }
+            else if (message.StartsWith("LEADER_BOARD"))
             {
                 string json = message.Substring("LEADER_BOARD_JSON ".Length); // відрізаємо префікс
 
@@ -348,8 +368,8 @@ public class UnityTcpClient : MonoBehaviour
                 {
                     conecting.LoadUsersFromJson(json);
                 }
-/*                loginController.stopWaitingAnimation();
-*/
+                conecting.stopWaitingAnimation();
+
             }
             else if (message.StartsWith("LOGIN_SUCCESS"))
             {
@@ -380,6 +400,38 @@ public class UnityTcpClient : MonoBehaviour
         Close();
         ConnectToServer();
         isReconnecting = false;
+    }
+
+    public void MoveObject(GameObject unit, Vector3 position, Vector3 rotating, Vector3 endDpoint)
+    {
+        if (unit == null)
+        {
+            Debug.LogWarning("Unit is null in MoveObject!");
+            return;
+        }
+
+        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            Debug.LogError("No NavMeshAgent found on unit!");
+            return;
+        }
+
+        // Встановити стартову позицію (тільки якщо потрібно «телепортувати»)
+        agent.Warp(position); // Warp краще за transform.position для агента
+
+        // Встановити обертання
+        unit.transform.rotation = Quaternion.Euler(rotating);
+
+        // Задати цільову точку для навігації
+        if (agent.isOnNavMesh)
+        {
+            agent.SetDestination(endDpoint);
+        }
+        else
+        {
+            Debug.LogWarning("Agent is not on NavMesh — cannot set destination.");
+        }
     }
 
     void OnDestroy()
@@ -485,28 +537,6 @@ public class UnityTcpClient : MonoBehaviour
             yield return null;
         }
     }
-
-    private IEnumerator MoveStepByStep(GameObject unit, List<Vector3> pathPoints, float threshold = 0.5f)
-    {
-        if (unit == null || !unit.activeInHierarchy)
-        {
-            Debug.LogWarning("Object is not active or does not exist.");
-            yield break;
-        }
-
-        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
-        if (agent == null || !agent.enabled || !agent.isOnNavMesh)
-        {
-            Debug.LogWarning("NavMeshAgent is not ready or not on NavMesh.");
-            yield break;
-        }
-
-        NavMeshPath path = new NavMeshPath();
-        agent.CalculatePath(pathPoints.Last(), path);
-        agent.SetPath(path);
-        Debug.Log("Path completed.");
-    }
-
     private void ProcessSpawnMessage(string message)
     {
         string[] parts = message.Split(' ');
@@ -605,7 +635,7 @@ public class UnityTcpClient : MonoBehaviour
         }
     }
 
-    private void ProcessExtractByUnitMessage(string message)
+    private void ProcessStartBuildingMessage(string message)
     {
         string[] parts = message.Split(' ');
         if (parts.Length < 3)
@@ -620,6 +650,81 @@ public class UnityTcpClient : MonoBehaviour
             return;
         }
 
+        GameObject unit = FindObjectByServerID(unitId);
+        GameObject building = FindObjectByServerID(targetId);
+        if (unit == null)
+        {
+            Debug.LogError($"Unit with ID {unitId} not found!");
+            return;
+        }
+        if (building == null)
+        {
+            Debug.LogError($"Resource with ID {targetId} not found!");
+            return;
+        }
+
+        VillagerParametrs unitObj = unit.GetComponent<VillagerParametrs>();
+        if (unitObj == null)
+        {
+
+            unitObj.StopExtracting();
+            unitObj.StopBuilding();
+
+            Debug.LogError($"VillagerParametrs component not found on unit with ID {unitId}!");
+            return;
+        }
+        Vector3 postionObject = new Vector3(
+           float.Parse(parts[3], CultureInfo.InvariantCulture),
+           float.Parse(parts[4], CultureInfo.InvariantCulture),
+           float.Parse(parts[5], CultureInfo.InvariantCulture)
+       );
+        Vector3 rotateObject = new Vector3(
+            float.Parse(parts[6], CultureInfo.InvariantCulture),
+            float.Parse(parts[7], CultureInfo.InvariantCulture),
+            float.Parse(parts[8], CultureInfo.InvariantCulture)
+        );
+       
+
+        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            Debug.LogError("No NavMeshAgent found on unit!");
+            return;
+        }
+
+        // Встановити стартову позицію (тільки якщо потрібно «телепортувати»)
+        agent.Warp(postionObject); // Warp краще за transform.position для агента
+
+        // Встановити обертання
+        unit.transform.rotation = Quaternion.Euler(rotateObject);
+        unitObj.IsRunningToBuild(true);
+        unitObj.moveToBuild(building);
+        Debug.Log($"Unit {unitId} started extracting resource {targetId}");
+    }
+    private void ProcessExtractByUnitMessage(string message)
+    {
+        string[] parts = message.Split(' ');
+        if (parts.Length < 3)
+        {
+            Debug.LogWarning($"Invalid GOEXTRACT message format: {message}");
+            return;
+        }
+
+        if (!int.TryParse(parts[1], out int unitId) || !int.TryParse(parts[2], out int targetId))
+        {
+            Debug.LogError($"Error parsing IDs in GOEXTRACT: {message}");
+            return;
+        }
+        Vector3 postionObject = new Vector3(
+                  float.Parse(parts[3], CultureInfo.InvariantCulture),
+                  float.Parse(parts[4], CultureInfo.InvariantCulture),
+                  float.Parse(parts[5], CultureInfo.InvariantCulture)
+              );
+        Vector3 rotateObject = new Vector3(
+            float.Parse(parts[6], CultureInfo.InvariantCulture),
+            float.Parse(parts[7], CultureInfo.InvariantCulture),
+            float.Parse(parts[8], CultureInfo.InvariantCulture)
+        );
         GameObject unit = FindObjectByServerID(unitId);
         GameObject resource = FindObjectByServerID(targetId);
         if (unit == null)
@@ -636,10 +741,31 @@ public class UnityTcpClient : MonoBehaviour
         VillagerParametrs unitObj = unit.GetComponent<VillagerParametrs>();
         if (unitObj == null)
         {
+
+            unitObj.StopExtracting();
+            unitObj.StopBuilding();
+
             Debug.LogError($"VillagerParametrs component not found on unit with ID {unitId}!");
             return;
         }
+        if (unit == null)
+        {
+            Debug.LogWarning("Unit is null in MoveObject!");
+            return;
+        }
 
+        NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
+        if (agent == null)
+        {
+            Debug.LogError("No NavMeshAgent found on unit!");
+            return;
+        }
+
+        // Встановити стартову позицію (тільки якщо потрібно «телепортувати»)
+        agent.Warp(postionObject); // Warp краще за transform.position для агента
+
+        // Встановити обертання
+        unit.transform.rotation = Quaternion.Euler(rotateObject);
         unitObj.IsRunningToResource(true);
         unitObj.MoveToResource(resource);
         Debug.Log($"Unit {unitId} started extracting resource {targetId}");
@@ -730,11 +856,41 @@ public class UnityTcpClient : MonoBehaviour
         int targetId = int.Parse(parts[2]);
         int damage = int.Parse(parts[3]);
 
+        Vector3 postionObject = new Vector3(
+                   float.Parse(parts[4], CultureInfo.InvariantCulture),
+                   float.Parse(parts[5], CultureInfo.InvariantCulture),
+                   float.Parse(parts[6], CultureInfo.InvariantCulture)
+               );
+        Vector3 rotateObject = new Vector3(
+            float.Parse(parts[7], CultureInfo.InvariantCulture),
+            float.Parse(parts[8], CultureInfo.InvariantCulture),
+            float.Parse(parts[9], CultureInfo.InvariantCulture)
+        );
+        
+
         GameObject attacker = FindObjectByServerID(attackerId);
         WarriorParametrs attackerObj = attacker?.GetComponent<WarriorParametrs>();
         GameObject target = FindObjectByServerID(targetId);
         if (attackerObj != null && target != null)
         {
+            if (attacker == null)
+            {
+                Debug.LogWarning("Unit is null in MoveObject!");
+                return;
+            }
+
+            NavMeshAgent agent = attacker.GetComponent<NavMeshAgent>();
+            if (agent == null)
+            {
+                Debug.LogError("No NavMeshAgent found on unit!");
+                return;
+            }
+
+            // Встановити стартову позицію (тільки якщо потрібно «телепортувати»)
+            agent.Warp(postionObject); // Warp краще за transform.position для агента
+
+            // Встановити обертання
+            attacker.transform.rotation = Quaternion.Euler(rotateObject);
             attackerObj.AttackEnemy(target);
         }
     }

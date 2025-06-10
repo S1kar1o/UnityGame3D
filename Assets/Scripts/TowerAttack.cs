@@ -76,7 +76,7 @@ public class TowerAttack : MonoBehaviour
             // Перевірка тегу
             if (enemy)
             {
-                if (hit.CompareTag(UnityTcpClient.Instance.tagOwner[UnityTcpClient.Instance.IDclient]))
+                if (hit.CompareTag(UnityTcpClient.Instance.tagOwner[UnityTcpClient.Instance.IDclient])||hit.CompareTag("Building"))
                 {
                     float distance = Vector3.Distance(transform.position, hit.transform.position);
                     if (distance < closestDistance)

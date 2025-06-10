@@ -9,7 +9,7 @@ public class BuildingWalls : MonoBehaviour
     public float flattenScale = 0.9f;
     public float rotationSpeed = 90f;
     public float snapDistance = 25f; // Відстань для кріплення до вежі 
-    public  GameObject wallsPrefab;
+    public GameObject wallsPrefab;
     private bool isPlaced = false;
     private TerrainData terrainData;
     private Renderer[] renderers;
@@ -24,7 +24,7 @@ public class BuildingWalls : MonoBehaviour
     void Start()
     {
         layer = 1 << LayerMask.NameToLayer("Ground"); // Створюємо маску для шару "Ground"
-                                                      if (terrain != null)
+        if (terrain != null)
         {
             terrainData = terrain.terrainData;
         }
@@ -70,7 +70,7 @@ public class BuildingWalls : MonoBehaviour
                 if (isSingleWall)
                 {
                     PlaceBuilding();
-                    isSingleWall=false;
+                    isSingleWall = false;
                 }
                 else
                 {
@@ -98,7 +98,8 @@ public class BuildingWalls : MonoBehaviour
             Debug.LogError($"Помилка при розміщенні будівлі: {e.Message}");
         }
     }
-    private void BuildingManyWalls() {
+    private void BuildingManyWalls()
+    {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
@@ -131,7 +132,7 @@ public class BuildingWalls : MonoBehaviour
             width = 25f; // Значення за замовчуванням
         }
         float distance1 = Vector3.Distance(starPosition, endPosition);
-        int amount =(int)(distance1 / width);
+        int amount = (int)(distance1 / width);
 
 
         // Створюємо нові стіни в ряд
@@ -142,11 +143,11 @@ public class BuildingWalls : MonoBehaviour
             GameObject newWall = Instantiate(wallsPrefab, position, Quaternion.identity, transform.parent);
             newWall.transform.LookAt(endPosition); // Орієнтуємо стіну у напрямку рядка
 
-           /* // Якщо потрібно зберігати оригінальний об'єкт незмінним
-            if (i == amount - 1)
-            {
-                transform.position = position + direction * width;
-            }*/
+            /* // Якщо потрібно зберігати оригінальний об'єкт незмінним
+             if (i == amount - 1)
+             {
+                 transform.position = position + direction * width;
+             }*/
         }
         Destroy(gameObject);
 
@@ -208,7 +209,7 @@ public class BuildingWalls : MonoBehaviour
 
         if (Physics.Raycast(ray, out RaycastHit hit, 3000f, layer))
         {
-           starPosition = hit.point;
+            starPosition = hit.point;
 
             // Знаходимо найближчу вежу
             GameObject nearestTower = FindNearestTower(hit.point);

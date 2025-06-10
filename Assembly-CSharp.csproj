@@ -92,6 +92,7 @@
     <Compile Include="Assets\Scripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\Statements\Units\VillagerParametrs.cs" />
     <Compile Include="Assets\Scripts\Statements\RockSpawner.cs" />
+    <Compile Include="Assets\Scripts\BuildingProgres.cs" />
     <Compile Include="Assets\Scripts\Statements\Units\HpBarFocuse\HpBarRotation.cs" />
     <Compile Include="Assets\IroNice19\IroNiceScripts\CreateBrige.cs" />
     <Compile Include="Assets\Animation\Scripts\VillagerAnimation.cs" />
