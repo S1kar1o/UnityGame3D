@@ -3264,6 +3264,7 @@ MonoBehaviour:
   - Enemy
   statusOponent: 0
   UserRaiting: 100
+  UserId: 
   UserNickName: David
 --- !u!4 &1576720664
 Transform:

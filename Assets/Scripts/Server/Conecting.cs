@@ -6,26 +6,26 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 
 public class Conecting : MonoBehaviour
 {
-    public TMP_Text points, nickName,id;
+    public TMP_Text points, nickName, id;
+    public TMP_InputField textOfLetter;
     private UnityTcpClient tcpClient;
-    public GameObject panelWithInformation;
+    public GameObject panelWithInformation, panelWithFriends, panelForWrittingLetter;
     public string telegramURL = "https://t.me/+WVqCryqlsII5ZmM6";
+    public GameObject userItemPrefab, friendItemPrefab,messageItemPref;
+    public Transform usersTopPanel, friendsPanel, panelWithLetterslTrans;
 
-    public GameObject userItemPrefab;
-    public Transform contentPanel;
-
-    public GameObject PanelWithRaiting;
-    private int alreadyLoad = 0;
-    private bool hasMoreUsers = true;
-    private bool isLoading = false;
+    public GameObject PanelWithRaiting, PanelWithLetters;
+    private int alreadyLoad = 0, alreadyLoadFriend = 0,alreadyLoadedMessages = 0;
+    private bool hasMoreUsers = true, hasMoreFriend = true, hasMoreMessage = false;
+    private bool isLoading = false, isLoadingFriends = false, isLoadingFriendsMessages = false;
     public float loadThreshold = 0.05f; // 5% до низу
 
-
+    public String tmpUserNick;
+    private GameObject prefabSent;
 
     public Coroutine currentAnimationCoroutine;
 
@@ -33,6 +33,26 @@ public class Conecting : MonoBehaviour
     [SerializeField] private RectTransform rectComponent;
     private float rotateSpeed = 400f;
     public Image bacgroundDurringLoading;
+    [System.Serializable]
+    public class UserMessage
+    {
+        public string id ;
+
+        public string sender_id;
+
+        public string receiver_id;
+
+        public string content;
+
+        public string timestamp; 
+
+        public bool isRead;
+    }
+    [System.Serializable]
+    public class MessageList
+    {
+        public UserMessage[] messages;
+    }
 
     public enum FriendshipStatus
     {
@@ -131,6 +151,114 @@ public class Conecting : MonoBehaviour
     }
 
     // Функція, що приймає JSON рядок і створює UI-елементи для користувачів
+    public void LoadFriendsMessage(string json)
+    {
+        panelWithFriends.SetActive(true);
+        Debug.Log("Loading users from JSON: " + json);
+
+        if (json != " Немає користувачів для відображення")
+        {
+            UserList userList = JsonUtility.FromJson<UserList>(json);
+
+            if (userList == null || userList.users == null || userList.users.Length == 0)
+            {
+                Debug.Log("No more users to load.");
+                hasMoreMessage = false;
+                isLoadingFriendsMessages = false;
+                return;
+            }
+
+            foreach (User user in userList.users)
+            {
+                GameObject item = Instantiate(friendItemPrefab, friendsPanel);
+
+                TMP_Text usernameText = item.transform.Find("PanelUserInformation/UsernameText")?.GetComponent<TMP_Text>();
+                TMP_Text ratingText = item.transform.Find("PanelUserInformation/PointsImg/RatingText")?.GetComponent<TMP_Text>();
+                TMP_Text userId = item.transform.Find("PanelUserInformation/CopyIdButton/UserId")?.GetComponent<TMP_Text>();
+
+                Button sendMessageButton = item.transform.Find("PanelUserInformation/SendMessage")?.GetComponent<Button>();
+                if (sendMessageButton != null)
+                {
+                    sendMessageButton.onClick.RemoveAllListeners();
+                    sendMessageButton.onClick.AddListener(() => GetFriendsLetters(item));
+                }
+
+                usernameText.text = user.username;
+                ratingText.text = user.rating.ToString();
+                userId.text = user.id;
+
+                user.MapEnumStatus();
+                alreadyLoadFriend++;
+            }
+        }
+    }
+    public void LoadFriendListFromMessages(string json)
+    {
+        Debug.Log("Loading messages from JSON: " + json);
+
+        if (string.IsNullOrEmpty(json) || json.Contains("Немає користувачів"))
+        {
+            Debug.Log("No messages to load.");
+            return;
+        }
+
+        MessageList messageList = JsonUtility.FromJson<MessageList>(json);
+
+        if (messageList == null || messageList.messages == null || messageList.messages.Length == 0)
+        {
+            Debug.Log("No messages found in the response.");
+            return;
+        }
+
+        foreach (UserMessage message in messageList.messages)
+        {
+            GameObject messageObj = Instantiate(messageItemPref, panelWithLetterslTrans);
+            TMP_Text usernameText = messageObj.transform.Find("Text")?.GetComponent<TMP_Text>();
+
+            if (message.sender_id == UnityTcpClient.Instance.UserId)
+            {
+                string content = UnityTcpClient.Instance.UserNickName + "\n" + "\t" + message.content;
+                usernameText.text = content;
+                Image imageComponent = messageObj.transform.GetComponent<Image>();
+                if (imageComponent != null)
+                    imageComponent.color = new Color(83f / 255f, 49f / 255f, 88f / 255f); // #533158
+            }
+            else
+            {
+                string content = tmpUserNick + "\n" + "\t" + message.content;
+                usernameText.text = content;
+            }
+
+            alreadyLoadedMessages++;
+        }
+
+        panelWithFriends.SetActive(false);
+        PanelWithLetters.SetActive(true);
+    }
+    public void activateFriendList()
+    {
+        panelWithFriends.SetActive(true);
+
+    }
+    public void activateLettersList()
+    {
+        PanelWithLetters.SetActive(true);
+
+    }
+    public async void GetFriendsLetters(GameObject item)
+    {
+        prefabSent = item;
+        GameObject txt = prefabSent.transform.Find("PanelUserInformation/UsernameText").gameObject;
+        tmpUserNick = txt.GetComponent<TMP_Text>().text;
+
+        PanelWithLetters.gameObject.SetActive(false);
+        Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
+        TMP_Text idSendTo = idTransform.GetComponent<TMP_Text>();
+
+        // ⚡ Передай кількість уже завантажених повідомлень
+        await UnityTcpClient.Instance.SendMessage($"LISTING_STATUS {idSendTo.text} {alreadyLoadedMessages}");
+        currentAnimationCoroutine = StartCoroutine(waitingAnimation());
+    }
     public void LoadUsersFromJson(string json)
     {
         Debug.Log("Loading users from JSON: " + json);
@@ -148,7 +276,7 @@ public class Conecting : MonoBehaviour
 
             foreach (User user in userList.users)
             {
-                GameObject item = Instantiate(userItemPrefab, contentPanel);
+                GameObject item = Instantiate(userItemPrefab, usersTopPanel);
 
                 TMP_Text usernameText = item.transform.Find("PanelUserInformation/UsernameText")?.GetComponent<TMP_Text>();
                 TMP_Text ratingText = item.transform.Find("PanelUserInformation/PointsImg/RatingText")?.GetComponent<TMP_Text>();
@@ -172,7 +300,8 @@ public class Conecting : MonoBehaviour
                 {
                     sendFriendButton.onClick.RemoveAllListeners(); // щоб не дублювались
                     sendFriendButton.onClick.AddListener(() => SendFriendRequest(item));
-                } Button deleteFrendButton = deleteFrend.GetComponent<Button>();
+                }
+                Button deleteFrendButton = deleteFrend.GetComponent<Button>();
                 if (deleteFrendButton != null)
                 {
                     deleteFrendButton.onClick.RemoveAllListeners(); // щоб не дублювались
@@ -207,7 +336,7 @@ public class Conecting : MonoBehaviour
                         sendToUserFriendRequest.SetActive(false);
                         himselfBorder.SetActive(false);
                         applyRequestButton.SetActive(false);
-                        declineFriendsRequest.SetActive(false) ;
+                        declineFriendsRequest.SetActive(false);
                         deleteFrend.SetActive(false);
                         break;
                     case FriendshipStatus.CanApply:
@@ -284,6 +413,38 @@ public class Conecting : MonoBehaviour
         await tcpClient.SendMessage($"SEND_FRIEND_REQUEST {idSendTo.text}");
 
     }
+    public void ActivateSendMessage()
+    {
+        panelForWrittingLetter.SetActive(true);
+        panelWithFriends.SetActive(false);
+
+    }
+    public void closeMenu(GameObject item)
+    {
+        item.SetActive(false);
+        TMP_InputField inputField = item.transform.Find("Viewport/Content/InputField (TMP)").GetComponent<TMP_InputField>();
+        if (inputField != null)
+        {
+            inputField.text = "";
+        }
+
+    }
+
+    public async void SendMessageToFriend()
+    {
+        Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
+        TMP_Text idSendTo = idTransform.GetComponent<TMP_Text>();
+
+        panelForWrittingLetter.SetActive(false);
+        bacgroundDurringLoading.gameObject.SetActive(false);
+
+        await UnityTcpClient.Instance.SendMessage($"SEND_MESSAGE {idSendTo.text} {textOfLetter.text}");
+
+        GameObject messageObj = Instantiate(messageItemPref, panelWithLetterslTrans);
+        TMP_Text usernameText = messageObj.transform.Find("Text")?.GetComponent<TMP_Text>();
+        String content = UnityTcpClient.Instance.UserNickName + "\n" + "\t" + textOfLetter.text;
+        usernameText.text = content;
+    }
     public async void AcceptFriendRequest(GameObject prefabSent)
     {
         Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
@@ -299,7 +460,7 @@ public class Conecting : MonoBehaviour
         friends.SetActive(true);
         await tcpClient.SendMessage($"ACCEPT_FRIEND_REQUEST {idSendTo.text}");
 
-    } 
+    }
     public async void DeleteFriend(GameObject prefabSent)
     {
         Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
@@ -317,7 +478,7 @@ public class Conecting : MonoBehaviour
         sendToUserFriendRequest.SetActive(true);
         await tcpClient.SendMessage($"REMOVE_FRIEND {idSendTo.text}");
 
-    } 
+    }
     public async void DeclineFriendRequest(GameObject prefabSent)
     {
         Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
@@ -333,6 +494,13 @@ public class Conecting : MonoBehaviour
         await tcpClient.SendMessage($"DECLINE_FRIEND_REQUEST {idSendTo.text}");
 
     }
+    public async void SendMessageToLoadFriendList()
+    {
+        int offset = alreadyLoadFriend; // скільки вже завантажено
+        await UnityTcpClient.Instance.SendMessage($"FRIENDLIST_STATUS {offset}");
+        currentAnimationCoroutine = StartCoroutine(waitingAnimation());
+    }
+
     public void CopyIdPlayer(TMP_Text userId)
     {
         GUIUtility.systemCopyBuffer = userId.text;

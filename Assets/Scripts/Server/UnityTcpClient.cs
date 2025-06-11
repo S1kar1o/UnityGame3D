@@ -274,7 +274,7 @@ public class UnityTcpClient : MonoBehaviour
                     float.Parse(parts[9], CultureInfo.InvariantCulture),
                     float.Parse(parts[10], CultureInfo.InvariantCulture)
                 );
-               
+
                 GameObject unit = FindObjectByServerID(unitId);
                 var extractor = unit?.GetComponent<VillagerParametrs>();
                 if (extractor != null)
@@ -298,6 +298,50 @@ public class UnityTcpClient : MonoBehaviour
             else if (message.StartsWith("ATTACK"))
             {
                 ProcessAttackMessage(message);
+            }
+            else if (message.StartsWith("FRIENDLIST_JSON"))
+            {
+                string json = message.Substring("FRIENDLIST_JSON ".Length); // â³äð³çàºìî ïðåô³êñ
+
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
+                {
+                    conecting.LoadFriendsMessage(json);
+                    conecting.stopWaitingAnimation();
+
+                }
+            }
+            else if (message.StartsWith("LISTING_STATUS_OK"))
+            {
+                string json = message.Substring("LISTING_STATUS_OK ".Length); // â³äð³çàºìî ïðåô³êñ
+
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
+                {
+                    conecting.LoadFriendListFromMessages(json);
+                    conecting.stopWaitingAnimation();
+
+                }
+            }
+            else if (message.StartsWith("LISTING_STATUS_EMPTY"))
+            {
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
+                {
+                    conecting.activateLettersList();
+                    conecting.stopWaitingAnimation();
+
+                }
+            }
+            else if (message.StartsWith("FRIENDLIST_EMPTY"))
+            {
+                Conecting conecting = FindAnyObjectByType<Conecting>();
+                if (conecting != null)
+                {
+                    conecting.stopWaitingAnimation();
+                    conecting.activateFriendList();
+
+                }
             }
             else if (message.StartsWith("EXTRACT"))
             {
@@ -683,7 +727,7 @@ public class UnityTcpClient : MonoBehaviour
             float.Parse(parts[7], CultureInfo.InvariantCulture),
             float.Parse(parts[8], CultureInfo.InvariantCulture)
         );
-       
+
 
         NavMeshAgent agent = unit.GetComponent<NavMeshAgent>();
         if (agent == null)
@@ -866,7 +910,7 @@ public class UnityTcpClient : MonoBehaviour
             float.Parse(parts[8], CultureInfo.InvariantCulture),
             float.Parse(parts[9], CultureInfo.InvariantCulture)
         );
-        
+
 
         GameObject attacker = FindObjectByServerID(attackerId);
         WarriorParametrs attackerObj = attacker?.GetComponent<WarriorParametrs>();
