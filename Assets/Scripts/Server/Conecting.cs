@@ -29,6 +29,7 @@ public class Conecting : MonoBehaviour
 
     public Coroutine currentAnimationCoroutine;
 
+    public String lastOpenedFriendList;
 
     [SerializeField] private RectTransform rectComponent;
     private float rotateSpeed = 400f;
@@ -255,9 +256,23 @@ public class Conecting : MonoBehaviour
         Transform idTransform = prefabSent.transform.Find("PanelUserInformation/CopyIdButton/UserId");
         TMP_Text idSendTo = idTransform.GetComponent<TMP_Text>();
 
-        // ⚡ Передай кількість уже завантажених повідомлень
+        if (lastOpenedFriendList == null)
+        {
+            lastOpenedFriendList = idSendTo.text;
+
+        }
         await UnityTcpClient.Instance.SendMessage($"LISTING_STATUS {idSendTo.text} {alreadyLoadedMessages}");
         currentAnimationCoroutine = StartCoroutine(waitingAnimation());
+        if(idSendTo.text!= lastOpenedFriendList)
+        {
+            foreach (Transform child in panelWithLetterslTrans)
+            {
+                GameObject.Destroy(child.gameObject);
+                alreadyLoadedMessages=0;
+
+            }
+        }
+        lastOpenedFriendList = idSendTo.text;
     }
     public void LoadUsersFromJson(string json)
     {
@@ -422,12 +437,14 @@ public class Conecting : MonoBehaviour
     public void closeMenu(GameObject item)
     {
         item.SetActive(false);
+        if (item.name == "ChatWithFriend")
+            panelWithFriends.SetActive(true);
         TMP_InputField inputField = item.transform.Find("Viewport/Content/InputField (TMP)").GetComponent<TMP_InputField>();
         if (inputField != null)
         {
             inputField.text = "";
         }
-
+       
     }
 
     public async void SendMessageToFriend()
