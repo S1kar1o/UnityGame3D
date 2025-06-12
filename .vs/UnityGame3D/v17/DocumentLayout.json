@@ -3,28 +3,48 @@
   "WorkspaceRootPath": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\audio\\unitsoundplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\audio\\unitsoundplayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\statements\\units\\villagerparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\statements\\units\\villagerparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\warrioranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\warrioranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\statements\\units\\riderparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\statements\\units\\riderparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\logining\\loginingtodb.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\logining\\loginingtodb.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\ironice19\\ironicescripts\\movingobjects1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\ironice19\\ironicescripts\\movingobjects1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\VillagerAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Animation\\Scripts\\VillagerAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\UnitSoundPlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Audio\\UnitSoundPlayer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\statements\\units\\warriorparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\statements\\units\\warriorparametrs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\WarriorAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Animation\\Scripts\\WarriorAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\ArcherAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Animation\\Scripts\\ArcherAnimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|d:\\project_metr(chehmestruk)\\unitygame3d\\assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\server\\unitytcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\archeranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\archeranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\CameraMoving.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Scripts\\CameraMoving.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\assets\\animation\\scripts\\villageranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:assets\\animation\\scripts\\villageranimation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Logining\\LoginingToDB.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2A907E0-45C4-BAD2-7304-49B0B80A96C1}|Assembly-CSharp.csproj|solutionrelative:Assets\\Scripts\\Logining\\LoginingToDB.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,17 +54,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 4,
               "Title": "UnitSoundPlayer.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\UnitSoundPlayer.cs",
               "RelativeDocumentMoniker": "Assets\\Audio\\UnitSoundPlayer.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Audio\\UnitSoundPlayer.cs",
               "RelativeToolTip": "Assets\\Audio\\UnitSoundPlayer.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAQwDIAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAMwA4AAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-06T21:47:49.816Z",
               "IsPinned": true,
@@ -52,31 +72,85 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
+              "Title": "RiderParametrs.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\RiderParametrs.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Statements\\Units\\RiderParametrs.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\RiderParametrs.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Statements\\Units\\RiderParametrs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T06:40:17.344Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MovingObjects1.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\IroNice19\\IroNiceScripts\\MovingObjects1.cs",
+              "RelativeDocumentMoniker": "Assets\\IroNice19\\IroNiceScripts\\MovingObjects1.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\IroNice19\\IroNiceScripts\\MovingObjects1.cs",
+              "RelativeToolTip": "Assets\\IroNice19\\IroNiceScripts\\MovingObjects1.cs",
+              "ViewState": "AgIAADUBAAAAAAAAAAAMwEQBAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T06:40:09.06Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "WarriorParametrs.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\WarriorParametrs.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Statements\\Units\\WarriorParametrs.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\WarriorParametrs.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Statements\\Units\\WarriorParametrs.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAMwDEAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-12T05:45:13.7Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VillagerParametrs.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\VillagerParametrs.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Statements\\Units\\VillagerParametrs.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Statements\\Units\\VillagerParametrs.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Statements\\Units\\VillagerParametrs.cs",
+              "ViewState": "AgIAAGoAAAAAAAAAAAAMwHAAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-11T17:54:18.947Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "ArcherAnimation.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\ArcherAnimation.cs",
               "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\ArcherAnimation.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\ArcherAnimation.cs",
               "RelativeToolTip": "Assets\\Animation\\Scripts\\ArcherAnimation.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAMwA4AAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-08T13:08:31.919Z"
+              "WhenOpened": "2025-05-08T13:08:31.919Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "UnityTcpClient.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Server\\UnityTcpClient.cs",
               "RelativeToolTip": "Assets\\Scripts\\Server\\UnityTcpClient.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOUAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAH0AAAAAAAAAAIAwwJoAAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-07T09:16:17.627Z"
+              "WhenOpened": "2025-05-07T09:16:17.627Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 10,
               "Title": "LoginingToDB.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\Logining\\LoginingToDB.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Logining\\LoginingToDB.cs",
@@ -88,27 +162,41 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 6,
               "Title": "WarriorAnimation.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\WarriorAnimation.cs",
               "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\WarriorAnimation.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\WarriorAnimation.cs",
               "RelativeToolTip": "Assets\\Animation\\Scripts\\WarriorAnimation.cs",
-              "ViewState": "AgIAABgAAAAAAAAAAAAYwCkAAAAlAAAAAAAAAA==",
+              "ViewState": "AgIAABMAAAAAAAAAAAD4vxsAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-06T20:03:54.849Z"
+              "WhenOpened": "2025-05-06T20:03:54.849Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 3,
               "Title": "VillagerAnimation.cs",
               "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\VillagerAnimation.cs",
               "RelativeDocumentMoniker": "Assets\\Animation\\Scripts\\VillagerAnimation.cs",
               "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Animation\\Scripts\\VillagerAnimation.cs",
               "RelativeToolTip": "Assets\\Animation\\Scripts\\VillagerAnimation.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAABgAAAAAAAAAAAD4vyAAAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-05T07:38:45.728Z"
+              "WhenOpened": "2025-05-05T07:38:45.728Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "CameraMoving.cs",
+              "DocumentMoniker": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\CameraMoving.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\CameraMoving.cs",
+              "ToolTip": "D:\\Project_Metr(Chehmestruk)\\UnityGame3D\\Assets\\Scripts\\CameraMoving.cs",
+              "RelativeToolTip": "Assets\\Scripts\\CameraMoving.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAIAwwBcAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-09T10:57:41.393Z"
             }
           ]
         }

@@ -19,9 +19,9 @@ public class CameraMoving : MonoBehaviour
 
     private void Update()
     {
-        if (utp.statusOponent)
+        if (true)
         {
-            isLocked = checkEnemy();
+            isLocked = false;
             if (!isLocked)
             {
                 float rotate = 0.0f;
