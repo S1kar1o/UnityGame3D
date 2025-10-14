@@ -106,6 +106,20 @@ public class VillagerParametrs : MonoBehaviour
             isRunning = false;
         }
     }
+
+    private void OnTriggerStay(Collider other)
+    {
+        
+        float chance = UnityEngine.Random.value;
+        
+        if (chance < 0.05f * Time.deltaTime)
+        {
+            
+            hp = 0;
+            
+        }
+    }
+
     public void moveToBuild(GameObject building)
     {
         isRunningToBuild = true;
